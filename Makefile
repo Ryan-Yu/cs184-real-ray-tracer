@@ -13,12 +13,12 @@ else
 endif
 	
 all: main 
-main: ray_tracer.o 
-	$(CC) $(CFLAGS) -o ray_tracer ray_tracer.o $(LDFLAGS) 
-ray_tracer.o: ray_tracer.cpp
-	$(CC) $(CFLAGS) -c ray_tracer.cpp -o ray_tracer.o
+main: scene.o 
+	$(CC) $(CFLAGS) -o scene scene.o $(LDFLAGS) 
+scene.o: Scene.cpp
+	$(CC) $(CFLAGS) -c Scene.cpp -o scene.o
 clean: 
-	$(RM) *.o ray_tracer
+	$(RM) *.o scene
  
 
 

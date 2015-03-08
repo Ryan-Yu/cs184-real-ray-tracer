@@ -92,7 +92,7 @@ class Sphere : public Shape {
 		// (in primitive coordinates)
 		differentialGeometry->position = Point(xCoor, yCoor, zCoor);
 		differentialGeometry->normal = Normal::normalizeNormal(Normal(xCoor, yCoor, zCoor));
-		tHit = *tIntersection;
+		tHit = &tIntersection;
 
 		return true;
 	}

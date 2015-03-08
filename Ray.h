@@ -1,8 +1,8 @@
 #ifndef RAY_H_
 #define RAY_H_
 
-#include "point.h"
-#include "vector4.h"
+#include "Point.h"
+#include "Vector4.h"
 
 class Ray {
   public:

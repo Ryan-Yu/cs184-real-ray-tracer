@@ -1,11 +1,8 @@
 #ifndef PRIMITIVE_H_
 #define PRIMITIVE_H_
 
-// Why do we need this?
-#include "intersection.h"
-
-// Forward declaration
-class Intersection;
+// Must #include -- forward declaration doesn't tell the compiler what the structure of Intersection is
+#include "Intersection.h"
 
 class Primitive {
 	public:

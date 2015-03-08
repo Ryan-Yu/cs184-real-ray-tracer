@@ -1,8 +1,8 @@
 #ifndef DIFFERENTIALGEOMETRY_H_
 #define DIFFERENTIALGEOMETRY_H_
 
-#include "point.h"
-#include "normal.h"
+#include "Point.h"
+#include "Normal.h"
 
 // Class that represents a point on a Primitive object, such as a sphere.
 // We will primarily use this class for intersection points of primitives and rays

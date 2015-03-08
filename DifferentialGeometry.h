@@ -4,6 +4,8 @@
 #include "point.h"
 #include "normal.h"
 
+// Class that represents a point on a Primitive object, such as a sphere.
+// We will primarily use this class for intersection points of primitives and rays
 class DifferentialGeometry {
 	public:
 		Point position;

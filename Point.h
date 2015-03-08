@@ -1,6 +1,7 @@
 #ifndef POINT_H_
 #define POINT_H_
 
+// Wrapper class for a 3D point
 class Point {
   public:
     float x, y, z;

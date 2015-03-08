@@ -1,6 +1,7 @@
 #ifndef SHAPE_H_
 #define SHAPE_H_
 
+// NOTE: A Primitive object has both a Material and a Shape
 class Shape {
 	public:
 		// Abstract methods that Sphere and Triangle inherit from.

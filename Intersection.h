@@ -13,7 +13,7 @@ class Intersection {
 
 		}
 
-		Intersection(DifferentialGeometry differntialGeometry, Primitive *primitive) {
+		Intersection(DifferentialGeometry differentialGeometry, Primitive *primitive) {
 			this->differentialGeometry = differentialGeometry;
 			this->primitive = primitive;
 		}

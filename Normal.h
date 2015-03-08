@@ -3,6 +3,7 @@
 
 #include <math.h>
 
+// Class that represents a normal vector
 class Normal {
   public:
     float x, y, z;

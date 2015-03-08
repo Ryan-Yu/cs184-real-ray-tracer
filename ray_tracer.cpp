@@ -105,6 +105,7 @@ class Dl {
 //****************************************************
 Viewport viewport;
 
+// TODO: Move these into appropriate classes
 //***** The following are set by command line options *****//
 // Ambient term
 Ka ka;
@@ -120,14 +121,6 @@ std::vector<Pl> point_lights;
 std::vector<Dl> directional_lights;
 
 bool debug;
-
-
-// TODO: Remove this!
-Vector3 normalizeVector(Vector3 vector_to_normalize) {
-  float magnitude = sqrt(pow(vector_to_normalize.x, 2) + pow(vector_to_normalize.y, 2) + pow(vector_to_normalize.z, 2));
-  return Vector3(vector_to_normalize.x / magnitude, vector_to_normalize.y / magnitude, vector_to_normalize.z / magnitude);
-}
-
 
 // TODO: Remove this!
 void setPixel(int x, int y, int r, int g, int b) {
@@ -218,10 +211,10 @@ void circle(float centerX, float centerY, float radius) {
           Vector3 prenormalized_directional_light_vector = Vector3(directional_lights[i].x, directional_lights[i].y, directional_lights[i].z);
 
           // Change orientation of light vector to point outwards to sphere
-          Vector3 directional_light_vector = normalizeVector(prenormalized_directional_light_vector.scaleVector(-1));
+          Vector3 directional_light_vector = Vector3::normalizeVector(prenormalized_directional_light_vector.scaleVector(-1));
 
           Vector3 prenormalized_directional_normal_vector = Vector3(x, y, z);
-          Vector3 directional_normal_vector = normalizeVector(prenormalized_directional_normal_vector);
+          Vector3 directional_normal_vector = Vector3::normalizeVector(prenormalized_directional_normal_vector);
 
 
           float directional_diffuse_dot_product = fmax(directional_light_vector.dotProduct(directional_normal_vector), 0);
@@ -261,10 +254,10 @@ void circle(float centerX, float centerY, float radius) {
           Vector3 normalized_point_light_location = Vector3(point_lights[i].x, point_lights[i].y, point_lights[i].z);
 
           Vector3 prenormalized_point_normal_vector = Vector3(x, y, z);
-          Vector3 point_normal_vector = normalizeVector(prenormalized_point_normal_vector);
+          Vector3 point_normal_vector = Vector3::normalizeVector(prenormalized_point_normal_vector);
 
           Vector3 prenormalized_point_light_vector = normalized_point_light_location.subtractVector(point_normal_vector).scaleVector(1);
-          Vector3 point_light_vector = normalizeVector(prenormalized_point_light_vector);
+          Vector3 point_light_vector = Vector3::normalizeVector(prenormalized_point_light_vector);
 
           float point_diffuse_dot_product = fmax(point_light_vector.dotProduct(point_normal_vector), 0);
           float point_diffuse_r = kd.r * point_lights[i].r * point_diffuse_dot_product;
@@ -423,10 +416,6 @@ void parseCommandLineOptions(int argc, char *argv[])
   }
 }
 
-
-//****************************************************
-// the usual stuff, nothing exciting here
-//****************************************************
 int main(int argc, char *argv[]) {
 
   // Turns debug mode ON or OFF

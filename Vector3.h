@@ -37,7 +37,7 @@ class Vector3 {
     return Vector3(this->x * other.x, this->y * other.y, this->z * other.z);
   }
 
-  Vector3 normalizeVector(Vector3 vector_to_normalize) {
+  static Vector3 normalizeVector(Vector3 vector_to_normalize) {
     float magnitude = sqrt(pow(vector_to_normalize.x, 2) + pow(vector_to_normalize.y, 2) + pow(vector_to_normalize.z, 2));
     return Vector3(vector_to_normalize.x / magnitude, vector_to_normalize.y / magnitude, vector_to_normalize.z / magnitude);
   }

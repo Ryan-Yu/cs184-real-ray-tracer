@@ -1,6 +1,7 @@
 #ifndef MATRIX_H_
 #define MATRIX_H_
 
+// Class that represents homogenized 3D matrices
 class Matrix4 {
   public:
     float matrix[4][4];

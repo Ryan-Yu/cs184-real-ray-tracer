@@ -1,4 +1,21 @@
 
+#include "vector3.h"
+#include "vector4.h"
+#include "sample.h"
+#include "point.h"
+#include "normal.h"
+//#include "matrix4.h"
+//#include "transformation.h"
+#include "ray.h"
+#include "differentialgeometry.h"
+#include "color.h"
+#include "brdfcoefficients.h"
+#include "material.h"
+#include "shape.h"
+#include "primitive.h"
+#include "intersection.h"
+
+
 #include <vector>
 #include <iostream>
 #include <fstream>
@@ -18,11 +35,10 @@
 #include <bitset>
 #include <algorithm>
 
-#include "vector3.h"
+using namespace std;
 
 inline float sqr(float x) { return x*x; }
 
-using namespace std;
 
 //****************************************************
 // Some Classes
@@ -100,9 +116,9 @@ Ks ks;
 // Phong exponent
 Sp sp;
 // List of point lights
-vector<Pl> point_lights;
+std::vector<Pl> point_lights;
 // List of directional lights
-vector<Dl> directional_lights;
+std::vector<Dl> directional_lights;
 
 bool debug;
 
@@ -118,34 +134,6 @@ Vector3 normalizeVector(Vector3 vector_to_normalize) {
   return Vector3(vector_to_normalize.x / magnitude, vector_to_normalize.y / magnitude, vector_to_normalize.z / magnitude);
 }
 
-// Integer to bits representation
-// (via http://stackoverflow.com/questions/2686542/converting-integer-to-a-bit-representation)
-vector<int> convert_to_bits(int x) {
-  vector<int> ret;
-  while(x) {
-    if (x&1)
-      ret.push_back(1);
-    else
-      ret.push_back(0);
-    x>>=1;  
-  }
-  reverse(ret.begin(),ret.end());
-  return ret;
-}
-
-// Bits to integer representation
-// (via http://stackoverflow.com/questions/18938831/convert-vector-of-binary-integers-to-vector-of-digits)
-int convert_to_int(const vector<int>& x) {
-  int result = 0;
-  int base = 1;
-  for (unsigned int i = x.size()-1; i > 0; --i)
-  {
-    result += x[i]*base;
-    base *= 2;
-  }
-  result += x[0] * base;
-  return result;
-}
 
 
 //****************************************************
@@ -229,7 +217,7 @@ void circle(float centerX, float centerY, float radius) {
         // Calculate ambient, diffuse, specular contributions for this light
         // Sum all 3 contributions together
         // Add contribution to resultant_rgb_sum_of_pixel
-        for (vector<Dl>::size_type i = 0; i < directional_lights.size(); i++)
+        for (std::vector<Dl>::size_type i = 0; i < directional_lights.size(); i++)
         {
           // current directional light given by directional_lights[i]
 
@@ -270,7 +258,7 @@ void circle(float centerX, float centerY, float radius) {
         // ----------
 
         // ***** BEGIN CONSIDERING POINT LIGHTS ***** //
-        for (vector<Pl>::size_type i = 0; i < point_lights.size(); i++)
+        for (std::vector<Pl>::size_type i = 0; i < point_lights.size(); i++)
         {
           // current directional light given by directional_lights[i]
 
@@ -349,32 +337,32 @@ void printCommandLineOptionVariables( )
 {
   if (debug)
   {
-    cout << "\n***** BEGIN PRINTING COMMAND LINE OPTION VARIABLES *****\n";
+    std::cout << "\n***** BEGIN PRINTING COMMAND LINE OPTION VARIABLES *****\n";
 
-    cout << "Directional Lights:\n";
+    std::cout << "Directional Lights:\n";
     if (directional_lights.size() == 0)
     {
-      cout << " (none)\n";
+      std::cout << " (none)\n";
     }
-    for (vector<Dl>::size_type i = 0; i < directional_lights.size(); i++)
+    for (std::vector<Dl>::size_type i = 0; i < directional_lights.size(); i++)
     {
-      cout << "  " << "Light " << (i + 1) << " (index " << i << " of list):\n";
-      cout << "     " << "x: " << directional_lights[i].x << " y: " << directional_lights[i].x << " z: " << directional_lights[i].x << "\n";
-      cout << "     " << "r: " << directional_lights[i].r << " g: " << directional_lights[i].g << " b: " << directional_lights[i].b << "\n";
+      std::cout << "  " << "Light " << (i + 1) << " (index " << i << " of list):\n";
+      std::cout << "     " << "x: " << directional_lights[i].x << " y: " << directional_lights[i].x << " z: " << directional_lights[i].x << "\n";
+      std::cout << "     " << "r: " << directional_lights[i].r << " g: " << directional_lights[i].g << " b: " << directional_lights[i].b << "\n";
     }
 
-    cout << "\nPoint Lights:\n";
+    std::cout << "\nPoint Lights:\n";
     if (point_lights.size() == 0)
     {
-      cout << " (none)\n";
+      std::cout << " (none)\n";
     }
-    for (vector<Dl>::size_type i = 0; i < point_lights.size(); i++)
+    for (std::vector<Dl>::size_type i = 0; i < point_lights.size(); i++)
     {
-      cout << "  " << "Light " << (i + 1) << " (index " << i << " of list):\n";
-      cout << "     " << "x: " << point_lights[i].x << " y: " << point_lights[i].x << " z: " << point_lights[i].x << "\n";
-      cout << "     " << "r: " << point_lights[i].r << " g: " << point_lights[i].g << " b: " << point_lights[i].b << "\n";
+      std::cout << "  " << "Light " << (i + 1) << " (index " << i << " of list):\n";
+      std::cout << "     " << "x: " << point_lights[i].x << " y: " << point_lights[i].x << " z: " << point_lights[i].x << "\n";
+      std::cout << "     " << "r: " << point_lights[i].r << " g: " << point_lights[i].g << " b: " << point_lights[i].b << "\n";
     }
-    cout << "***** FINISH PRINTING COMMAND LINE OPTION VARIABLES *****\n\n";
+    std::cout << "***** FINISH PRINTING COMMAND LINE OPTION VARIABLES *****\n\n";
   }
 }
 
@@ -397,7 +385,7 @@ void parseCommandLineOptions(int argc, char *argv[])
       // Check that -dl has enough option parameters
       if ((i + 6) > (argc - 1))
       {
-        cout << "Invalid number of parameters for -dl.";
+        std::cout << "Invalid number of parameters for -dl.";
         exit(1);
       }
 
@@ -409,7 +397,7 @@ void parseCommandLineOptions(int argc, char *argv[])
       else
       {
         // We already have 5 directional lights, so we can't add any more
-        cout << "Too many directional lights.";
+        std::cout << "Too many directional lights.";
         exit(1);
       }
 
@@ -420,7 +408,7 @@ void parseCommandLineOptions(int argc, char *argv[])
       // Check that -pl has enough option parameters
       if ((i + 6) > (argc - 1))
       {
-        cout << "Invalid number of parameters for -pl.";
+        std::cout << "Invalid number of parameters for -pl.";
         exit(1);
       }
       
@@ -432,7 +420,7 @@ void parseCommandLineOptions(int argc, char *argv[])
       else
       {
         // We already have 5 point lights, so we can't add any more
-        cout << "Too many point lights.";
+        std::cout << "Too many point lights.";
         exit(1);
       }
 
@@ -440,7 +428,7 @@ void parseCommandLineOptions(int argc, char *argv[])
     }
     else
     {
-      cout << "Extra parameters in command line options; terminating program.";
+      std::cout << "Extra parameters in command line options; terminating program.";
       exit(1);
     }
 
@@ -465,8 +453,6 @@ int main(int argc, char *argv[]) {
   // Initalize theviewport size
   viewport.w = 400;
   viewport.h = 400;
-
-  Vector3 vect3 = Vector3(2, 2, 2);
 
   return 0;
 }

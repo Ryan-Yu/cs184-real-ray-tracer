@@ -8,11 +8,18 @@
 #ifndef RAY_H_
 #define RAY_H_
 
+#include "point.h"
+#include "vector4.h"
+
 class Ray {
   public:
     Point position;
     Vector4 direction;
     float t_min, t_max;
+
+  Ray() {
+
+  }
 
   Ray(Point position, Vector4 direction, float t_min, float t_max) {
 	  this->position = position;
@@ -23,7 +30,8 @@ class Ray {
 
   // Methods we probably need:
   /*
-   *
+   * (1) findIntersectionWithPrimitive(Primitive p)
+   *     // returns t value of intersection
    */
 
 };

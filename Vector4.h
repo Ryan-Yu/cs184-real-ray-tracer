@@ -1,9 +1,15 @@
 #ifndef VECTOR4_H_
 #define VECTOR4_H_
 
+#include <math.h>
+
 class Vector4 {
   public:
     float x, y, z, w;
+
+  Vector4() {
+
+  }
 
   Vector4(float x, float y, float z, float w) {
     this->x = x;

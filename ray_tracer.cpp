@@ -5,7 +5,7 @@
 #include "point.h"
 #include "normal.h"
 #include "matrix4.h"
-//#include "transformation.h"
+#include "transformation.h"
 #include "ray.h"
 #include "differentialgeometry.h"
 #include "color.h"

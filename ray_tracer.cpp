@@ -1,3 +1,11 @@
+#include <vector>
+#include <iostream>
+#include <fstream>
+#include <cmath>
+#include <string>
+#include <limits>
+#include <cfloat>
+
 #include "Vector3.h"
 #include "Vector4.h"
 #include "Sample.h"
@@ -13,13 +21,7 @@
 #include "Shape.h"
 #include "Primitive.h"
 #include "Intersection.h"
-
-#include <vector>
-#include <iostream>
-#include <fstream>
-#include <cmath>
-#include <string>
-#include <limits>
+#include "AggregatePrimitive.h"
 
 #ifdef _WIN32
 #include <windows.h>

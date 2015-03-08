@@ -33,14 +33,104 @@ class Sphere : public Shape {
 	// NOTE: Intersection object comprises of a DifferentialGeometry and a Primitive.
 	// NOTE: This method must populate tHit and differentialGeometry.
 	bool intersect(Ray &ray, float* tHit, DifferentialGeometry* differentialGeometry) {
-		return false;
+
+		// Sphere equation: (x - x0)^2 + (y - y0)^2 + (z - z0)^2 = r^2
+
+		// Ray equations
+		// x(t) = ft + g
+		float f = ray.direction.x;
+		float g = ray.position.x;
+
+		// y(t) = ht + i
+		float h = ray.direction.y;
+		float i = ray.position.y;
+
+		// z(t) = jt + k
+		float j = ray.direction.z;
+		float k = ray.position.z;
+
+		// (ft + m))^2 + (ht + n))^2 + (jt + p))^2 - r^2 = 0
+		float m = g - this->x;
+		float n = i - this->y;
+		float p = k - this->z;
+
+		// at^2 + bt + c = 0
+		float a = pow(f, 2) + pow(h, 2) + pow(j, 2);
+		float b = (2 * f * m) + (2 * h * n) + (2 * j * p);
+		float c = pow(m, 2) + pow(n, 2) + pow(p, 2) - pow(this->r, 2);
+
+		float discriminant = pow(b, 2) - (4 * a * c);
+
+		// No intersection, so return false
+		if (discriminant < 0) {
+			return false;
+		}
+
+		// Quadratic equation: (-b +/- sqrt(b^2 - 4ac)) / 2a
+		float sqrtTerm = pow(b, 2) - (4 * a * c);
+
+		float tIntersection;
+
+		if (sqrtTerm == 0) {
+			tIntersection = (b * -1.0) / (2.0 * a);
+		} else {
+			// sqrtTerm is positive
+			tIntersection = ((b * -1.0) + sqrtTerm) / (2.0 * a);
+			if ((((b * -1.0) - sqrtTerm) / (2.0 * a)) < tIntersection) {
+				tIntersection = ((b * -1.0) + sqrtTerm) / (2.0 * a);
+			}
+		}
+
+		// at this point, tIntersection is our closest intersection point
+
+		// now, find the (xCoor, yCoor, zCoor) that tIntersection corresponds to
+		float xCoor = (f * tIntersection) + g;
+		float yCoor = (h * tIntersection) + i;
+		float zCoor = (j * tIntersection) + k;
+
+		// (?) Because we are on a sphere, the Normal is precisely the normalizecd version of the intersection point
+		// (in primitive coordinates)
+		differentialGeometry->position = Point(xCoor, yCoor, zCoor);
+		differentialGeometry->normal = Normal::normalizeNormal(Normal(xCoor, yCoor, zCoor));
+		tHit = *tIntersection;
+
+		return true;
 	}
 
 	// Test if ray intersects with the shape or not.
 	// This method is passed up to the geometric primitive class, which owns a method
 	// of the same signature.
 	bool intersectP(Ray &ray) {
-		return false;
+		// Ray equations
+		// x(t) = ft + g
+		float f = ray.direction.x;
+		float g = ray.position.x;
+
+		// y(t) = ht + i
+		float h = ray.direction.y;
+		float i = ray.position.y;
+
+		// z(t) = jt + k
+		float j = ray.direction.z;
+		float k = ray.position.z;
+
+		// (ft + m))^2 + (ht + n))^2 + (jt + p))^2 - r^2 = 0
+		float m = g - this->x;
+		float n = i - this->y;
+		float p = k - this->z;
+
+		// at^2 + bt + c = 0
+		float a = pow(f, 2) + pow(h, 2) + pow(j, 2);
+		float b = (2 * f * m) + (2 * h * n) + (2 * j * p);
+		float c = pow(m, 2) + pow(n, 2) + pow(p, 2) - pow(this->r, 2);
+
+		// discriminant = b^2 - 4ac
+		float discriminant = pow(b, 2) - (4 * a * c);
+
+		if (discriminant < 0) {
+			return false;
+		}
+		return true;
 	}
 };
 

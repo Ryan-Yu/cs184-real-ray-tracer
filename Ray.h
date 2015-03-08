@@ -21,12 +21,6 @@ class Ray {
 	  this->t_max = t_max;
   }
 
-  // TODO: Methods we probably need:
-  /*
-   * (1) findIntersectionWithPrimitive(Primitive p)
-   *     // returns t value of intersection
-   */
-
 };
 
 #endif /* RAY_H_ */

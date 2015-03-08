@@ -27,7 +27,7 @@ class Normal {
   }
 
 
-  Normal normalizeNormal(Normal other) {
+  static Normal normalizeNormal(Normal other) {
     float normalizedMagnitude = sqrt(pow(this->x, 2.0) + pow(this->y, 2.0) + pow(this->z, 2.0));
     return Normal(this->x / normalizedMagnitude, this->y / normalizedMagnitude, this->z / normalizedMagnitude);
   }

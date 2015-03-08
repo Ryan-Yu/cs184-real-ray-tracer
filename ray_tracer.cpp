@@ -22,6 +22,7 @@
 #include "Primitive.h"
 #include "Intersection.h"
 #include "AggregatePrimitive.h"
+#include "Film.h"
 
 #ifdef _WIN32
 #include <windows.h>
@@ -358,9 +359,26 @@ void parseCommandLineOptions(int argc, char *argv[])
 
   int i = 1;
   while (i <= argc - 1) {
-
     flag = argv[i];
-    if (flag == "-dl")
+
+    if (flag == "-dimensions")
+	{
+	  // Check that -dl has enough option parameters
+	  if ((i + 2) > (argc - 1))
+	  {
+		std::cout << "Invalid number of parameters for -dimensions.";
+		exit(1);
+	  }
+
+	  int widthOfFilm = stoi(argv[i+1]);
+	  int heightOfFilm = stoi(argv[i+2]);
+	  if (widthOfFilm < 1000 || heightOfFilm < 500 || widthOfFilm > 3000 || heightOfFilm > 3000) {
+		  std::cout << "Dimensions of output file must be at least 1000x500 and no more than 3000x3000.";
+		  exit(1);
+	  }
+	  i += 2;
+	}
+    else if (flag == "-dl")
     {
       // Check that -dl has enough option parameters
       if ((i + 6) > (argc - 1))

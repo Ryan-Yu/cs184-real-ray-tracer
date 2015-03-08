@@ -4,7 +4,7 @@
 #include "sample.h"
 #include "point.h"
 #include "normal.h"
-//#include "matrix4.h"
+#include "matrix4.h"
 //#include "transformation.h"
 #include "ray.h"
 #include "differentialgeometry.h"
@@ -14,7 +14,6 @@
 #include "shape.h"
 #include "primitive.h"
 #include "intersection.h"
-
 
 #include <vector>
 #include <iostream>
@@ -104,7 +103,7 @@ class Dl {
 //****************************************************
 // Global Variables
 //****************************************************
-Viewport	viewport;
+Viewport viewport;
 
 //***** The following are set by command line options *****//
 // Ambient term
@@ -123,25 +122,14 @@ std::vector<Dl> directional_lights;
 bool debug;
 
 
-
-//****************************************************
-// helper function that normalizes a vector and returns the normalized vector
-//****************************************************
+// TODO: Remove this!
 Vector3 normalizeVector(Vector3 vector_to_normalize) {
-
   float magnitude = sqrt(pow(vector_to_normalize.x, 2) + pow(vector_to_normalize.y, 2) + pow(vector_to_normalize.z, 2));
-  // printf("The vector that we are trying to normalize is (%f, %f, %f) and its magnitud e is: %f\n", vector_to_normalize.x, vector_to_normalize.y, vector_to_normalize.z, magnitude);
   return Vector3(vector_to_normalize.x / magnitude, vector_to_normalize.y / magnitude, vector_to_normalize.z / magnitude);
 }
 
 
-
-//****************************************************
-// A routine to set a pixel by drawing a GL point.  This is not a
-// general purpose routine as it assumes a lot of stuff specific to
-// this example.
-//****************************************************
-
+// TODO: Remove this!
 void setPixel(int x, int y, int r, int g, int b) {
 
 }
@@ -298,9 +286,7 @@ void circle(float centerX, float centerY, float radius) {
         // ***** FINISH CONSIDERING POINT LIGHTS ***** //
         Vector3 resultant_rgb = Vector3(resultant_rgb_sum_of_pixel_r, resultant_rgb_sum_of_pixel_g, resultant_rgb_sum_of_pixel_b);
         setPixel(i, j, resultant_rgb.x, resultant_rgb.y, resultant_rgb.z);
-        // setPixel(i,j, resultant_rgb_sum_of_pixel_r, resultant_rgb_sum_of_pixel_g, resultant_rgb_sum_of_pixel_b);
       }
-
     }
   }
 }

@@ -1,10 +1,3 @@
-/*
- * DifferentialGeometry.h
- *
- *  Created on: Mar 7, 2015
- *      Author: ryanyu
- */
-
 #ifndef DIFFERENTIALGEOMETRY_H_
 #define DIFFERENTIALGEOMETRY_H_
 

@@ -1,10 +1,3 @@
-/*
- * Normal.h
- *
- *  Created on: Mar 7, 2015
- *      Author: ryanyu
- */
-
 #ifndef NORMAL_H_
 #define NORMAL_H_
 

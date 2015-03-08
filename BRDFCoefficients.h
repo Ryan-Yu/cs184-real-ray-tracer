@@ -1,10 +1,3 @@
-/*
- * BRDFCoefficients.h
- *
- *  Created on: Mar 7, 2015
- *      Author: ryanyu
- */
-
 #ifndef BRDFCOEFFICIENTS_H_
 #define BRDFCOEFFICIENTS_H_
 

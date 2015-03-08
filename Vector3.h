@@ -39,7 +39,6 @@ class Vector3 {
 
   Vector3 normalizeVector(Vector3 vector_to_normalize) {
     float magnitude = sqrt(pow(vector_to_normalize.x, 2) + pow(vector_to_normalize.y, 2) + pow(vector_to_normalize.z, 2));
-    // printf("The vector that we are trying to normalize is (%f, %f, %f) and its magnitude is: %f\n", vector_to_normalize.x, vector_to_normalize.y, vector_to_normalize.z, magnitude);
     return Vector3(vector_to_normalize.x / magnitude, vector_to_normalize.y / magnitude, vector_to_normalize.z / magnitude);
   }
 };

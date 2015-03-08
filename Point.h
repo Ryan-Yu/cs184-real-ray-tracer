@@ -1,10 +1,3 @@
-/*
- * Point.h
- *
- *  Created on: Mar 7, 2015
- *      Author: ryanyu
- */
-
 #ifndef POINT_H_
 #define POINT_H_
 

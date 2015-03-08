@@ -1,16 +1,9 @@
-/*
- * Material.h
- *
- *  Created on: Mar 7, 2015
- *      Author: ryanyu
- */
-
 #ifndef MATERIAL_H_
 #define MATERIAL_H_
 
 class Material {
-public:
-	BRDFCoefficients constantBRDF;
+	public:
+		BRDFCoefficients constantBRDF;
 
 	Material() {
 

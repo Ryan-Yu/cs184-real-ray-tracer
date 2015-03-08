@@ -1,10 +1,3 @@
-/*
- * Ray.h
- *
- *  Created on: Mar 7, 2015
- *      Author: ryanyu
- */
-
 #ifndef RAY_H_
 #define RAY_H_
 
@@ -28,7 +21,7 @@ class Ray {
 	  this->t_max = t_max;
   }
 
-  // Methods we probably need:
+  // TODO: Methods we probably need:
   /*
    * (1) findIntersectionWithPrimitive(Primitive p)
    *     // returns t value of intersection

@@ -1,10 +1,3 @@
-/*
- * Sample.h
- *
- *  Created on: Mar 7, 2015
- *      Author: ryanyu
- */
-
 #ifndef SAMPLE_H_
 #define SAMPLE_H_
 

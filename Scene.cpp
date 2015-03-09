@@ -26,7 +26,6 @@
 #include "Bucket.h"
 #include "Camera.h"
 #include "Light.h"
-#include "RayTracer.h"
 
 #ifdef _WIN32
 #include <windows.h>
@@ -111,6 +110,7 @@ class Dl {
 // Global Variables
 //****************************************************
 
+
 // REAL GLOBAL VARIABLES
 std::vector<Bucket> listOfBuckets;
 Film film;
@@ -118,9 +118,46 @@ Camera camera;
 int recursionDepth;
 std::vector<Light> lights;
 AggregatePrimitive aggregatePrimitive;
+
+class RayTracer {
+	public:
+
+		void trace(Ray& ray, int depth, Color* color) {
+			if (depth > recursionDepth) {
+				color->r = 0;
+				color->g = 0;
+				color->b =0;
+				return;
+			}
+			float tHit;
+			Intersection intersection;
+			// This method will populate tHit and intersection if there is an intersection with this ray and any primitive.
+			if (!aggregatePrimitive.intersect(ray, &tHit, &intersection) ) {
+				color->r = 0;
+				color->g = 0;
+				color->b =0;
+				return;
+			}
+			BRDFCoefficients brdf;
+			// This method will populate the brdf variable with the brdf values of the intersection primitive.
+			intersection.primitive->getBRDF(intersection.differentialGeometry, &brdf);
+
+			//There is an intersection, so we have to loop through all the light sources
+
+		}
+};
+
 RayTracer rayTracer;
 
 Viewport viewport;
+
+
+
+
+
+
+
+
 
 
 
@@ -140,6 +177,12 @@ std::vector<Pl> point_lights;
 std::vector<Dl> directional_lights;
 
 bool debug;
+
+
+
+
+
+
 
 // TODO: Remove this!
 void setPixel(int x, int y, int r, int g, int b) {

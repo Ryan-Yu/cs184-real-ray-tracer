@@ -5,8 +5,16 @@ class AggregatePrimitive {
 	public:
 		std::vector<Primitive*> listOfPrimitives;
 
+	AggregatePrimitive() {
+
+	}
+
 	AggregatePrimitive(std::vector<Primitive*> listOfPrimitives) {
 		this->listOfPrimitives = listOfPrimitives;
+	}
+
+	void addPrimitive(Primitive* primitive) {
+		listOfPrimitives.push_back(primitive);
 	}
 
 	// Just loops through all the primitives in the list and calls the intersect routine

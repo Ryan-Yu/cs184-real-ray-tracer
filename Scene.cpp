@@ -26,6 +26,7 @@
 #include "Bucket.h"
 #include "Camera.h"
 #include "Light.h"
+#include "RayTracer.h"
 
 #ifdef _WIN32
 #include <windows.h>
@@ -116,8 +117,8 @@ Film film;
 Camera camera;
 int recursionDepth;
 std::vector<Light> lights;
-
-
+AggregatePrimitive aggregatePrimitive;
+RayTracer rayTracer;
 
 Viewport viewport;
 
@@ -446,7 +447,7 @@ void render() {
 	  		Color* currentSampleColor;
 	  		camera.generateRay(currentSample, currentRay);
 
-	  		// TODO: rayTracer.trace(ray, DEPTH, currentSampleColor);
+	  		rayTracer.trace(*currentRay, recursionDepth, currentSampleColor);
 
 	  		film.commitColor(currentSample, *currentSampleColor);
 	  	}
@@ -475,6 +476,13 @@ void initializeSampler() {
 	}
 }
 
+void initializePrimitives() {
+	Sphere sphere1 = Sphere(0, 0, -2, 1);
+	GeometricPrimitive primitive1;
+	primitive1.shape = &sphere1;
+	aggregatePrimitive.addPrimitive(&primitive1);
+}
+
 
 int main(int argc, char *argv[]) {
 
@@ -486,6 +494,7 @@ int main(int argc, char *argv[]) {
   printCommandLineOptionVariables();
   // Initializes list of buckets; Buckets have a list of samples
   initializeSampler();
+  initializePrimitives();
   render();
 
 

@@ -2,19 +2,19 @@
 #define RAY_H_
 
 #include "Point.h"
-#include "Vector4.h"
+#include "Vector3.h"
 
 class Ray {
   public:
     Point position;
-    Vector4 direction;
+    Vector3 direction;
     float t_min, t_max;
 
   Ray() {
 
   }
 
-  Ray(Point position, Vector4 direction, float t_min, float t_max) {
+  Ray(Point position, Vector3 direction, float t_min, float t_max) {
 	  this->position = position;
 	  this->direction = direction;
 	  this->t_min = t_min;

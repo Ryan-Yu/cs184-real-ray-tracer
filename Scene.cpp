@@ -24,6 +24,7 @@
 #include "AggregatePrimitive.h"
 #include "Film.h"
 #include "Bucket.h"
+#include "Camera.h"
 
 #ifdef _WIN32
 #include <windows.h>
@@ -473,7 +474,6 @@ int main(int argc, char *argv[]) {
 
   // Turns debug mode ON or OFF
   debug = true;
-  std::cout << "hi";
 
   // Parse command line options
   parseCommandLineOptions(argc, argv);
@@ -482,7 +482,10 @@ int main(int argc, char *argv[]) {
   // Initializes list of buckets; Buckets have a list of samples
   initializeSampler();
 
-  printContentsOfBuckets();
+//  printContentsOfBuckets();
+
+
+
 
   return 0;
 }

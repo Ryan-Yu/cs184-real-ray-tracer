@@ -110,8 +110,6 @@ class Dl {
 // Global Variables
 //****************************************************
 
-
-// REAL GLOBAL VARIABLES
 std::vector<Bucket> listOfBuckets;
 Film film;
 Camera camera;
@@ -126,21 +124,41 @@ class RayTracer {
 			if (depth > recursionDepth) {
 				color->r = 0;
 				color->g = 0;
-				color->b =0;
+				color->b = 0;
 				return;
 			}
-			float tHit;
-			Intersection intersection;
-			// This method will populate tHit and intersection if there is an intersection with this ray and any primitive.
-			if (!aggregatePrimitive.intersect(ray, &tHit, &intersection) ) {
+//			float tHit = FLT_MIN;
+//			Intersection intersection = Intersection();
+
+			if (!aggregatePrimitive.intersectP(ray)) {
 				color->r = 0;
 				color->g = 0;
-				color->b =0;
+				color->b = 0;
 				return;
+			} else {
+				//For testing purposes, simply shade red if the ray intersects the point
+				color->r = 1;
+				color->g = 0;
+				color->b = 0;
 			}
-			BRDFCoefficients brdf;
-			// This method will populate the brdf variable with the brdf values of the intersection primitive.
-			intersection.primitive->getBRDF(intersection.differentialGeometry, &brdf);
+
+			// This method will populate tHit and intersection if there is an intersection with this ray and any primitive.
+//			if (!aggregatePrimitive.intersect(ray, &tHit, &intersection) ) {
+//				color->r = 0;
+//				color->g = 0;
+//				color->b = 0;
+//				return;
+//			} else {
+//				//For testing purposes, simply shade red if the ray intersects the point
+//				color->r = 1;
+//				color->g = 0;
+//				color->b = 0;
+//			}
+
+
+//			BRDFCoefficients brdf;
+//			// This method will populate the brdf variable with the brdf values of the intersection primitive.
+//			intersection.primitive->getBRDF(intersection.differentialGeometry, &brdf);
 
 			//There is an intersection, so we have to loop through all the light sources
 
@@ -149,17 +167,11 @@ class RayTracer {
 
 RayTracer rayTracer;
 
+
+
+//TODO: Delete all this shit.
+
 Viewport viewport;
-
-
-
-
-
-
-
-
-
-
 
 // TODO: Move these into appropriate classes
 //***** The following are set by command line options *****//
@@ -487,12 +499,12 @@ void render() {
 
 	  		// For each sample, generate a ray from the eye to the sample location
 	  		Ray* currentRay;
-	  		Color* currentSampleColor;
+	  		Color currentSampleColor;
 	  		camera.generateRay(currentSample, currentRay);
 
-	  		rayTracer.trace(*currentRay, recursionDepth, currentSampleColor);
-
-	  		film.commitColor(currentSample, *currentSampleColor);
+	  		rayTracer.trace(*currentRay, recursionDepth, &currentSampleColor);
+	  		cout << currentSampleColor.r;
+	  		film.commitColor(currentSample, currentSampleColor);
 	  	}
 	}
 }

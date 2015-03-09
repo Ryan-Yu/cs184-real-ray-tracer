@@ -517,6 +517,8 @@ void render() {
 	  		// Call the trace method to try to populate currentSampleColor for the currentSample
 	  		rayTracer.trace(currentRay, recursionDepth, &currentSampleColor);
 
+//	  		cout << currentSampleColor.r;
+
 	  		// Commit the currentSampleColor for the currentSample onto our Film
 	  		film.commitColor(currentSample, currentSampleColor);
 	  	}

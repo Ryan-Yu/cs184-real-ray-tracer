@@ -6,10 +6,10 @@
 
 class Primitive {
 	public:
-		bool intersect(Ray& ray, float* tHit, Intersection* in) {
+		virtual bool intersect(Ray& ray, float* tHit, Intersection* in) {
 			return false;
 		}
-		bool intersectP(Ray& ray) {
+		virtual bool intersectP(Ray& ray) {
 			return false;
 		}
 		BRDFCoefficients getBRDF(DifferentialGeometry& differentialGeometry, BRDFCoefficients* brdf) {

@@ -59,6 +59,7 @@ class GeometricPrimitive : public Primitive {
 			return shape->intersectP(ray);
 		}
 
+		// Simply returns the BRDFCoefficients object of 'this' Primitive
 		BRDFCoefficients getBRDF(DifferentialGeometry& differentialGeometry, BRDFCoefficients* brdf) {
 			return material->getBRDF(differentialGeometry, brdf);
 		}

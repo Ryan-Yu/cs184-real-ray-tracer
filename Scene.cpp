@@ -132,23 +132,9 @@ class RayTracer {
 				color->b = 0;
 				return;
 			}
-//			float tHit = FLT_MIN;
-//			Intersection intersection = Intersection();
-			printRay(ray);
-			if (!aggregatePrimitive.intersectP(ray)) {
-				color->r = 0;
-				color->g = 0;
-				color->b = 0;
-				return;
-			} else {
-				//For testing purposes, simply shade red if the ray intersects the point
-				color->r = 1;
-				color->g = 0;
-				color->b = 0;
-			}
 
-			// This method will populate tHit and intersection if there is an intersection with this ray and any primitive.
-//			if (!aggregatePrimitive.intersect(ray, &tHit, &intersection) ) {
+//			// For testing only: shade coordinate red if ray intersects it, else shade black
+//			if (!aggregatePrimitive.intersectP(ray)) {
 //				color->r = 0;
 //				color->g = 0;
 //				color->b = 0;
@@ -161,9 +147,22 @@ class RayTracer {
 //			}
 
 
-//			BRDFCoefficients brdf;
-//			// This method will populate the brdf variable with the brdf values of the intersection primitive.
-//			intersection.primitive->getBRDF(intersection.differentialGeometry, &brdf);
+			// TODO: this may be wrong
+			float tHit = FLT_MIN;
+			Intersection intersection;
+
+			// This method will populate tHit and intersection if there is an intersection with this ray and any primitive.
+			if (!aggregatePrimitive.intersect(ray, &tHit, &intersection) ) {
+				// If no intersection, then make the color black and return
+				color->r = 0;
+				color->g = 0;
+				color->b = 0;
+				return;
+			}
+
+			BRDFCoefficients brdf;
+			// This method will populate the brdf variable with the brdf values of the intersection primitive.
+			brdf = intersection.primitive->getBRDF(intersection.differentialGeometry, &brdf);
 
 			//There is an intersection, so we have to loop through all the light sources
 
@@ -411,7 +410,9 @@ void printCommandLineOptionVariables( )
 // (2) -depth n
 //     sets recursion depth
 // (3) -dl x y z r g b
+//     (directional lights)
 // (4) -pl x y z r g b
+//     (point lights)
 void parseCommandLineOptions(int argc, char *argv[])
 {
   string flag;
@@ -509,11 +510,14 @@ void render() {
 	  		Sample currentSample = listOfBuckets[i].samples[j];
 
 	  		// For each sample, generate a ray from the eye to the sample location
-	  		Ray* currentRay;
+	  		Ray currentRay;
 	  		Color currentSampleColor;
-	  		camera.generateRay(currentSample, currentRay);
+	  		camera.generateRay(currentSample, &currentRay);
 
-	  		rayTracer.trace(*currentRay, recursionDepth, &currentSampleColor);
+	  		// Call the trace method to try to populate currentSampleColor for the currentSample
+	  		rayTracer.trace(currentRay, recursionDepth, &currentSampleColor);
+
+	  		// Commit the currentSampleColor for the currentSample onto our Film
 	  		film.commitColor(currentSample, currentSampleColor);
 	  	}
 	}
@@ -541,16 +545,26 @@ void initializeSampler() {
 	}
 }
 
+// Initializing Primitives for testing purposes
 void initializePrimitives() {
-	Sphere sphere1 = Sphere(0, 0, -2, 1);
-	GeometricPrimitive primitive1;
-	primitive1.shape = &sphere1;
-	aggregatePrimitive.addPrimitive(&primitive1);
+	// Must use 'new', as need to store pointers to variables that will live outside of the scope of this function
+	Sphere *sphere1 = new Sphere(0, 0, -2, 1);
+	Material *material1 = new Material();
+	BRDFCoefficients *brdf = new BRDFCoefficients();
+	Color *color1 = new Color(5, 6, 7);
+	brdf->ka = *color1;
+	material1->constantBRDF = *brdf;
+
+	GeometricPrimitive *primitive1 = new GeometricPrimitive();
+
+	primitive1->shape = sphere1;
+	primitive1->material = material1;
+
+	aggregatePrimitive.addPrimitive(primitive1);
 }
 
 
 int main(int argc, char *argv[]) {
-
   // Turns debug mode ON or OFF
   debug = true;
 
@@ -561,7 +575,6 @@ int main(int argc, char *argv[]) {
   initializeSampler();
   initializePrimitives();
   render();
-
 
 //  printContentsOfBuckets();
   return 0;

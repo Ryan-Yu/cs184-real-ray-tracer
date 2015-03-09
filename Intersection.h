@@ -3,19 +3,19 @@
 
 // Forward declaration
 // http://stackoverflow.com/questions/28925071/c-confusion-with-forward-declaring-classes-and-using-include-statements
-class Primitive;
+class GeometricPrimitive;
 
 // This class represents an intersection point of a ray and a primitive.
 class Intersection {
 	public:
 		DifferentialGeometry differentialGeometry;
-		Primitive *primitive;
+		GeometricPrimitive *primitive;
 
 		Intersection() {
 
 		}
 
-		Intersection(DifferentialGeometry differentialGeometry, Primitive *primitive) {
+		Intersection(DifferentialGeometry differentialGeometry, GeometricPrimitive *primitive) {
 			this->differentialGeometry = differentialGeometry;
 			this->primitive = primitive;
 		}

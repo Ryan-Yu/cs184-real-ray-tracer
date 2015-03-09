@@ -5,15 +5,19 @@
 class Shape {
 	public:
 		// Abstract methods that Sphere and Triangle inherit from.
-		bool intersect(Ray &ray, float* tHit, DifferentialGeometry* differentialGeometry) {
+		virtual bool intersect(Ray &ray, float* tHit, DifferentialGeometry* differentialGeometry) {
 			return false;
 		}
-		bool intersectP(Ray &ray) {
+		virtual bool intersectP(Ray &ray) {
 			return false;
 		}
+
+		virtual ~Shape() {
+
+		}
+
 };
 
-// TODO: Fill out the intersect and intersectP methods.
 class Sphere : public Shape {
 	public:
 		float x, y, z, r;

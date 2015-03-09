@@ -3,17 +3,17 @@
 
 class AggregatePrimitive {
 	public:
-		std::vector<Primitive*> listOfPrimitives;
+		std::vector<GeometricPrimitive*> listOfPrimitives;
 
 	AggregatePrimitive() {
 
 	}
 
-	AggregatePrimitive(std::vector<Primitive*> listOfPrimitives) {
+	AggregatePrimitive(std::vector<GeometricPrimitive*> listOfPrimitives) {
 		this->listOfPrimitives = listOfPrimitives;
 	}
 
-	void addPrimitive(Primitive* primitive) {
+	void addPrimitive(GeometricPrimitive* primitive) {
 		listOfPrimitives.push_back(primitive);
 	}
 
@@ -26,7 +26,7 @@ class AggregatePrimitive {
 		float* pointerOfSmallestTSeenSoFar;
 		Intersection* pointerOfClosestIntersectionSoFar;
 		// For each primitive...
-		for (std::vector<Primitive*>::size_type i = 0; i < listOfPrimitives.size(); i++) {
+		for (std::vector<GeometricPrimitive*>::size_type i = 0; i < listOfPrimitives.size(); i++) {
 			// Find whether the primitive hits the ray...
 			if (listOfPrimitives[i]->intersect(ray, tHit, in)) {
 				hit = true;
@@ -51,9 +51,8 @@ class AggregatePrimitive {
 	// Just loops through all the primitives in the list and calls the intersectP routine
 	// Returns true if our input ray hits ANY primitive, and false otherwise
 	bool intersectP(Ray& ray) {
-		for (std::vector<Primitive*>::size_type i = 0; i < listOfPrimitives.size(); i++) {
+		for (std::vector<GeometricPrimitive*>::size_type i = 0; i < listOfPrimitives.size(); i++) {
 			if (listOfPrimitives[i]->intersectP(ray)) {
-				std::cout << "HIT!!!!\n";
 				return true;
 			}
 		}

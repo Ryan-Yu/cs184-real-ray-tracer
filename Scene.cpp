@@ -23,6 +23,7 @@
 #include "Intersection.h"
 #include "AggregatePrimitive.h"
 #include "Film.h"
+#include "Bucket.h"
 
 #ifdef _WIN32
 #include <windows.h>
@@ -48,8 +49,9 @@ inline float sqr(float x) { return x*x; }
 class Viewport;
 
 class Viewport {
-  public:
-    int w, h; // width and height
+public:
+	int w, h;
+
 };
 
 // NOTE: in-class initialization of non-static data member is a C++11 extension (might have to remove)
@@ -105,7 +107,16 @@ class Dl {
 //****************************************************
 // Global Variables
 //****************************************************
+
+// REAL GLOBAL VARIABLES
+std::vector<Bucket> listOfBuckets;
+Film film;
+
+
+
 Viewport viewport;
+
+
 
 // TODO: Move these into appropriate classes
 //***** The following are set by command line options *****//
@@ -286,29 +297,6 @@ void circle(float centerX, float centerY, float radius) {
   }
 }
 
-//****************************************************
-// function that does the actual drawing of stuff
-//***************************************************
-void myDisplay() {
-
-  // Start drawing
-  circle(viewport.w / 2.0 , viewport.h / 2.0 , min(viewport.w, viewport.h) * 0.45);
-}
-
-
-
-//****************************************************
-// function that assists with exit of program on space bar press
-//***************************************************
-void exitOnSpaceBarPress( unsigned char key, int x, int y )
-{
-    switch ( key )
-    {
-    // Space bar
-    case ' ':
-        exit(1);
-    }
-}
 
 
 //****************************************************
@@ -319,6 +307,9 @@ void printCommandLineOptionVariables( )
   if (debug)
   {
     std::cout << "\n***** BEGIN PRINTING COMMAND LINE OPTION VARIABLES *****\n";
+
+    std::cout << "  " << "Film Width: " << film.width << "\n";
+    std::cout << "  " << "Film Height: " << film.height << "\n";
 
     std::cout << "Directional Lights:\n";
     if (directional_lights.size() == 0)
@@ -347,12 +338,9 @@ void printCommandLineOptionVariables( )
   }
 }
 
-
-//****************************************************
-// function that parses command line options,
-// given number of command line arguments (argc)
-// and the argument array (argv)
-//***************************************************
+// (1) -dimensions width height
+//     adds viewport width and height attributes to Viewport global variable
+// (2)
 void parseCommandLineOptions(int argc, char *argv[])
 {
   string flag;
@@ -376,6 +364,8 @@ void parseCommandLineOptions(int argc, char *argv[])
 		  std::cout << "Dimensions of output file must be at least 1000x500 and no more than 3000x3000.";
 		  exit(1);
 	  }
+	  film.width = widthOfFilm;
+	  film.height = heightOfFilm;
 	  i += 2;
 	}
     else if (flag == "-dl")
@@ -435,18 +425,64 @@ void parseCommandLineOptions(int argc, char *argv[])
   }
 }
 
+// Prints contents of samples and buckets for debug purposes
+void printContentsOfBuckets() {
+	if (debug) {
+		for (vector<Bucket>::size_type i = 0; i < listOfBuckets.size(); i++) {
+			std::cout << "  Samples for bucket anchored at (" << listOfBuckets[i].anchorPoint.x << ", " << listOfBuckets[i].anchorPoint.y << ")\n";
+			for (vector<Sample>::size_type j = 0; j < listOfBuckets[i].samples.size(); j++) {
+				std::cout << "    " << "Sample: x = " << listOfBuckets[i].samples[j].x << "; y = " << listOfBuckets[i].samples[j].y << "\n";
+			}
+		}
+	}
+}
+
+// Main rendering loop
+void render() {
+//	while (!sampler.generateSample(&sample)) {
+//		camera.generateRay(sample, &ray);
+//		rayTracer.trace(ray, &color);
+//		film.commitColor(sample, color);
+//	}
+}
+
+
+// initializes list of samples
+void initializeSampler() {
+
+	// Image plane = (-1, -1) (-1, 1) (1, -1) (1, 1) with z coordinate -1
+	// NOTE: Image plane width = height = 2
+
+	float i, j;
+	int numberOfBuckets = film.width * film.height;
+
+	float widthOfBucket = 2.0 / film.width;
+	float heightOfBucket = 2.0 / film.height;
+
+	for (i = -1.0; i < 1.0; i += widthOfBucket) {
+		for (j = -1.0; j < 1.0; j += heightOfBucket) {
+			std::vector<Sample> currentSamples;
+			currentSamples.push_back(Sample(i + (widthOfBucket / 2.0), j + (heightOfBucket / 2.0)));
+			listOfBuckets.push_back(Bucket(currentSamples, Point(i, j, -1)));
+		}
+	}
+}
+
+
 int main(int argc, char *argv[]) {
 
   // Turns debug mode ON or OFF
   debug = true;
+  std::cout << "hi";
 
   // Parse command line options
   parseCommandLineOptions(argc, argv);
   printCommandLineOptionVariables();
 
-  // Initalize theviewport size
-  viewport.w = 400;
-  viewport.h = 400;
+  // Initializes list of buckets; Buckets have a list of samples
+  initializeSampler();
+
+  printContentsOfBuckets();
 
   return 0;
 }

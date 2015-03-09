@@ -7,15 +7,15 @@ class Film {
 
 	public:
 		std::vector< std::vector< Color > > filmOutput;
-		int filmWidth, filmHeight;
+		int width, height;
 
 	Film() {
 
 	}
 
 	Film(int width, int height) {
-		this->filmWidth = width;
-		this->filmHeight = height;
+		this->width = width;
+		this->height = height;
 	}
 
 	void commitColor(Sample& sample, Color& color) {

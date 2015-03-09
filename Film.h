@@ -18,7 +18,7 @@ class Film {
 		this->height = height;
 	}
 
-	void commitColor(Sample& sample, Color color) {
+	void commitColor(Sample& sample, Color& color) {
 		// Assuming sample.x and sample.y are coordinates in the image plane (i.e. [-1, 1]) coordinate system,
 		// we must convert sample.x and sample.y to the coordinate system of the film before we populate
 		// the Film's corresponding coordinate in our 2D array

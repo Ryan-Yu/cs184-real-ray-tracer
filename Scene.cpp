@@ -25,6 +25,7 @@
 #include "Film.h"
 #include "Bucket.h"
 #include "Camera.h"
+#include "Light.h"
 
 #ifdef _WIN32
 #include <windows.h>
@@ -114,6 +115,7 @@ std::vector<Bucket> listOfBuckets;
 Film film;
 Camera camera;
 int recursionDepth;
+std::vector<Light> lights;
 
 
 
@@ -362,10 +364,10 @@ void parseCommandLineOptions(int argc, char *argv[])
 
 	  int widthOfFilm = stoi(argv[i+1]);
 	  int heightOfFilm = stoi(argv[i+2]);
-	  if (widthOfFilm < 1000 || heightOfFilm < 500 || widthOfFilm > 3000 || heightOfFilm > 3000) {
-		  std::cout << "Dimensions of output file must be at least 1000x500 and no more than 3000x3000.";
-		  exit(1);
-	  }
+//	  if (widthOfFilm < 1000 || heightOfFilm < 500 || widthOfFilm > 3000 || heightOfFilm > 3000) {
+//		  std::cout << "Dimensions of output file must be at least 1000x500 and no more than 3000x3000.";
+//		  exit(1);
+//	  }
 	  film.width = widthOfFilm;
 	  film.height = heightOfFilm;
 	  i += 2;
@@ -391,17 +393,7 @@ void parseCommandLineOptions(int argc, char *argv[])
       }
 
       // Add directional lights to our directional lights list
-      if (directional_lights.size() < 5)
-      {
-        directional_lights.push_back( Dl( stof(argv[i+1]), stof(argv[i+2]), stof(argv[i+3]), stof(argv[i+4]), stof(argv[i+5]), stof(argv[i+6]) ) );
-      }
-      else
-      {
-        // We already have 5 directional lights, so we can't add any more
-        std::cout << "Too many directional lights.";
-        exit(1);
-      }
-
+      lights.push_back( DirectionalLight( stof(argv[i+1]), stof(argv[i+2]), stof(argv[i+3]), stof(argv[i+4]), stof(argv[i+5]), stof(argv[i+6]) ) );
       i += 6;
     }
     else if (flag == "-pl")
@@ -413,18 +405,7 @@ void parseCommandLineOptions(int argc, char *argv[])
         exit(1);
       }
 
-      // Add point lights to our point lights list
-      if (point_lights.size() < 5)
-      {
-        point_lights.push_back( Pl( stof(argv[i+1]), stof(argv[i+2]), stof(argv[i+3]), stof(argv[i+4]), stof(argv[i+5]), stof(argv[i+6]) ) );
-      }
-      else
-      {
-        // We already have 5 point lights, so we can't add any more
-        std::cout << "Too many point lights.";
-        exit(1);
-      }
-
+      lights.push_back( PointLight( stof(argv[i+1]), stof(argv[i+2]), stof(argv[i+3]), stof(argv[i+4]), stof(argv[i+5]), stof(argv[i+6]) ) );
       i += 6;
     }
     else
@@ -452,11 +433,24 @@ void printContentsOfBuckets() {
 
 // Main rendering loop
 void render() {
-//	while (!sampler.generateSample(&sample)) {
-//		camera.generateRay(sample, &ray);
-//		rayTracer.trace(ray, &color);
-//		film.commitColor(sample, color);
-//	}
+	// Loop through all of the samples in each bucket...
+	// Current Bucket given by 'listOfBuckets[i]'
+	for (vector<Bucket>::size_type i = 0; i < listOfBuckets.size(); i++) {
+		// Current Sample given by 'listOfBuckets[i].samples[j]
+	  	for (vector<Sample>::size_type j = 0; j < listOfBuckets[i].samples.size(); j++) {
+
+	  		Sample currentSample = listOfBuckets[i].samples[j];
+
+	  		// For each sample, generate a ray from the eye to the sample location
+	  		Ray* currentRay;
+	  		Color* currentSampleColor;
+	  		camera.generateRay(currentSample, currentRay);
+
+	  		// TODO: rayTracer.trace(ray, DEPTH, currentSampleColor);
+
+	  		film.commitColor(currentSample, *currentSampleColor);
+	  	}
+	}
 }
 
 
@@ -490,28 +484,9 @@ int main(int argc, char *argv[]) {
   // Parse command line options
   parseCommandLineOptions(argc, argv);
   printCommandLineOptionVariables();
-
   // Initializes list of buckets; Buckets have a list of samples
   initializeSampler();
-
-  // Loop through all of the samples in each bucket...
-  // Current Bucket given by 'listOfBuckets[i]'
-  for (vector<Bucket>::size_type i = 0; i < listOfBuckets.size(); i++) {
-	  // Current Sample given by 'listOfBuckets[i].samples[j]
-  		for (vector<Sample>::size_type j = 0; j < listOfBuckets[i].samples.size(); j++) {
-
-  			Sample currentSample = listOfBuckets[i].samples[j];
-
-  			// For each sample, generate a ray from the eye to the sample location
-  			Ray* currentRay;
-  			Color* currentSampleColor;
-  			camera.generateRay(currentSample, currentRay);
-
-  			// rayTracer.trace(ray, DEPTH, currentSampleColor);
-
-  			film.commitColor(currentSample, *currentSampleColor);
-  		}
-  }
+  render();
 
 
 //  printContentsOfBuckets();

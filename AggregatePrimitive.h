@@ -53,6 +53,7 @@ class AggregatePrimitive {
 	bool intersectP(Ray& ray) {
 		for (std::vector<Primitive*>::size_type i = 0; i < listOfPrimitives.size(); i++) {
 			if (listOfPrimitives[i]->intersectP(ray)) {
+				std::cout << "HIT!!!!\n";
 				return true;
 			}
 		}

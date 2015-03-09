@@ -105,11 +105,17 @@ class Dl {
   }
 };
 
+//****************************************************
+// Forward Declarations
+//****************************************************
+void printRay(Ray ray);
+void printCommandLineOptionVariables();
+
 
 //****************************************************
 // Global Variables
 //****************************************************
-
+bool debug;
 std::vector<Bucket> listOfBuckets;
 Film film;
 Camera camera;
@@ -119,7 +125,6 @@ AggregatePrimitive aggregatePrimitive;
 
 class RayTracer {
 	public:
-
 		void trace(Ray& ray, int depth, Color* color) {
 			if (depth > recursionDepth) {
 				color->r = 0;
@@ -129,7 +134,7 @@ class RayTracer {
 			}
 //			float tHit = FLT_MIN;
 //			Intersection intersection = Intersection();
-
+			printRay(ray);
 			if (!aggregatePrimitive.intersectP(ray)) {
 				color->r = 0;
 				color->g = 0;
@@ -187,12 +192,6 @@ Sp sp;
 std::vector<Pl> point_lights;
 // List of directional lights
 std::vector<Dl> directional_lights;
-
-bool debug;
-
-
-
-
 
 
 
@@ -361,8 +360,16 @@ void circle(float centerX, float centerY, float radius) {
 
 
 //****************************************************
-// function that prints all of our command line option variables
-//***************************************************
+// debug printing functions
+//****************************************************
+
+void printRay(Ray ray) {
+	if (debug) {
+		printf("Ray: (%f, %f, %f) + t(%f, %f, %f)\n", ray.position.x, ray.position.y, ray.position.z, ray.direction.x, ray.direction.y, ray.direction.z);
+	}
+}
+
+
 void printCommandLineOptionVariables( )
 {
   if (debug)
@@ -398,9 +405,13 @@ void printCommandLineOptionVariables( )
   }
 }
 
+
 // (1) -dimensions width height
 //     adds viewport width and height attributes to Viewport global variable
-// (2)
+// (2) -depth n
+//     sets recursion depth
+// (3) -dl x y z r g b
+// (4) -pl x y z r g b
 void parseCommandLineOptions(int argc, char *argv[])
 {
   string flag;
@@ -503,7 +514,6 @@ void render() {
 	  		camera.generateRay(currentSample, currentRay);
 
 	  		rayTracer.trace(*currentRay, recursionDepth, &currentSampleColor);
-	  		cout << currentSampleColor.r;
 	  		film.commitColor(currentSample, currentSampleColor);
 	  	}
 	}

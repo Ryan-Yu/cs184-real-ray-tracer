@@ -12,11 +12,15 @@ else
 	FLAGS += -D_DEBUG -g Wall
 endif
 	
-all: main 
-main: scene.o 
+all: scene 
+scene: scene.o 
 	$(CC) $(CFLAGS) -o scene scene.o $(LDFLAGS) 
 scene.o: Scene.cpp
 	$(CC) $(CFLAGS) -c Scene.cpp -o scene.o
+	
+lodepng.o: lodepng.cpp lodepng.h
+	$(CC) $(CFLAGS) -c lodepng.cpp -o lodepng.o
+
 clean: 
 	$(RM) *.o scene
  

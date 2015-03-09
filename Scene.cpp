@@ -27,6 +27,8 @@
 #include "Camera.h"
 #include "Light.h"
 
+#include "lodepng.h"
+
 #ifdef _WIN32
 #include <windows.h>
 #else
@@ -56,7 +58,6 @@ public:
 
 };
 
-// NOTE: in-class initialization of non-static data member is a C++11 extension (might have to remove)
 class Ka {
   public:
     float r, g, b;
@@ -133,38 +134,38 @@ class RayTracer {
 				return;
 			}
 
-//			// For testing only: shade coordinate red if ray intersects it, else shade black
-//			if (!aggregatePrimitive.intersectP(ray)) {
-//				color->r = 0;
-//				color->g = 0;
-//				color->b = 0;
-//				return;
-//			} else {
-//				//For testing purposes, simply shade red if the ray intersects the point
-//				color->r = 1;
-//				color->g = 0;
-//				color->b = 0;
-//			}
-
-
-			// TODO: this may be wrong
-			float tHit = FLT_MIN;
-			Intersection intersection;
-
-			// This method will populate tHit and intersection if there is an intersection with this ray and any primitive.
-			if (!aggregatePrimitive.intersect(ray, &tHit, &intersection) ) {
-				// If no intersection, then make the color black and return
+			// For testing only: shade coordinate red if ray intersects it, else shade black
+			if (!aggregatePrimitive.intersectP(ray)) {
 				color->r = 0;
 				color->g = 0;
 				color->b = 0;
 				return;
+			} else {
+				//For testing purposes, simply shade red if the ray intersects the point
+				color->r = 1;
+				color->g = 0;
+				color->b = 0;
 			}
 
-			BRDFCoefficients brdf;
-			// This method will populate the brdf variable with the brdf values of the intersection primitive.
-			brdf = intersection.primitive->getBRDF(intersection.differentialGeometry, &brdf);
 
-			//There is an intersection, so we have to loop through all the light sources
+//			// TODO: this may be wrong
+//			float tHit = FLT_MIN;
+//			Intersection intersection;
+//
+//			// This method will populate tHit and intersection if there is an intersection with this ray and any primitive.
+//			if (!aggregatePrimitive.intersect(ray, &tHit, &intersection) ) {
+//				// If no intersection, then make the color black and return
+//				color->r = 0;
+//				color->g = 0;
+//				color->b = 0;
+//				return;
+//			}
+//
+//			BRDFCoefficients brdf;
+//			// This method will populate the brdf variable with the brdf values of the intersection primitive.
+//			brdf = intersection.primitive->getBRDF(intersection.differentialGeometry, &brdf);
+//
+//			//There is an intersection, so we have to loop through all the light sources
 
 		}
 };

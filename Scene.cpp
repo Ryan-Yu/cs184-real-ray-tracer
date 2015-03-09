@@ -112,6 +112,8 @@ class Dl {
 // REAL GLOBAL VARIABLES
 std::vector<Bucket> listOfBuckets;
 Film film;
+Camera camera;
+int recursionDepth;
 
 
 
@@ -308,10 +310,9 @@ void printCommandLineOptionVariables( )
   if (debug)
   {
     std::cout << "\n***** BEGIN PRINTING COMMAND LINE OPTION VARIABLES *****\n";
-
     std::cout << "  " << "Film Width: " << film.width << "\n";
-    std::cout << "  " << "Film Height: " << film.height << "\n";
-
+    std::cout << "  " << "Film Height: " << film.height << "\n\n";
+    std::cout << "  Recursion Depth: " << recursionDepth << "\n\n";
     std::cout << "Directional Lights:\n";
     if (directional_lights.size() == 0)
     {
@@ -352,7 +353,7 @@ void parseCommandLineOptions(int argc, char *argv[])
 
     if (flag == "-dimensions")
 	{
-	  // Check that -dl has enough option parameters
+	  // Check that -dimensions has enough option parameters
 	  if ((i + 2) > (argc - 1))
 	  {
 		std::cout << "Invalid number of parameters for -dimensions.";
@@ -368,6 +369,17 @@ void parseCommandLineOptions(int argc, char *argv[])
 	  film.width = widthOfFilm;
 	  film.height = heightOfFilm;
 	  i += 2;
+	}
+    else if (flag == "-depth")
+	{
+	  // Check that -depth has enough option parameters
+	  if ((i + 1) > (argc - 1))
+	  {
+		std::cout << "Invalid number of parameters for -depth.";
+		exit(1);
+	  }
+	  recursionDepth = stoi(argv[i+1]);
+	  i += 1;
 	}
     else if (flag == "-dl")
     {
@@ -482,13 +494,29 @@ int main(int argc, char *argv[]) {
   // Initializes list of buckets; Buckets have a list of samples
   initializeSampler();
 
+  // Loop through all of the samples in each bucket...
+  // Current Bucket given by 'listOfBuckets[i]'
+  for (vector<Bucket>::size_type i = 0; i < listOfBuckets.size(); i++) {
+	  // Current Sample given by 'listOfBuckets[i].samples[j]
+  		for (vector<Sample>::size_type j = 0; j < listOfBuckets[i].samples.size(); j++) {
+
+  			Sample currentSample = listOfBuckets[i].samples[j];
+
+  			// For each sample, generate a ray from the eye to the sample location
+  			Ray* currentRay;
+  			Color* currentSampleColor;
+  			camera.generateRay(currentSample, currentRay);
+
+  			// rayTracer.trace(ray, DEPTH, currentSampleColor);
+
+  			film.commitColor(currentSample, *currentSampleColor);
+  		}
+  }
+
+
 //  printContentsOfBuckets();
-
-
-
-
   return 0;
-}
+};
 
 
 

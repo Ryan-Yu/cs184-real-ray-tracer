@@ -75,16 +75,6 @@ class Film {
 			}
 		}
 
-//		for (std::vector<Color>::size_type i = 0; i < filmOutput.size(); i++) {
-//			rawImage[(width * height * i) + 0] = 50;
-//			rawImage[(width * height * i) + 1] = 50;
-//			rawImage[(width * height * i) + 2] = 50;
-//			rawImage[(width * height * i) + 3] = 255;
-//			rawImage[(width * height * i) + 0] = filmOutput[i].r;
-//			rawImage[(width * height * i) + 1] = filmOutput[i].g;
-//			rawImage[(width * height * i) + 2] = filmOutput[i].b;
-//			rawImage[(width * height * i) + 3] = 255.0;
-//		}
 	}
 
 

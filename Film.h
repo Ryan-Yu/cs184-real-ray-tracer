@@ -3,6 +3,25 @@
 
 #include "lodepng.h"
 
+
+class Bucket {
+public:
+	int numberOfSamples;
+	Color color;
+	Bucket() {
+		Color initialColor(0.0, 0.0, 0.0);
+		color = initialColor;
+		numberOfSamples = 0;
+	}
+
+	void add(Color colorToAdd) {
+		// TODO: Need to define this
+		color = color.addColor(colorToAdd);
+		numberOfSamples++;
+	}
+};
+
+
 // Class that represents the output of our ray tracing
 // The output is represented by a 2D array of Colors.
 class Film {
@@ -16,7 +35,7 @@ class Film {
 	}
 
 	public:
-		std::vector< Color > filmOutput;
+		std::vector<Bucket> buckets;
 		int width, height;
 		std::vector<unsigned char> rawImage;
 
@@ -27,67 +46,49 @@ class Film {
 	Film(int width, int height) {
 		this->width = width;
 		this->height = height;
+
+		// Might fail...
+		buckets.resize(width * height);
+
+		// Initialize one empty bucket per pixel in our image plane
+		for (int y = 0; y < height; y++) {
+			for (int x = 0; x < width; x++) {
+				buckets.push_back(Bucket());
+			}
+		}
 	}
 
 	void commitColor(Sample& sample, Color& color) {
-		// Assuming sample.x and sample.y are coordinates in the image plane (i.e. [-1, 1]) coordinate system,
-		// we must convert sample.x and sample.y to the coordinate system of the film before we populate
-		// the Film's corresponding coordinate in our 2D array
-
-		// Convert [-1, 1] coordinate system sample to [width, height] coordinate systems sample
-		// NOTE: This only works for one sample per bucket, centered in the middle of the bucket index;
-		// NOTE: we might need to convert Sample coordinates to image plane coordinates to include
-		// more than one sample per bucket
-
-		// First, grab width and height of each bucket...
-		float widthOfBucket = 2.0 / width;
-		float heightOfBucket = 2.0 / height;
-
-		// Given this information, calculate the bottom left index of the bucket that the sample is in...
-		Sample bottomLeftIndexOfSample = Sample(sample.x - (widthOfBucket / 2.0), sample.y - (heightOfBucket / 2.0));
-
-		std::cout << "In film, bottom left index is: ";
-		printSample(bottomLeftIndexOfSample);
-
-		// Scale the sample appropriately to [width, height] coordinate system
-		Sample scaledFinalSample = Sample(ceil((bottomLeftIndexOfSample.x + 1) * (width / 2.0)), (bottomLeftIndexOfSample.y + 1) * (height / 2.0));
-
-//		printColor(color);
-
-		filmOutput.push_back(Color(color.r, color.g, color.b));
-
-		std::cout << "In film, final point is: ";
-		printSample(scaledFinalSample);
-
+		// Find the index of our 'buckets' array that corresponds with the sample's pixel, and add the 'color' to this index of the array
+		// NOTE: sample.x and sample.y are in the coordinate system of the viewing plane, i.e. [width -> height]
+		buckets[(width * sample.y) + sample.x].add(color);
 	}
 
 
 	void convertToRawData() {
 		rawImage.resize(4 * width * height);
-		int i = 0;
 		for (unsigned y = 0; y < height; y++) {
 			for (unsigned x = 0; x < width; x++) {
-				rawImage[(4 * width * y) + (4 * x) + 0] = filmOutput[i].r;
-				rawImage[(4 * width * y) + (4 * x) + 1] = filmOutput[i].g;
-				rawImage[(4 * width * y) + (4 * x) + 2] = filmOutput[i].b;
-				rawImage[(4 * width * y) + (4 * x) + 3] = 255;
-				i++;
+				double numSamplesInBucket = buckets[(width * y) + x].numberOfSamples;
+				rawImage[(4 * width * y) + (4 * x) + 0] = std::min((buckets[(width * y) + x].color.r / numSamplesInBucket), 255.0);
+				rawImage[(4 * width * y) + (4 * x) + 1] = std::min((buckets[(width * y) + x].color.g / numSamplesInBucket), 255.0);
+				rawImage[(4 * width * y) + (4 * x) + 2] = std::min((buckets[(width * y) + x].color.b / numSamplesInBucket), 255.0);
+				rawImage[(4 * width * y) + (4 * x) + 3] = 255.0;
 			}
 		}
 
 	}
 
-
 	// First converts our 2D array of color into raw data so LodePNG can use it
 	// Then encodes the image to a file with LodePNG
-	// Method signature of lodepng::encode:
-	// void encodeOneStep(const char* filename, std::vector<unsigned char>& image, unsigned width, unsigned height)
-	void writeImage() {
+	void writeImage(const char* filename) {
+		// Generate rawImage from our vector of buckets
 		convertToRawData();
-		const char* filename = "test.png";
+
 		// Encode the image so LodePNG can play with it
 		unsigned error = lodepng::encode(filename, rawImage, width, height);
-//		//if there's an error, display it
+
+		// If there's an error, display it
 	    if (error) {
 	    	std::cout << "encoder error " << error << ": "<< lodepng_error_text(error) << std::endl;
 	    }

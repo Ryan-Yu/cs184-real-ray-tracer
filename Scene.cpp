@@ -23,7 +23,6 @@
 #include "Intersection.h"
 #include "AggregatePrimitive.h"
 #include "Film.h"
-#include "Bucket.h"
 #include "Camera.h"
 #include "Light.h"
 
@@ -117,7 +116,7 @@ void printCommandLineOptionVariables();
 // Global Variables
 //****************************************************
 bool debug;
-std::vector<Bucket> listOfBuckets;
+std::vector<Sample> samples;
 Film film;
 Camera camera;
 int recursionDepth;
@@ -437,8 +436,8 @@ void parseCommandLineOptions(int argc, char *argv[])
 //		  std::cout << "Dimensions of output file must be at least 1000x500 and no more than 3000x3000.";
 //		  exit(1);
 //	  }
-	  film.width = widthOfFilm;
-	  film.height = heightOfFilm;
+	  film = Film(widthOfFilm, heightOfFilm);
+	  camera = Camera(widthOfFilm, heightOfFilm);
 	  i += 2;
 	}
     else if (flag == "-depth")
@@ -495,70 +494,49 @@ static void printSample(Sample sample) {
 }
 
 // Prints contents of samples and buckets for debug purposes
-void printContentsOfBuckets() {
+void printSamples() {
 	if (debug) {
-		for (vector<Bucket>::size_type i = 0; i < listOfBuckets.size(); i++) {
-			std::cout << "  Samples for bucket anchored at (" << listOfBuckets[i].anchorPoint.x << ", " << listOfBuckets[i].anchorPoint.y << ")\n";
-			for (vector<Sample>::size_type j = 0; j < listOfBuckets[i].samples.size(); j++) {
-				printSample(listOfBuckets[i].samples[j]);
-			}
+		for (vector<Sample>::size_type i = 0; i < samples.size(); i++) {
+			printSample(samples[i]);
 		}
 	}
 }
 
 // Main rendering loop
 void render() {
-	// Loop through all of the samples in each bucket...
-	// Current Bucket given by 'listOfBuckets[i]'
-	for (vector<Bucket>::size_type i = 0; i < listOfBuckets.size(); i++) {
-		// Current Sample given by 'listOfBuckets[i].samples[j]
-	  	for (vector<Sample>::size_type j = 0; j < listOfBuckets[i].samples.size(); j++) {
+	// Loop through all of the samples...
+	for (vector<Sample>::size_type i = 0; i < samples.size(); i++) {
 
-	  		Sample currentSample = listOfBuckets[i].samples[j];
+		// For each sample, generate a ray from the eye to the sample location
+		Ray currentRay;
+		Color currentSampleColor;
 
-	  		// For each sample, generate a ray from the eye to the sample location
-	  		Ray currentRay;
-	  		Color currentSampleColor;
-	  		camera.generateRay(currentSample, &currentRay);
+		// Given the sample in Film-coordinates, tell the camera to generate a viewing ray in IMAGE PLANE [-1, 1] coordinates
+		camera.generateRay(samples[i], &currentRay);
 
-	  		// Call the trace method to try to populate currentSampleColor for the currentSample
-	  		rayTracer.trace(currentRay, recursionDepth, &currentSampleColor);
+		// Call the trace method to try to populate currentSampleColor for the currentSample
+		rayTracer.trace(currentRay, recursionDepth, &currentSampleColor);
 
-	  		// Commit the currentSampleColor for the currentSample onto our Film
-	  		film.commitColor(currentSample, currentSampleColor);
-	  	}
+		// Commit the currentSampleColor for the currentSample onto our Film
+		film.commitColor(samples[i], currentSampleColor);
 	}
+
 }
 
 
 // initializes list of samples
 void initializeSampler() {
-
-	// Image plane = (-1, -1) (-1, 1) (1, -1) (1, 1) with z coordinate -1
-	// NOTE: Image plane width = height = 2
-
 	float x, y;
-	int numberOfBuckets = film.width * film.height;
 
 	float widthOfBucket = 2.0 / film.width;
 	float heightOfBucket = 2.0 / film.height;
 
-//	for (i = -1.0; i < 1.0; i += widthOfBucket) {
-//		for (j = -1.0; j < 1.0; j += heightOfBucket) {
-//			std::vector<Sample> currentSamples;
-//			currentSamples.push_back(Sample(i + (widthOfBucket / 2.0), j + (heightOfBucket / 2.0)));
-//			listOfBuckets.push_back(Bucket(currentSamples, Point(i, j, -1)));
-//		}
-//	}
-
-	for (y = -1.0; y < 1.0; y += heightOfBucket) {
-		for (x = -1.0; x < 1.0; x += widthOfBucket) {
-			std::vector<Sample> currentSamples;
-			currentSamples.push_back(Sample(x + (widthOfBucket / 2.0), y + (heightOfBucket / 2.0)));
-			listOfBuckets.push_back(Bucket(currentSamples, Point(x, y, -1)));
+	// Generates samples in the FILM's coordinates
+	for (y = 0; y < film.height; y++) {
+		for (x = 0; x < film.width; x++) {
+			samples.push_back(Sample(x, y));
 		}
 	}
-
 
 }
 
@@ -594,7 +572,7 @@ int main(int argc, char *argv[]) {
   initializePrimitives();
   render();
 
-  film.writeImage();
+  film.writeImage("ryan.png");
   return 0;
 };
 

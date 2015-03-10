@@ -11,10 +11,11 @@ else
 	FLAGS += -std=c++11
 	FLAGS += -D_DEBUG -g Wall
 endif
-	
+
 all: scene 
 scene: scene.o 
-	$(CC) $(CFLAGS) -o scene scene.o $(LDFLAGS) 
+	$(CC) $(CFLAGS) -o scene scene.o lodepng.o $(LDFLAGS) 	
+
 scene.o: Scene.cpp
 	$(CC) $(CFLAGS) -c Scene.cpp -o scene.o
 	

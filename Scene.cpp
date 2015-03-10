@@ -488,13 +488,17 @@ void parseCommandLineOptions(int argc, char *argv[])
   }
 }
 
+static void printSample(Sample sample) {
+	std::cout << "    " << "Sample: x = " << sample.x << "; y = " << sample.y << "\n";
+}
+
 // Prints contents of samples and buckets for debug purposes
 void printContentsOfBuckets() {
 	if (debug) {
 		for (vector<Bucket>::size_type i = 0; i < listOfBuckets.size(); i++) {
 			std::cout << "  Samples for bucket anchored at (" << listOfBuckets[i].anchorPoint.x << ", " << listOfBuckets[i].anchorPoint.y << ")\n";
 			for (vector<Sample>::size_type j = 0; j < listOfBuckets[i].samples.size(); j++) {
-				std::cout << "    " << "Sample: x = " << listOfBuckets[i].samples[j].x << "; y = " << listOfBuckets[i].samples[j].y << "\n";
+				printSample(listOfBuckets[i].samples[j]);
 			}
 		}
 	}
@@ -546,6 +550,8 @@ void initializeSampler() {
 			listOfBuckets.push_back(Bucket(currentSamples, Point(i, j, -1)));
 		}
 	}
+
+
 }
 
 // Initializing Primitives for testing purposes
@@ -578,6 +584,7 @@ int main(int argc, char *argv[]) {
   initializeSampler();
   initializePrimitives();
   render();
+  film.writeImage();
 
 //  printContentsOfBuckets();
   return 0;

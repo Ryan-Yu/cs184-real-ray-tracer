@@ -42,74 +42,17 @@
 
 using namespace std;
 
-inline float sqr(float x) { return x*x; }
-
-
-//****************************************************
-// Some Classes
-//****************************************************
-
-class Viewport;
-
-class Viewport {
-public:
-	int w, h;
-
-};
-
-class Ka {
-  public:
-    float r, g, b;
-};
-
-class Kd {
-  public:
-    float r, g, b;
-};
-
-class Ks {
-  public:
-    float r, g, b;
-};
-
-class Sp {
-  public:
-    float v = 1;
-};
-
-class Pl {
-  public:
-    float x, y, z, r, g, b;
-
-  Pl(float x, float y, float z, float r, float g, float b) {
-    this->x = x;
-    this->y = y;
-    this->z = z;
-    this->r = r;
-    this->g = g;
-    this->b = b;
-  }
-};
-
-class Dl {
-  public:
-    float x, y, z, r, g, b;
-
-  Dl(float x, float y, float z, float r, float g, float b) {
-    this->x = x;
-    this->y = y;
-    this->z = z;
-    this->r = r;
-    this->g = g;
-    this->b = b;
-  }
-};
 
 //****************************************************
 // Forward Declarations
 //****************************************************
-void printRay(Ray ray);
+static void printRay(Ray ray);
+static void printSample(Sample sample);
+static void printColor(Color color);
 void printCommandLineOptionVariables();
+void printSamples();
+Color applyShadingModel(DifferentialGeometry differentialGeometry, BRDFCoefficients brdf, Ray lightRay, Color lightColor);
+class RayTracer;
 
 
 //****************************************************
@@ -147,7 +90,6 @@ class RayTracer {
 //				color->b = 0;
 //			}
 
-
 			// TODO: this may be wrong
 			float tHit = FLT_MIN;
 			Intersection intersection;
@@ -172,218 +114,174 @@ class RayTracer {
 			Color lightColor;
 
 			// There is an intersection, so we have to loop through all the light sources and consider their contributions to the intersection pixel
-			for (std::vector<Dl>::size_type i = 0; i < directional_lights.size(); i++) {
+			for (std::vector<DirectionalLight>::size_type i = 0; i < directional_lights.size(); i++) {
+
 				// TODO:
 				// Generate light ray from the intersection point to the light position
 				// directional_lights[i].generateLightRay(intersection.differentialGeometry, &lightRay, &lightColor);
-				// *colorOfPixel += shading(intersection.differentialGeometry, brdf, lightRay, lightColor);
+				// if this light ray is not blocked, do:
+				//     *color += shading(intersection.differentialGeometry, brdf, lightRay, lightColor);
+
+				// For now, we just ignore shadows and reflections and just apply our shading model
+				// i.e. just call:
+				Color colorToAdd = applyShadingModel(intersection.differentialGeometry, brdf, lightRay, lightColor);
+				color->r += colorToAdd.r;
+				color->g += colorToAdd.g;
+				color->b += colorToAdd.b;
 			}
 
-			for (std::vector<Dl>::size_type i = 0; i < point_lights.size(); i++) {
+			for (std::vector<PointLight>::size_type i = 0; i < point_lights.size(); i++) {
 				// TODO:
 				// Generate light ray from the intersection point to the light position
 				// point_lights[i].generateLightRay(intersection.differentialGeometry, &lightRay, &lightColor);
-				// *colorOfPixel += shading(intersection.differentialGeometry, brdf, lightRay, lightColor);
+				// if this light ray is not blocked, do:
+				//     *color += shading(intersection.differentialGeometry, brdf, lightRay, lightColor);
+
+				// For now, we just ignore shadows and reflections and just apply our shading model
+				// i.e. just call:
+				Color colorToAdd = applyShadingModel(intersection.differentialGeometry, brdf, lightRay, lightColor);
+				color->r += colorToAdd.r;
+				color->g += colorToAdd.g;
+				color->b += colorToAdd.b;
 			}
+
+			// TODO: Handle reflection rays
 
 		}
 };
 
+// (Declaration of RayTracer global variable)
 RayTracer rayTracer;
 
 
-
-//TODO: Delete all this shit.
-
-Viewport viewport;
-
-// TODO: Move these into appropriate classes
-//***** The following are set by command line options *****//
-// Ambient term
-Ka ka;
-// Diffuse term
-Kd kd;
-// Specular term
-Ks ks;
-// Phong exponent
-Sp sp;
-
-
-
-// TODO: Remove this!
-void setPixel(int x, int y, int r, int g, int b) {
-
-}
-
 //****************************************************
-// Draw a filled circle.
+// applies Phong shading model to differentialGeometry.position
 //****************************************************
+Color applyShadingModel(DifferentialGeometry differentialGeometry, BRDFCoefficients brdf, Ray lightRay, Color lightColor) {
+	// NOTE: for a sphere:
+	// (0) differentialGeometry.position is the position that we're shading in WORLD coordinates
+	// (1) differentialGeometry.normal is simply the normalized version of differentialGeometry.position, which is probably wrong
+	float x = differentialGeometry.position.x;
+	float y = differentialGeometry.position.y;
+	float z = differentialGeometry.position.z;
 
-// For viewport of [400 x 400], center X = 200, center Y = 200
-void circle(float centerX, float centerY, float radius) {
+	// ***** BEGIN COMPUTATION OF PHONG SHADING MODEL ***** //
 
-  // We could eliminate wasted work by only looping over the pixels
-  // inside the sphere's radius.  But the example is more clear this
-  // way.  In general drawing an object by loopig over the whole
-  // screen is wasteful.
+	float resultant_rgb_sum_of_pixel_r = 0;
+	float resultant_rgb_sum_of_pixel_g = 0;
+	float resultant_rgb_sum_of_pixel_b = 0;
 
-  int i,j;  // Pixel indices
+	// TODO: Set viewer vector -- CHANGE THIS
+	Vector3 viewer_vector = Vector3();
 
-  /*
-  Example:
+	// ***** BEGIN CONSIDERING DIRECTIONAL LIGHTS ***** //
+	// Iterate through each directional light...
+	// Calculate ambient, diffuse, specular contributions for this light
+	// Sum all 3 contributions together
+	// Add contributions to resultant_rgb_sum_of_pixel_r/g/b
+	for (std::vector<DirectionalLight>::size_type i = 0; i < directional_lights.size(); i++)
+	{
+	  // Calculate ambient term -- UNCHANGED
+	  float directional_ambient_r = brdf.ka.r * directional_lights[i].r;
+	  float directional_ambient_g = brdf.ka.r * directional_lights[i].g;
+	  float directional_ambient_b = brdf.ka.r * directional_lights[i].b;
 
-  centerX = 200
-  centerY = 200
-  radius = 180
+	  // Calculate diffuse term -- UNCHANGED
+	  Vector3 prenormalized_directional_light_vector = Vector3(directional_lights[i].x, directional_lights[i].y, directional_lights[i].z);
 
-  -->
+	  // Change orientation of light vector to point outwards to sphere -- UNCHANGED
+	  Vector3 directional_light_vector = Vector3::normalizeVector(prenormalized_directional_light_vector.scaleVector(-1));
 
-  minI = max(0, 20) = 20
-  maxI = min(399, 380) = 380
-  minJ = max(0, 20) = 20
-  maxJ = min(399, 380) = 380
-  */
+	  // TODO: Need to change -- (x, y, z) is in world coordinates now, not relative to center of sphere
+	  // NOTE: we should defer this logic to Sphere/Triangle, as follows:
+	  Vector3 directional_normal_vector = Vector3(differentialGeometry.normal.x, differentialGeometry.normal.y, differentialGeometry.normal.z);
+//	  Vector3 prenormalized_directional_normal_vector = Vector3(x, y, z);
+//	  Vector3 directional_normal_vector = Vector3::normalizeVector(prenormalized_directional_normal_vector);
 
-  int minI = max(0,(int)floor(centerX-radius));
-  int maxI = min(viewport.w-1,(int)ceil(centerX+radius));
+	  float directional_diffuse_dot_product = fmax(directional_light_vector.dotProduct(directional_normal_vector), 0);
+	  float directional_diffuse_r = brdf.kd.r * directional_lights[i].r * directional_diffuse_dot_product;
+	  float directional_diffuse_g = brdf.kd.g * directional_lights[i].g * directional_diffuse_dot_product;
+	  float directional_diffuse_b = brdf.kd.b * directional_lights[i].b * directional_diffuse_dot_product;
 
-  int minJ = max(0,(int)floor(centerY-radius));
-  int maxJ = min(viewport.h-1,(int)ceil(centerY+radius));
+	  // Calculate specular term
+	  Vector3 directional_reflective_vector = directional_normal_vector.scaleVector(directional_light_vector.dotProduct(directional_normal_vector) * 2).subtractVector(directional_light_vector);
+	  float directional_specular_dot_product_term = pow(fmax(directional_reflective_vector.dotProduct(viewer_vector), 0), brdf.sp);
+	  float directional_specular_r = brdf.ks.r * directional_lights[i].r * directional_specular_dot_product_term;
+	  float directional_specular_g = brdf.ks.g * directional_lights[i].g * directional_specular_dot_product_term;
+	  float directional_specular_b = brdf.ks.b * directional_lights[i].b * directional_specular_dot_product_term;
 
-  for (i=0;i<viewport.w;i++) {
-    for (j=0;j<viewport.h;j++) {
+	  // Combine three contributions together
+	  resultant_rgb_sum_of_pixel_r += (directional_ambient_r + directional_diffuse_r + directional_specular_r);
+	  resultant_rgb_sum_of_pixel_g += (directional_ambient_g + directional_diffuse_g + directional_specular_g);
+	  resultant_rgb_sum_of_pixel_b += (directional_ambient_b + directional_diffuse_b + directional_specular_b);
+	}
+	// ***** FINISH CONSIDERING DIRECTIONAL LIGHTS ***** //
 
-      // Location of the center of pixel relative to center of sphere
-      float x = (i+0.5-centerX);
-      float y = (j+0.5-centerY);
+	// ***** BEGIN CONSIDERING POINT LIGHTS ***** //
+	for (std::vector<PointLight>::size_type i = 0; i < point_lights.size(); i++)
+	{
+	  // current directional light given by directional_lights[i]
 
-      float dist = sqrt(sqr(x) + sqr(y));
+	  // Calculate ambient term
+	  float point_ambient_r = brdf.ka.r * point_lights[i].r;
+	  float point_ambient_g = brdf.ka.g * point_lights[i].g;
+	  float point_ambient_b = brdf.ka.b * point_lights[i].b;
 
-      // if current pixel (i, j) is inside the bounds of the circle
-      if (dist<=radius) {
+	  // Calculate diffuse term
 
-        // This is the front-facing Z coordinate
-        float z = sqrt(radius*radius-dist*dist);
+	  // Location of point light given by command line options (i.e. x, y, z)
+	  Vector3 normalized_point_light_location = Vector3(point_lights[i].x, point_lights[i].y, point_lights[i].z);
 
-        // printf("(%f, %f, %f)\n", x, y, z);
+	  Vector3 prenormalized_point_normal_vector = Vector3(x, y, z);
+	  Vector3 point_normal_vector = Vector3::normalizeVector(prenormalized_point_normal_vector);
 
-        // (x, y, z) represents location of current pixel relative to very center of sphere (3-space)
-        // i.e. n = xi + yj + zk
+	  Vector3 prenormalized_point_light_vector = normalized_point_light_location.subtractVector(point_normal_vector).scaleVector(1);
+	  Vector3 point_light_vector = Vector3::normalizeVector(prenormalized_point_light_vector);
 
-        // ***** BEGIN COMPUTATION OF PHONG SHADING MODEL ***** //
+	  float point_diffuse_dot_product = fmax(point_light_vector.dotProduct(point_normal_vector), 0);
+	  float point_diffuse_r = brdf.kd.r * point_lights[i].r * point_diffuse_dot_product;
+	  float point_diffuse_g = brdf.kd.g * point_lights[i].g * point_diffuse_dot_product;
+	  float point_diffuse_b = brdf.kd.b * point_lights[i].b * point_diffuse_dot_product;
 
-        // resultant_rgb_sum_of_pixel = Vector3(0, 0, 0);
+	  // Calculate specular term
+	  Vector3 point_reflective_vector = point_normal_vector.scaleVector(point_light_vector.dotProduct(point_normal_vector) * 2).subtractVector(point_light_vector);
+	  float point_specular_dot_product_term = pow(fmax(point_reflective_vector.dotProduct(viewer_vector), 0), brdf.sp);
+	  float point_specular_r = brdf.ks.r * point_lights[i].r * point_specular_dot_product_term;
+	  float point_specular_g = brdf.ks.g * point_lights[i].g * point_specular_dot_product_term;
+	  float point_specular_b = brdf.ks.b * point_lights[i].b * point_specular_dot_product_term;
 
-        float resultant_rgb_sum_of_pixel_r = 0;
-        float resultant_rgb_sum_of_pixel_g = 0;
-        float resultant_rgb_sum_of_pixel_b = 0;
+	  // Combine three contributions together
+	  resultant_rgb_sum_of_pixel_r += (point_ambient_r + point_diffuse_r + point_specular_r);
+	  resultant_rgb_sum_of_pixel_g += (point_ambient_g + point_diffuse_g + point_specular_g);
+	  resultant_rgb_sum_of_pixel_b += (point_ambient_b + point_diffuse_b + point_specular_b);
+	}
 
-        // Set viewer vector to constant (0, 0, 1)
-        Vector3 viewer_vector = Vector3(0, 0, 1);
-
-        // ***** BEGIN CONSIDERING DIRECTIONAL LIGHTS ***** //
-        // Iterate through each directional light...
-        // Calculate ambient, diffuse, specular contributions for this light
-        // Sum all 3 contributions together
-        // Add contribution to resultant_rgb_sum_of_pixel
-        for (std::vector<Dl>::size_type i = 0; i < directional_lights.size(); i++)
-        {
-          // current directional light given by directional_lights[i]
-
-          // Calculate ambient term
-          float directional_ambient_r = ka.r * directional_lights[i].r;
-          float directional_ambient_g = ka.g * directional_lights[i].g;
-          float directional_ambient_b = ka.b * directional_lights[i].b;
-
-          // Calculate diffuse term
-          Vector3 prenormalized_directional_light_vector = Vector3(directional_lights[i].x, directional_lights[i].y, directional_lights[i].z);
-
-          // Change orientation of light vector to point outwards to sphere
-          Vector3 directional_light_vector = Vector3::normalizeVector(prenormalized_directional_light_vector.scaleVector(-1));
-
-          Vector3 prenormalized_directional_normal_vector = Vector3(x, y, z);
-          Vector3 directional_normal_vector = Vector3::normalizeVector(prenormalized_directional_normal_vector);
-
-
-          float directional_diffuse_dot_product = fmax(directional_light_vector.dotProduct(directional_normal_vector), 0);
-          float directional_diffuse_r = kd.r * directional_lights[i].r * directional_diffuse_dot_product;
-          float directional_diffuse_g = kd.g * directional_lights[i].g * directional_diffuse_dot_product;
-          float directional_diffuse_b = kd.b * directional_lights[i].b * directional_diffuse_dot_product;
-
-          // Calculate specular term
-          Vector3 directional_reflective_vector = directional_normal_vector.scaleVector(directional_light_vector.dotProduct(directional_normal_vector) * 2).subtractVector(directional_light_vector);
-          float directional_specular_dot_product_term = pow(fmax(directional_reflective_vector.dotProduct(viewer_vector), 0), sp.v);
-          float directional_specular_r = ks.r * directional_lights[i].r * directional_specular_dot_product_term;
-          float directional_specular_g = ks.g * directional_lights[i].g * directional_specular_dot_product_term;
-          float directional_specular_b = ks.b * directional_lights[i].b * directional_specular_dot_product_term;
-
-          // Combine three contributions together
-          resultant_rgb_sum_of_pixel_r += (directional_ambient_r + directional_diffuse_r + directional_specular_r);
-          resultant_rgb_sum_of_pixel_g += (directional_ambient_g + directional_diffuse_g + directional_specular_g);
-          resultant_rgb_sum_of_pixel_b += (directional_ambient_b + directional_diffuse_b + directional_specular_b);
-        }
-        // ***** FINISH CONSIDERING DIRECTIONAL LIGHTS ***** //
-
-        // ----------
-
-        // ***** BEGIN CONSIDERING POINT LIGHTS ***** //
-        for (std::vector<Pl>::size_type i = 0; i < point_lights.size(); i++)
-        {
-          // current directional light given by directional_lights[i]
-
-          // Calculate ambient term
-          float point_ambient_r = ka.r * point_lights[i].r;
-          float point_ambient_g = ka.g * point_lights[i].g;
-          float point_ambient_b = ka.b * point_lights[i].b;
-
-          // Calculate diffuse term
-
-          // Location of point light given by command line options (i.e. x, y, z)
-          Vector3 normalized_point_light_location = Vector3(point_lights[i].x, point_lights[i].y, point_lights[i].z);
-
-          Vector3 prenormalized_point_normal_vector = Vector3(x, y, z);
-          Vector3 point_normal_vector = Vector3::normalizeVector(prenormalized_point_normal_vector);
-
-          Vector3 prenormalized_point_light_vector = normalized_point_light_location.subtractVector(point_normal_vector).scaleVector(1);
-          Vector3 point_light_vector = Vector3::normalizeVector(prenormalized_point_light_vector);
-
-          float point_diffuse_dot_product = fmax(point_light_vector.dotProduct(point_normal_vector), 0);
-          float point_diffuse_r = kd.r * point_lights[i].r * point_diffuse_dot_product;
-          float point_diffuse_g = kd.g * point_lights[i].g * point_diffuse_dot_product;
-          float point_diffuse_b = kd.b * point_lights[i].b * point_diffuse_dot_product;
-
-          // Calculate specular term
-          Vector3 point_reflective_vector = point_normal_vector.scaleVector(point_light_vector.dotProduct(point_normal_vector) * 2).subtractVector(point_light_vector);
-          float point_specular_dot_product_term = pow(fmax(point_reflective_vector.dotProduct(viewer_vector), 0), sp.v);
-          float point_specular_r = ks.r * point_lights[i].r * point_specular_dot_product_term;
-          float point_specular_g = ks.g * point_lights[i].g * point_specular_dot_product_term;
-          float point_specular_b = ks.b * point_lights[i].b * point_specular_dot_product_term;
-
-          // Combine three contributions together
-          resultant_rgb_sum_of_pixel_r += (point_ambient_r + point_diffuse_r + point_specular_r);
-          resultant_rgb_sum_of_pixel_g += (point_ambient_g + point_diffuse_g + point_specular_g);
-          resultant_rgb_sum_of_pixel_b += (point_ambient_b + point_diffuse_b + point_specular_b);
-        }
-        // ***** FINISH CONSIDERING POINT LIGHTS ***** //
-        Vector3 resultant_rgb = Vector3(resultant_rgb_sum_of_pixel_r, resultant_rgb_sum_of_pixel_g, resultant_rgb_sum_of_pixel_b);
-        setPixel(i, j, resultant_rgb.x, resultant_rgb.y, resultant_rgb.z);
-      }
-    }
-  }
+	// ***** FINISH CONSIDERING POINT LIGHTS ***** //
+	return Color(resultant_rgb_sum_of_pixel_r, resultant_rgb_sum_of_pixel_g, resultant_rgb_sum_of_pixel_b);
 }
 
 
-
 //****************************************************
-// debug printing functions
+// Debug printing functions
 //****************************************************
 
-void printRay(Ray ray) {
+static void printRay(Ray ray) {
 	if (debug) {
 		printf("Ray: (%f, %f, %f) + t(%f, %f, %f)\n", ray.position.x, ray.position.y, ray.position.z, ray.direction.x, ray.direction.y, ray.direction.z);
 	}
 }
 
+static void printSample(Sample sample) {
+	if (debug) {
+		std::cout << "Sample: x = " << sample.x << "; y = " << sample.y << "\n";
+	}
+}
+
+static void printColor(Color color) {
+	if (debug) {
+		printf("Color: (r, g, b) = (%f, %f, %f)", color.r, color.g, color.b);
+	}
+}
 
 void printCommandLineOptionVariables( )
 {
@@ -399,7 +297,7 @@ void printCommandLineOptionVariables( )
     {
       std::cout << " (none)\n";
     }
-    for (std::vector<Dl>::size_type i = 0; i < directional_lights.size(); i++)
+    for (std::vector<DirectionalLight>::size_type i = 0; i < directional_lights.size(); i++)
     {
       std::cout << "  " << "Light " << (i + 1) << " (index " << i << " of list):\n";
       std::cout << "     " << "x: " << directional_lights[i].x << " y: " << directional_lights[i].x << " z: " << directional_lights[i].x << "\n";
@@ -411,7 +309,7 @@ void printCommandLineOptionVariables( )
     {
       std::cout << " (none)\n";
     }
-    for (std::vector<Dl>::size_type i = 0; i < point_lights.size(); i++)
+    for (std::vector<PointLight>::size_type i = 0; i < point_lights.size(); i++)
     {
       std::cout << "  " << "Light " << (i + 1) << " (index " << i << " of list):\n";
       std::cout << "     " << "x: " << point_lights[i].x << " y: " << point_lights[i].x << " z: " << point_lights[i].x << "\n";
@@ -422,7 +320,18 @@ void printCommandLineOptionVariables( )
   }
 }
 
+// Prints contents of samples and buckets for debug purposes
+void printSamples() {
+	if (debug) {
+		for (vector<Sample>::size_type i = 0; i < samples.size(); i++) {
+			printSample(samples[i]);
+		}
+	}
+}
 
+
+//****************************************************
+// Parsing of command line options, with options:
 // (1) -dimensions width height
 //     adds viewport width and height attributes to Viewport global variable
 // (2) -depth n
@@ -431,6 +340,9 @@ void printCommandLineOptionVariables( )
 //     (directional lights)
 // (4) -pl x y z r g b
 //     (point lights)
+//
+// NOTE: also performs proper initialization of Film and Camera global variables
+//****************************************************
 void parseCommandLineOptions(int argc, char *argv[])
 {
   string flag;
@@ -505,22 +417,15 @@ void parseCommandLineOptions(int argc, char *argv[])
   }
 }
 
-static void printSample(Sample sample) {
-	if (debug) {
-		std::cout << "    " << "Sample: x = " << sample.x << "; y = " << sample.y << "\n";
-	}
-}
 
-// Prints contents of samples and buckets for debug purposes
-void printSamples() {
-	if (debug) {
-		for (vector<Sample>::size_type i = 0; i < samples.size(); i++) {
-			printSample(samples[i]);
-		}
-	}
-}
-
+//****************************************************
 // Main rendering loop
+//
+// Loops through samples, and does the following per sample:
+// (1) generates a ray from the eye through the sample
+// (2) traces this ray with the ray tracer
+// (3) commits the color returns by the ray tracer to the film
+//****************************************************
 void render() {
 	// Loop through all of the samples...
 	for (vector<Sample>::size_type i = 0; i < samples.size(); i++) {
@@ -542,7 +447,9 @@ void render() {
 }
 
 
-// initializes list of samples
+//****************************************************
+// Populates a list of samples based on the film height and width
+//****************************************************
 void initializeSampler() {
 	float x, y;
 
@@ -558,7 +465,10 @@ void initializeSampler() {
 
 }
 
-// Initializing Primitives for testing purposes
+
+//****************************************************
+// Initializes primitives for our scene
+//****************************************************
 void initializePrimitives() {
 	// Must use 'new', as need to store pointers to variables that will live outside of the scope of this function
 	Sphere *sphere1 = new Sphere(0, 0, -2, 1);
@@ -577,6 +487,9 @@ void initializePrimitives() {
 }
 
 
+//****************************************************
+// Main function
+//****************************************************
 int main(int argc, char *argv[]) {
   // Turns debug mode ON or OFF
   debug = true;
@@ -590,7 +503,7 @@ int main(int argc, char *argv[]) {
   initializePrimitives();
   render();
 
-  film.writeImage("ryan.png");
+  film.writeImage("ray_tracer_output.png");
   return 0;
 };
 

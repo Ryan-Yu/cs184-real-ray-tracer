@@ -165,7 +165,26 @@ class RayTracer {
 			// This method will populate the brdf variable with the brdf values of the intersection primitive.
 			brdf = intersection.primitive->getBRDF(intersection.differentialGeometry, &brdf);
 
-			// There is an intersection, so we have to loop through all the light sources
+			// Initialize a new Color with R = G = B = 0.0
+			// This color will be appended to with our shading model
+			Color colorOfPixel;
+			Ray lightRay;
+			Color lightColor;
+
+			// There is an intersection, so we have to loop through all the light sources and consider their contributions to the intersection pixel
+			for (std::vector<Dl>::size_type i = 0; i < directional_lights.size(); i++) {
+				// TODO:
+				// Generate light ray from the intersection point to the light position
+				// directional_lights[i].generateLightRay(intersection.differentialGeometry, &lightRay, &lightColor);
+				// *colorOfPixel += shading(intersection.differentialGeometry, brdf, lightRay, lightColor);
+			}
+
+			for (std::vector<Dl>::size_type i = 0; i < point_lights.size(); i++) {
+				// TODO:
+				// Generate light ray from the intersection point to the light position
+				// point_lights[i].generateLightRay(intersection.differentialGeometry, &lightRay, &lightColor);
+				// *colorOfPixel += shading(intersection.differentialGeometry, brdf, lightRay, lightColor);
+			}
 
 		}
 };
@@ -574,11 +593,4 @@ int main(int argc, char *argv[]) {
   film.writeImage("ryan.png");
   return 0;
 };
-
-
-
-
-
-
-
 

@@ -120,8 +120,9 @@ std::vector<Sample> samples;
 Film film;
 Camera camera;
 int recursionDepth;
-std::vector<Light> lights;
 AggregatePrimitive aggregatePrimitive;
+std::vector<PointLight> point_lights;
+std::vector<DirectionalLight> directional_lights;
 
 class RayTracer {
 	public:
@@ -133,38 +134,38 @@ class RayTracer {
 				return;
 			}
 
-			// For testing only: shade coordinate red if ray intersects it, else shade black
-			if (!aggregatePrimitive.intersectP(ray)) {
-				color->r = 0;
-				color->g = 0;
-				color->b = 0;
-				return;
-			} else {
-				//For testing purposes, simply shade red if the ray intersects the point
-				color->r = 255;
-				color->g = 0;
-				color->b = 0;
-			}
-
-
-//			// TODO: this may be wrong
-//			float tHit = FLT_MIN;
-//			Intersection intersection;
-//
-//			// This method will populate tHit and intersection if there is an intersection with this ray and any primitive.
-//			if (!aggregatePrimitive.intersect(ray, &tHit, &intersection) ) {
-//				// If no intersection, then make the color black and return
+//			// For testing only: shade coordinate red if ray intersects it, else shade black
+//			if (!aggregatePrimitive.intersectP(ray)) {
 //				color->r = 0;
 //				color->g = 0;
 //				color->b = 0;
 //				return;
+//			} else {
+//				//For testing purposes, simply shade red if the ray intersects the point
+//				color->r = 255;
+//				color->g = 0;
+//				color->b = 0;
 //			}
-//
-//			BRDFCoefficients brdf;
-//			// This method will populate the brdf variable with the brdf values of the intersection primitive.
-//			brdf = intersection.primitive->getBRDF(intersection.differentialGeometry, &brdf);
-//
-//			//There is an intersection, so we have to loop through all the light sources
+
+
+			// TODO: this may be wrong
+			float tHit = FLT_MIN;
+			Intersection intersection;
+
+			// This method will populate tHit and intersection if there is an intersection with this ray and any primitive.
+			if (!aggregatePrimitive.intersect(ray, &tHit, &intersection) ) {
+				// If no intersection, then make the color black and return
+				color->r = 0;
+				color->g = 0;
+				color->b = 0;
+				return;
+			}
+
+			BRDFCoefficients brdf;
+			// This method will populate the brdf variable with the brdf values of the intersection primitive.
+			brdf = intersection.primitive->getBRDF(intersection.differentialGeometry, &brdf);
+
+			// There is an intersection, so we have to loop through all the light sources
 
 		}
 };
@@ -187,10 +188,6 @@ Kd kd;
 Ks ks;
 // Phong exponent
 Sp sp;
-// List of point lights
-std::vector<Pl> point_lights;
-// List of directional lights
-std::vector<Dl> directional_lights;
 
 
 
@@ -377,6 +374,7 @@ void printCommandLineOptionVariables( )
     std::cout << "  " << "Film Width: " << film.width << "\n";
     std::cout << "  " << "Film Height: " << film.height << "\n\n";
     std::cout << "  Recursion Depth: " << recursionDepth << "\n\n";
+
     std::cout << "Directional Lights:\n";
     if (directional_lights.size() == 0)
     {
@@ -400,6 +398,7 @@ void printCommandLineOptionVariables( )
       std::cout << "     " << "x: " << point_lights[i].x << " y: " << point_lights[i].x << " z: " << point_lights[i].x << "\n";
       std::cout << "     " << "r: " << point_lights[i].r << " g: " << point_lights[i].g << " b: " << point_lights[i].b << "\n";
     }
+
     std::cout << "***** FINISH PRINTING COMMAND LINE OPTION VARIABLES *****\n\n";
   }
 }
@@ -461,7 +460,7 @@ void parseCommandLineOptions(int argc, char *argv[])
       }
 
       // Add directional lights to our directional lights list
-      lights.push_back( DirectionalLight( stof(argv[i+1]), stof(argv[i+2]), stof(argv[i+3]), stof(argv[i+4]), stof(argv[i+5]), stof(argv[i+6]) ) );
+      directional_lights.push_back( DirectionalLight( stof(argv[i+1]), stof(argv[i+2]), stof(argv[i+3]), stof(argv[i+4]), stof(argv[i+5]), stof(argv[i+6]) ) );
       i += 6;
     }
     else if (flag == "-pl")
@@ -473,7 +472,7 @@ void parseCommandLineOptions(int argc, char *argv[])
         exit(1);
       }
 
-      lights.push_back( PointLight( stof(argv[i+1]), stof(argv[i+2]), stof(argv[i+3]), stof(argv[i+4]), stof(argv[i+5]), stof(argv[i+6]) ) );
+      point_lights.push_back( PointLight( stof(argv[i+1]), stof(argv[i+2]), stof(argv[i+3]), stof(argv[i+4]), stof(argv[i+5]), stof(argv[i+6]) ) );
       i += 6;
     }
     else

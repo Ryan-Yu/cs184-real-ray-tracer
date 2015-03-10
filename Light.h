@@ -2,17 +2,20 @@
 #define LIGHT_H_
 
 class Light {
-	void generateLightRay(DifferentialGeometry& differentialGeometry, Ray* lightRay, Color* lightColor) {
+	public:
+		virtual void generateLightRay(DifferentialGeometry& differentialGeometry, Ray* lightRay, Color* lightColor) {
 
-	}
+		}
 };
 
 class PointLight : public Light {
 	public:
 		float x, y, z, r, g, b;
+
 	PointLight() {
 
 	}
+
 	PointLight(float x, float y, float z, float r, float g, float b) {
 		this->x = x;
 		this->y = y;
@@ -21,6 +24,7 @@ class PointLight : public Light {
 		this->g = g;
 		this->b = b;
 	}
+
 	void generateLightRay(DifferentialGeometry& differentialGeometry, Ray* lightRay, Color* lightColor) {
 		lightRay->position = Point(differentialGeometry.position.x, differentialGeometry.position.y, differentialGeometry.position.z);
 		lightRay->direction = Vector3(this->x - differentialGeometry.position.x, this->y - differentialGeometry.position.y, this->z - differentialGeometry.position.z);
@@ -32,12 +36,16 @@ class PointLight : public Light {
 		lightColor->b = this->b;
 	}
 };
+
+
 class DirectionalLight : public Light {
 	public:
 		float x, y, z, r, g, b;
+
 	DirectionalLight() {
 
 	}
+
 	DirectionalLight(float x, float y, float z, float r, float g, float b) {
 		this->x = x;
 		this->y = y;
@@ -46,6 +54,7 @@ class DirectionalLight : public Light {
 		this->g = g;
 		this->b = b;
 	}
+
 	void generateLightRay(DifferentialGeometry& differentialGeometry, Ray* lightRay, Color* lightColor) {
 		lightRay->position = Point(differentialGeometry.position.x, differentialGeometry.position.y, differentialGeometry.position.z);
 		lightRay->direction = Vector3(this->x - differentialGeometry.position.x, this->y - differentialGeometry.position.y, this->z - differentialGeometry.position.z);
@@ -56,8 +65,5 @@ class DirectionalLight : public Light {
 		lightColor->b = this->b;
 	}
 };
-
-
-
 
 #endif /* LIGHT_H_ */

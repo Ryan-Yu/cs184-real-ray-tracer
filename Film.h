@@ -11,6 +11,10 @@ class Film {
 		std::cout << "Sample: x = " << sample.x << "; y = " << sample.y << "\n";
 	}
 
+	static void printColor(Color color) {
+		std::cout << "Color: r = " << color.r << "; g = " << color.g << "; b = " << color.b << "\n";
+	}
+
 	public:
 		std::vector< Color > filmOutput;
 		int width, height;
@@ -42,8 +46,13 @@ class Film {
 		// Given this information, calculate the bottom left index of the bucket that the sample is in...
 		Sample bottomLeftIndexOfSample = Sample(sample.x - (widthOfBucket / 2.0), sample.y - (heightOfBucket / 2.0));
 
+		std::cout << "In film, bottom left index is: ";
+		printSample(bottomLeftIndexOfSample);
+
 		// Scale the sample appropriately to [width, height] coordinate system
-		Sample scaledFinalSample = Sample(ceil((bottomLeftIndexOfSample.x + 1) * (width / 2.0)), ceil((bottomLeftIndexOfSample.y + 1) * (height / 2.0)));
+		Sample scaledFinalSample = Sample(ceil((bottomLeftIndexOfSample.x + 1) * (width / 2.0)), (bottomLeftIndexOfSample.y + 1) * (height / 2.0));
+
+//		printColor(color);
 
 		filmOutput.push_back(Color(color.r, color.g, color.b));
 
@@ -55,14 +64,15 @@ class Film {
 
 	void convertToRawData() {
 		rawImage.resize(4 * width * height);
-		for(unsigned y = 0; y < height; y++) {
-			for(unsigned x = 0; x < width; x++) {
-				rawImage[4 * width * y + 4 * x + 0] = 255;
-				rawImage[4 * width * y + 4 * x + 1] = 255;
-				rawImage[4 * width * y + 4 * x + 2] = 255;
-				rawImage[4 * width * y + 4 * x + 3] = 255;
+		int i = 0;
+		for (unsigned y = 0; y < height; y++) {
+			for (unsigned x = 0; x < width; x++) {
+				rawImage[(4 * width * y) + (4 * x) + 0] = filmOutput[i].r;
+				rawImage[(4 * width * y) + (4 * x) + 1] = filmOutput[i].g;
+				rawImage[(4 * width * y) + (4 * x) + 2] = filmOutput[i].b;
+				rawImage[(4 * width * y) + (4 * x) + 3] = 255;
+				i++;
 			}
-
 		}
 
 //		for (std::vector<Color>::size_type i = 0; i < filmOutput.size(); i++) {

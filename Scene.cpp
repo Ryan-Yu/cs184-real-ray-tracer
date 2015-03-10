@@ -142,7 +142,7 @@ class RayTracer {
 				return;
 			} else {
 				//For testing purposes, simply shade red if the ray intersects the point
-				color->r = 1;
+				color->r = 255;
 				color->g = 0;
 				color->b = 0;
 			}
@@ -489,7 +489,9 @@ void parseCommandLineOptions(int argc, char *argv[])
 }
 
 static void printSample(Sample sample) {
-	std::cout << "    " << "Sample: x = " << sample.x << "; y = " << sample.y << "\n";
+	if (debug) {
+		std::cout << "    " << "Sample: x = " << sample.x << "; y = " << sample.y << "\n";
+	}
 }
 
 // Prints contents of samples and buckets for debug purposes
@@ -522,8 +524,6 @@ void render() {
 	  		// Call the trace method to try to populate currentSampleColor for the currentSample
 	  		rayTracer.trace(currentRay, recursionDepth, &currentSampleColor);
 
-//	  		cout << currentSampleColor.r;
-
 	  		// Commit the currentSampleColor for the currentSample onto our Film
 	  		film.commitColor(currentSample, currentSampleColor);
 	  	}
@@ -537,17 +537,25 @@ void initializeSampler() {
 	// Image plane = (-1, -1) (-1, 1) (1, -1) (1, 1) with z coordinate -1
 	// NOTE: Image plane width = height = 2
 
-	float i, j;
+	float x, y;
 	int numberOfBuckets = film.width * film.height;
 
 	float widthOfBucket = 2.0 / film.width;
 	float heightOfBucket = 2.0 / film.height;
 
-	for (i = -1.0; i < 1.0; i += widthOfBucket) {
-		for (j = -1.0; j < 1.0; j += heightOfBucket) {
+//	for (i = -1.0; i < 1.0; i += widthOfBucket) {
+//		for (j = -1.0; j < 1.0; j += heightOfBucket) {
+//			std::vector<Sample> currentSamples;
+//			currentSamples.push_back(Sample(i + (widthOfBucket / 2.0), j + (heightOfBucket / 2.0)));
+//			listOfBuckets.push_back(Bucket(currentSamples, Point(i, j, -1)));
+//		}
+//	}
+
+	for (y = -1.0; y < 1.0; y += heightOfBucket) {
+		for (x = -1.0; x < 1.0; x += widthOfBucket) {
 			std::vector<Sample> currentSamples;
-			currentSamples.push_back(Sample(i + (widthOfBucket / 2.0), j + (heightOfBucket / 2.0)));
-			listOfBuckets.push_back(Bucket(currentSamples, Point(i, j, -1)));
+			currentSamples.push_back(Sample(x + (widthOfBucket / 2.0), y + (heightOfBucket / 2.0)));
+			listOfBuckets.push_back(Bucket(currentSamples, Point(x, y, -1)));
 		}
 	}
 
@@ -580,13 +588,13 @@ int main(int argc, char *argv[]) {
   // Parse command line options
   parseCommandLineOptions(argc, argv);
   printCommandLineOptionVariables();
+
   // Initializes list of buckets; Buckets have a list of samples
   initializeSampler();
   initializePrimitives();
   render();
-  film.writeImage();
 
-//  printContentsOfBuckets();
+  film.writeImage();
   return 0;
 };
 

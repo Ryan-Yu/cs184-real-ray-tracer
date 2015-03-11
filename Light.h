@@ -29,7 +29,8 @@ class PointLight : public Light {
 		lightRay->position = Point(differentialGeometry.position.x, differentialGeometry.position.y, differentialGeometry.position.z);
 		lightRay->direction = Vector3(this->x - differentialGeometry.position.x, this->y - differentialGeometry.position.y, this->z - differentialGeometry.position.z);
 		lightRay->t_min = LDBL_EPSILON;
-		//Determine intersection point of our light ray and (this->x, this->y, this->z)
+
+		// Determine intersection point of our light ray and (this->x, this->y, this->z)
 		lightRay->t_max = (this->x - lightRay->position.x)/(lightRay->direction.x);
 		lightColor->r = this->r;
 		lightColor->g = this->g;

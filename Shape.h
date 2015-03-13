@@ -92,12 +92,14 @@ class Sphere : public Shape {
 		float yCoor = (h * tIntersection) + i;
 		float zCoor = (j * tIntersection) + k;
 
-		// (?) Because we are on a sphere, the Normal is precisely the normalized version of the intersection point
-		// (in primitive coordinates)
+		// Location of our intersection point, in WORLD coordinates
 		differentialGeometry->position = Point(xCoor, yCoor, zCoor);
 
 		// Compute normal of the sphere and the intersection point in WORLD coordinates
-		differentialGeometry->normal = Normal::normalizeNormal(Normal(xCoor, yCoor, zCoor));
+		// This is NOT equal to the position of the intersection point
+//		differentialGeometry->normal = Normal::normalizeNormal(Normal(xCoor, yCoor, zCoor));
+
+		differentialGeometry->normal = Normal::normalizeNormal(Normal(xCoor - this->x, yCoor - this->y, zCoor - this->z));
 		tHit = &tIntersection;
 
 		return true;

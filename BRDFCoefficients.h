@@ -9,7 +9,7 @@ class BRDFCoefficients {
 		int sp;
 
 	BRDFCoefficients() {
-
+		this->sp = 1;
 	}
 
 	BRDFCoefficients(Color kd, Color ks, Color ka, Color kr, int sp) {

@@ -50,104 +50,16 @@ class Sphere : public Shape {
 
 		// Ray equations
 		// x(t) = ft + g
-//		float f = ray.direction.x;
-//		float g = ray.position.x;
-//
-//		// y(t) = ht + i
-//		float h = ray.direction.y;
-//		float i = ray.position.y;
-//
-//		// z(t) = jt + k
-//		float j = ray.direction.z;
-//		float k = ray.position.z;
-//
-//		// (ft + m))^2 + (ht + n))^2 + (jt + p))^2 - r^2 = 0
-//		float m = g - this->x;
-//		float n = i - this->y;
-//		float p = k - this->z;
-//
-//		// at^2 + bt + c = 0
-//		float a = pow(f, 2) + pow(h, 2) + pow(j, 2);
-//		float b = (2 * f * m) + (2 * h * n) + (2 * j * p);
-//		float c = pow(m, 2) + pow(n, 2) + pow(p, 2) - pow(this->r, 2);
-//
-//		float discriminant = pow(b, 2) - (4 * a * c);
-//
-//		// No intersection, so return false
-//		if (discriminant < 0) {
-//			return false;
-//		}
-//
-//		// Quadratic equation: (-b +/- sqrt(b^2 - 4ac)) / 2a
-//		float sqrtTerm = pow(b, 2) - (4 * a * c);
-//
-//		float tIntersection;
-//
-//		if (sqrtTerm == 0) {
-//			tIntersection = (b * -1.0) / (2.0 * a);
-//		} else {
-//			// sqrtTerm is positive
-//			tIntersection = ((b * -1.0) + pow(sqrtTerm, 0.5)) / (2.0 * a);
-//			if ((((b * -1.0) - pow(sqrtTerm, 0.5)) / (2.0 * a)) < tIntersection) {
-//				tIntersection = ((b * -1.0) - pow(sqrtTerm, 0.5)) / (2.0 * a);
-//			}
-//		}
-//
-//		// at this point, tIntersection is our closest intersection point
-//
-//		// now, find the (xCoor, yCoor, zCoor) that tIntersection corresponds to
-//		float xCoor = (f * tIntersection) + g;
-//		float yCoor = (h * tIntersection) + i;
-//		float zCoor = (j * tIntersection) + k;
-//
-//		// Compute normal of the sphere and the intersection point in WORLD coordinates
-//		// This is NOT equal to the position of the intersection point
-//
-//		differentialGeometry->normal = Normal::normalizeNormal(Normal(xCoor - this->x, yCoor - this->y, zCoor - this->z));
-//
-//		differentialGeometry->position = Point(xCoor, yCoor, zCoor);
-//		tHit = &tIntersection;
-//		return true;
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-		printRay(ray);
-		Transformation translationToSphereCenter = Transformation(Matrix4::createTranslationMatrix(this->x, this->y, this->z));
-		Ray translatedRay = translationToSphereCenter.transformRay(ray);
-		printRay(translatedRay);
-
-
-
-		// Sphere equation: (x - x0)^2 + (y - y0)^2 + (z - z0)^2 = r^2
-
-		// Ray equations
-		// x(t) = ft + g
-		float f = translatedRay.direction.x;
-		float g = translatedRay.position.x;
+		float f = ray.direction.x;
+		float g = ray.position.x;
 
 		// y(t) = ht + i
-		float h = translatedRay.direction.y;
-		float i = translatedRay.position.y;
+		float h = ray.direction.y;
+		float i = ray.position.y;
 
 		// z(t) = jt + k
-		float j = translatedRay.direction.z;
-		float k = translatedRay.position.z;
+		float j = ray.direction.z;
+		float k = ray.position.z;
 
 		// (ft + m))^2 + (ht + n))^2 + (jt + p))^2 - r^2 = 0
 		float m = g - this->x;
@@ -190,17 +102,91 @@ class Sphere : public Shape {
 
 		// Compute normal of the sphere and the intersection point in WORLD coordinates
 		// This is NOT equal to the position of the intersection point
-//		differentialGeometry->normal = Normal::normalizeNormal(Normal(xCoor, yCoor, zCoor));
 
-		differentialGeometry->normal = Normal::normalizeNormal(Normal(xCoor, yCoor, zCoor));
+		differentialGeometry->normal = Normal::normalizeNormal(Normal(xCoor - this->x, yCoor - this->y, zCoor - this->z));
 
-		// Location of our intersection point, in WORLD coordinates
-		Point resultantWorldPosition = Transformation(Matrix4::createTranslationMatrix(-1.0 * this->x, -1.0 * this->y, -1.0 * this->z)).transformPoint(Point(xCoor, yCoor, zCoor));
-		differentialGeometry->position = resultantWorldPosition;
-		printf("%f, %f, %f\n", resultantWorldPosition.x, resultantWorldPosition.y, resultantWorldPosition.z);
+		differentialGeometry->position = Point(xCoor, yCoor, zCoor);
 		tHit = &tIntersection;
-//		std::cout << "\n";
 		return true;
+
+
+//      TODO: Transformation
+//		printRay(ray);
+//		Transformation translationToSphereCenter = Transformation(Matrix4::createTranslationMatrix(this->x, this->y, this->z));
+//		Ray translatedRay = translationToSphereCenter.transformRay(ray);
+//		printRay(translatedRay);
+//
+//
+//
+//		// Sphere equation: (x - x0)^2 + (y - y0)^2 + (z - z0)^2 = r^2
+//
+//		// Ray equations
+//		// x(t) = ft + g
+//		float f = translatedRay.direction.x;
+//		float g = translatedRay.position.x;
+//
+//		// y(t) = ht + i
+//		float h = translatedRay.direction.y;
+//		float i = translatedRay.position.y;
+//
+//		// z(t) = jt + k
+//		float j = translatedRay.direction.z;
+//		float k = translatedRay.position.z;
+//
+//		// (ft + m))^2 + (ht + n))^2 + (jt + p))^2 - r^2 = 0
+//		float m = g - this->x;
+//		float n = i - this->y;
+//		float p = k - this->z;
+//
+//		// at^2 + bt + c = 0
+//		float a = pow(f, 2) + pow(h, 2) + pow(j, 2);
+//		float b = (2 * f * m) + (2 * h * n) + (2 * j * p);
+//		float c = pow(m, 2) + pow(n, 2) + pow(p, 2) - pow(this->r, 2);
+//
+//		float discriminant = pow(b, 2) - (4 * a * c);
+//
+//		// No intersection, so return false
+//		if (discriminant < 0) {
+//			return false;
+//		}
+//
+//		// Quadratic equation: (-b +/- sqrt(b^2 - 4ac)) / 2a
+//		float sqrtTerm = pow(b, 2) - (4 * a * c);
+//
+//		float tIntersection;
+//
+//		if (sqrtTerm == 0) {
+//			tIntersection = (b * -1.0) / (2.0 * a);
+//		} else {
+//			// sqrtTerm is positive
+//			tIntersection = ((b * -1.0) + pow(sqrtTerm, 0.5)) / (2.0 * a);
+//			if ((((b * -1.0) - pow(sqrtTerm, 0.5)) / (2.0 * a)) < tIntersection) {
+//				tIntersection = ((b * -1.0) - pow(sqrtTerm, 0.5)) / (2.0 * a);
+//			}
+//		}
+//
+//		// at this point, tIntersection is our closest intersection point
+//
+//		// now, find the (xCoor, yCoor, zCoor) that tIntersection corresponds to
+//		float xCoor = (f * tIntersection) + g;
+//		float yCoor = (h * tIntersection) + i;
+//		float zCoor = (j * tIntersection) + k;
+//
+//		// Compute normal of the sphere and the intersection point in WORLD coordinates
+//		// This is NOT equal to the position of the intersection point
+////		differentialGeometry->normal = Normal::normalizeNormal(Normal(xCoor, yCoor, zCoor));
+//
+//		differentialGeometry->normal = Normal::normalizeNormal(Normal(xCoor, yCoor, zCoor));
+//
+//		// Location of our intersection point, in WORLD coordinates
+//		Point resultantWorldPosition = Transformation(Matrix4::createTranslationMatrix(-1.0 * this->x, -1.0 * this->y, -1.0 * this->z)).transformPoint(Point(xCoor, yCoor, zCoor));
+//		differentialGeometry->position = resultantWorldPosition;
+//		printf("%f, %f, %f\n", resultantWorldPosition.x, resultantWorldPosition.y, resultantWorldPosition.z);
+//		tHit = &tIntersection;
+////		std::cout << "\n";
+//		return true;
+
+
 	}
 
 	// Test if ray intersects with the shape or not.

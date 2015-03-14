@@ -149,9 +149,15 @@ class RayTracer {
 				// if this light ray is not blocked, do:
 				//     *color += shading(intersection.differentialGeometry, brdf, lightRay, lightColor);
 
+				point_lights[i].generateLightRay(intersection.differentialGeometry, &lightRay, &lightColor);
+
 				// For now, we just ignore shadows and reflections and just apply our shading model
 				// i.e. just call:
-				Color colorToAdd = applyShadingModel(intersection.differentialGeometry, brdf, lightRay, lightColor);
+				Color colorToAdd = applyShadingModel(
+						intersection.differentialGeometry,
+						brdf, lightRay,
+						Color(point_lights[i].r, point_lights[i].g, point_lights[i].b));
+
 				color->r += colorToAdd.r;
 				color->g += colorToAdd.g;
 				color->b += colorToAdd.b;
@@ -179,9 +185,9 @@ Color applyShadingModel(DifferentialGeometry differentialGeometry, BRDFCoefficie
 
 	// ****(?)****  Set viewer vector
 	// (?) is it (0, 0, 0) or
-	Vector3 viewer_vector = Vector3(0, 0, 0);
+//	Vector3 viewer_vector = Vector3(0, 0, 0);
 	// (?) -1 * incoming_ray's_vector?
-//	 Vector3 viewer_vector = Vector3(-1.0 * differentialGeometry.position.x, -1.0 * differentialGeometry.position.y, -1.0 * differentialGeometry.position.z);
+	 Vector3 viewer_vector = Vector3(-1.0 * differentialGeometry.position.x, -1.0 * differentialGeometry.position.y, -1.0 * differentialGeometry.position.z);
 
 	// **************************************
     // For directional light
@@ -202,8 +208,6 @@ Color applyShadingModel(DifferentialGeometry differentialGeometry, BRDFCoefficie
 		// TODO: Need to change -- (x, y, z) is in world coordinates now, not relative to center of sphere
 		// NOTE: we should defer this logic to Sphere/Triangle, as follows:
 		Vector3 directional_normal_vector = Vector3(differentialGeometry.normal.x, differentialGeometry.normal.y, differentialGeometry.normal.z);
-		//	  Vector3 prenormalized_directional_normal_vector = Vector3(x, y, z);
-		//	  Vector3 directional_normal_vector = Vector3::normalizeVector(prenormalized_directional_normal_vector);
 
 		float directional_diffuse_dot_product = fmax(directional_light_vector.dotProduct(directional_normal_vector), 0);
 		float directional_diffuse_r = brdf.kd.r * lightColor.r * directional_diffuse_dot_product;
@@ -238,6 +242,7 @@ Color applyShadingModel(DifferentialGeometry differentialGeometry, BRDFCoefficie
 
 		Vector3 point_normal_vector = Vector3(differentialGeometry.normal.x, differentialGeometry.normal.y, differentialGeometry.normal.z);
 
+		// ****(?)****
 		Vector3 prenormalized_point_light_vector = normalized_point_light_location.subtractVector(point_normal_vector).scaleVector(1);
 		Vector3 point_light_vector = Vector3::normalizeVector(prenormalized_point_light_vector);
 
@@ -438,7 +443,7 @@ void render() {
 
 		// Given the sample in Film-coordinates, tell the camera to generate a viewing ray in IMAGE PLANE [-1, 1] coordinates
 		camera.generateRay(samples[i], &currentRay);
-		printSample(samples[i]);
+
 		// Call the trace method to try to populate currentSampleColor for the currentSample
 		rayTracer.trace(currentRay, recursionDepth, &currentSampleColor);
 
@@ -478,18 +483,18 @@ void initializePrimitives() {
 	BRDFCoefficients *brdf = new BRDFCoefficients();
 
 	// ka
-	Color *color1 = new Color(11, 11, 60);
+	Color *color1 = new Color(51, 51, 204);
 
 	// kd
-	Color *color2 = new Color(255, 185, 255);
+	Color *color2 = new Color(51, 51, 204);
 
 	// ks
-	Color *color3 = new Color(255, 255, 255);
+	Color *color3 = new Color(0, 215, 215);
 
-	brdf->ka = *color1;
+//	brdf->ka = *color1;
 	brdf->kd = *color2;
-	brdf->ks = *color3;
-	brdf->sp = 128;
+//	brdf->ks = *color3;
+//	brdf->sp = 3;
 	material1->constantBRDF = *brdf;
 
 	GeometricPrimitive *primitive1 = new GeometricPrimitive();

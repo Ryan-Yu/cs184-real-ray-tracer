@@ -1,6 +1,8 @@
 #ifndef LIGHT_H_
 #define LIGHT_H_
 
+const float shadowBias = 0.001;
+
 class Light {
 	public:
 		virtual void generateLightRay(DifferentialGeometry& differentialGeometry, Ray* lightRay, Color* lightColor) {
@@ -28,7 +30,7 @@ class PointLight : public Light {
 	void generateLightRay(DifferentialGeometry& differentialGeometry, Ray* lightRay, Color* lightColor) {
 		lightRay->position = Point(differentialGeometry.position.x, differentialGeometry.position.y, differentialGeometry.position.z);
 		lightRay->direction = Vector3(this->x - differentialGeometry.position.x, this->y - differentialGeometry.position.y, this->z - differentialGeometry.position.z);
-		lightRay->t_min = 0.001;
+		lightRay->t_min = shadowBias;
 
 		// Determine intersection point of our light ray and (this->x, this->y, this->z)
 		lightRay->t_max = (this->x - lightRay->position.x)/(lightRay->direction.x);
@@ -60,7 +62,7 @@ class DirectionalLight : public Light {
 		lightRay->position = Point(differentialGeometry.position.x, differentialGeometry.position.y, differentialGeometry.position.z);
 		// Directional lights have constant direction.
 		lightRay->direction = Vector3(this->x, this->y, this->z);
-		lightRay->t_min = 0.001;
+		lightRay->t_min = shadowBias;
 		lightRay->t_max = FLT_MAX;
 		lightColor->r = this->r;
 		lightColor->g = this->g;

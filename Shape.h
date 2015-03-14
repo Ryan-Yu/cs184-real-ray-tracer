@@ -162,11 +162,8 @@ class Sphere : public Shape {
 			// sqrtTerm is positive
 			intersectionPoint1 = ((b * -1.0) + pow(sqrtTerm, 0.5)) / (2.0 * a);
 			intersectionPoint2 = ((b * -1.0) - pow(sqrtTerm, 0.5)) / (2.0 * a);
-//			if ((((b * -1.0) - pow(sqrtTerm, 0.5)) / (2.0 * a)) < tIntersection) {
-//				tIntersection = ((b * -1.0) - pow(sqrtTerm, 0.5)) / (2.0 * a);
-//			}
 		}
-		printf("Intersection point 1: %f; Intersection point 2: %f; t_min: %f\n", intersectionPoint1, intersectionPoint2, ray.t_min);
+
 		if (intersectionPoint1 > ray.t_min && intersectionPoint1 < ray.t_max) {
 			return true;
 		}

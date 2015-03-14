@@ -34,6 +34,10 @@ class Color {
   Color multiplyColor(Color other) {
     return Color(this->r * other.r, this->g * other.g, this->b * other.b);
   }
+
+  bool greaterThanZero() {
+	  return (this->r > 0.0 || this->g > 0.0 || this->b > 0.0);
+  }
 };
 
 #endif /* COLOR_H_ */

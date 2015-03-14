@@ -76,26 +76,53 @@ class Sphere : public Shape {
 		// Quadratic equation: (-b +/- sqrt(b^2 - 4ac)) / 2a
 		float sqrtTerm = pow(b, 2) - (4 * a * c);
 
-		float tIntersection;
+		float intersectionPoint1 = FLT_MAX;
+		float intersectionPoint2 = FLT_MAX;
+		float tIntersection = FLT_MAX;
 
 		if (sqrtTerm == 0) {
 			tIntersection = (b * -1.0) / (2.0 * a);
+			// if our ONE intersection point is invalid, then return false
+			if (!(tIntersection > ray.t_min && tIntersection < ray.t_max)) {
+				return false;
+			}
+		// We have TWO intersection points
 		} else {
-			// sqrtTerm is positive
-			tIntersection = ((b * -1.0) + pow(sqrtTerm, 0.5)) / (2.0 * a);
-			if ((((b * -1.0) - pow(sqrtTerm, 0.5)) / (2.0 * a)) < tIntersection) {
-				tIntersection = ((b * -1.0) - pow(sqrtTerm, 0.5)) / (2.0 * a);
+			// Calculate both intersection points
+			intersectionPoint1 = ((b * -1.0) + pow(sqrtTerm, 0.5)) / (2.0 * a);
+			intersectionPoint2 = ((b * -1.0) - pow(sqrtTerm, 0.5)) / (2.0 * a);
+
+			bool intersectionPoint1Valid = false;
+			bool intersectionPoint2Valid = false;
+
+			// If intersectionPoint1 is valid, according to our t_min and t_max...
+			if (intersectionPoint1 > ray.t_min && intersectionPoint1 < ray.t_max) {
+				intersectionPoint1Valid = true;
+			}
+
+			// If intersectionPoint1 is valid, according to our t_min and t_max...
+			if (intersectionPoint2 > ray.t_min && intersectionPoint2 < ray.t_max) {
+				intersectionPoint2Valid = true;
+			}
+
+			// Both points are valid
+			if (intersectionPoint1Valid && intersectionPoint2Valid) {
+				tIntersection = fmin(intersectionPoint1, intersectionPoint2);
+			// Only intersection point 1 is valid
+			} else if (intersectionPoint1Valid && !intersectionPoint2Valid) {
+				tIntersection = intersectionPoint1;
+			// Only intersection point 2 is valid
+			} else if (!intersectionPoint1Valid && intersectionPoint2Valid) {
+				tIntersection = intersectionPoint2;
+			// Neither of our points are valid
+			} else {
+				return false;
 			}
 		}
 
-//		if (tIntersection < ray.t_min) {
-//			return false;
-//		}
+		// NOTE: At this point, tIntersection is our closest intersection point
 
-
-		// at this point, tIntersection is our closest intersection point
-
-		// now, find the (xCoor, yCoor, zCoor) that tIntersection corresponds to
+		// Now, find the (xCoor, yCoor, zCoor) that tIntersection corresponds to
 		float xCoor = (f * tIntersection) + g;
 		float yCoor = (h * tIntersection) + i;
 		float zCoor = (j * tIntersection) + k;
@@ -106,7 +133,10 @@ class Sphere : public Shape {
 		differentialGeometry->normal = Normal::normalizeNormal(Normal(xCoor - this->x, yCoor - this->y, zCoor - this->z));
 
 		differentialGeometry->position = Point(xCoor, yCoor, zCoor);
-		tHit = &tIntersection;
+
+		// IMPORTANT: this used to be:
+		// tHit = &tIntersection
+		*tHit = tIntersection;
 		return true;
 
 	}

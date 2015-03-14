@@ -195,10 +195,8 @@ Color applyShadingModel(DifferentialGeometry differentialGeometry, BRDFCoefficie
 	float resultant_rgb_sum_of_pixel_g = 0;
 	float resultant_rgb_sum_of_pixel_b = 0;
 
-	// ****(?)****  Set viewer vector
-	// (?) is it (0, 0, 0) or
-	Vector3 viewer_vector = Vector3(0, 0, 0);
-	// (?) -1 * incoming_ray's_vector?
+	// Set viewer vector to -1 * incoming_ray's_vector
+	Vector3 viewer_vector = Vector3::normalizeVector(Vector3(-1.0* differentialGeometry.position.x, -1.0 *differentialGeometry.position.y, -1.0 * differentialGeometry.position.z));
 
 	// **************************************
     // For directional light
@@ -209,14 +207,13 @@ Color applyShadingModel(DifferentialGeometry differentialGeometry, BRDFCoefficie
 		float directional_ambient_g = brdf.ka.r * lightColor.g;
 		float directional_ambient_b = brdf.ka.r * lightColor.b;
 
-		// Light vector is no longer this...
-		// ****(?)****
+		// Direction of light ray computed in 'generateLightRay()'
 		Vector3 prenormalized_directional_light_vector = lightRay.direction;
 
-		// ****(?)**** Change orientation of light vector to point inwards to sphere
+		// Change orientation of light vector to point inwards to sphere
 		Vector3 directional_light_vector = Vector3::normalizeVector(prenormalized_directional_light_vector.scaleVector(-1));
 
-		// TODO: Need to change -- (x, y, z) is in world coordinates now, not relative to center of sphere
+		// NOTE: (x, y, z) is in world coordinates now, not relative to center of sphere
 		// NOTE: we should defer this logic to Sphere/Triangle, as follows:
 		Vector3 directional_normal_vector = Vector3(differentialGeometry.normal.x, differentialGeometry.normal.y, differentialGeometry.normal.z);
 
@@ -227,7 +224,9 @@ Color applyShadingModel(DifferentialGeometry differentialGeometry, BRDFCoefficie
 
 		// Calculate specular term
 		Vector3 directional_reflective_vector = directional_normal_vector.scaleVector(directional_light_vector.dotProduct(directional_normal_vector) * 2).subtractVector(directional_light_vector);
+
 		float directional_specular_dot_product_term = pow(fmax(directional_reflective_vector.dotProduct(viewer_vector), 0), brdf.sp);
+
 		float directional_specular_r = brdf.ks.r * lightColor.r * directional_specular_dot_product_term;
 		float directional_specular_g = brdf.ks.g * lightColor.g * directional_specular_dot_product_term;
 		float directional_specular_b = brdf.ks.b * lightColor.b * directional_specular_dot_product_term;
@@ -253,7 +252,6 @@ Color applyShadingModel(DifferentialGeometry differentialGeometry, BRDFCoefficie
 
 		Vector3 point_normal_vector = Vector3(differentialGeometry.normal.x, differentialGeometry.normal.y, differentialGeometry.normal.z);
 
-		// ****(?)****
 		Vector3 prenormalized_point_light_vector = normalized_point_light_location.subtractVector(point_normal_vector).scaleVector(1);
 		Vector3 point_light_vector = Vector3::normalizeVector(prenormalized_point_light_vector);
 
@@ -553,7 +551,7 @@ void initializePrimitives() {
 	BRDFCoefficients *brdf3 = new BRDFCoefficients();
 
 	// ka
-	Color *color7 = new Color(100, 100, 100);
+	Color *color7 = new Color(25.5, 25.5, 25.5);
 
 	// kd
 	Color *color8 = new Color(0, 255, 255);

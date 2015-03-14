@@ -3,11 +3,6 @@
 
 #include "Matrix4.h"
 static void printRay(Ray ray);
-//static void printRay(Ray ray) {
-//	if (debug) {
-//		printf("Ray: (%f, %f, %f) + t(%f, %f, %f)\n", ray.position.x, ray.position.y, ray.position.z, ray.direction.x, ray.direction.y, ray.direction.z);
-//	}
-//}
 
 // NOTE: A Primitive object has both a Material and a Shape
 class Shape {
@@ -164,10 +159,10 @@ class Sphere : public Shape {
 			intersectionPoint2 = ((b * -1.0) - pow(sqrtTerm, 0.5)) / (2.0 * a);
 		}
 
-		if (intersectionPoint1 > ray.t_min && intersectionPoint1 < ray.t_max) {
+		if (intersectionPoint1 >= ray.t_min && intersectionPoint1 < ray.t_max) {
 			return true;
 		}
-		if (intersectionPoint2 > ray.t_min && intersectionPoint2 < ray.t_max) {
+		if (intersectionPoint2 >= ray.t_min && intersectionPoint2 < ray.t_max) {
 			return true;
 		}
 

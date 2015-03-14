@@ -128,29 +128,30 @@ class RayTracer {
 
 				Ray reversedLightRay = Ray(lightRay.position, lightRay.direction.scaleVector(-1.0), lightRay.t_min, lightRay.t_max);
 
-				// If the light ray is not blocked, we apply our shading model
-				if (!aggregatePrimitive.intersectP(reversedLightRay)) {
-					// For now, we just ignore shadows and reflections and just apply our shading model
-					Color colorToAdd = applyShadingModel(
-							intersection.differentialGeometry,
-							brdf,
-							lightRay,
-							Color(directional_lights[i].r, directional_lights[i].g, directional_lights[i].b));
-
-					color->r += colorToAdd.r;
-					color->g += colorToAdd.g;
-					color->b += colorToAdd.b;
-				}
-
-//				Color colorToAdd = applyShadingModel(
-//						intersection.differentialGeometry,
-//						brdf,
-//						lightRay,
-//						Color(directional_lights[i].r, directional_lights[i].g, directional_lights[i].b));
+//				// If the light ray is not blocked, we apply our shading model
+//				// TODO: Fix shading...
+//				if (!aggregatePrimitive.intersectP(reversedLightRay)) {
+//					// For now, we just ignore shadows and reflections and just apply our shading model
+//					Color colorToAdd = applyShadingModel(
+//							intersection.differentialGeometry,
+//							brdf,
+//							lightRay,
+//							Color(directional_lights[i].r, directional_lights[i].g, directional_lights[i].b));
 //
-//				color->r += colorToAdd.r;
-//				color->g += colorToAdd.g;
-//				color->b += colorToAdd.b;
+//					color->r += colorToAdd.r;
+//					color->g += colorToAdd.g;
+//					color->b += colorToAdd.b;
+//				}
+
+				Color colorToAdd = applyShadingModel(
+						intersection.differentialGeometry,
+						brdf,
+						lightRay,
+						Color(directional_lights[i].r, directional_lights[i].g, directional_lights[i].b));
+
+				color->r += colorToAdd.r;
+				color->g += colorToAdd.g;
+				color->b += colorToAdd.b;
 
 			}
 
@@ -491,88 +492,229 @@ void initializeSampler() {
 //****************************************************
 void initializePrimitives() {
 	// Must use 'new', as need to store pointers to variables that will live outside of the scope of this function
-	Sphere *sphere1 = new Sphere(0, 0, -20, 3);
-	Material *material1 = new Material();
-	BRDFCoefficients *brdf = new BRDFCoefficients();
+//	Sphere *sphere1 = new Sphere(0, 0, -20, 3);
+//	Material *material1 = new Material();
+//	BRDFCoefficients *brdf = new BRDFCoefficients();
+//
+//	// ka
+//	Color *color1 = new Color(25.5, 25.5, 25.5);
+//
+//	// kd
+//	Color *color2 = new Color(255, 0, 255);
+//
+//	// ks
+//	Color *color3 = new Color(255, 255, 255);
+//
+//	brdf->ka = *color1;
+//	brdf->kd = *color2;
+//	brdf->ks = *color3;
+//	brdf->sp = 50;
+//	material1->constantBRDF = *brdf;
+//
+//	GeometricPrimitive *primitive1 = new GeometricPrimitive();
+//	primitive1->shape = sphere1;
+//	primitive1->material = material1;
+//	aggregatePrimitive.addPrimitive(primitive1);
+//
+//	///////////////////////
+//
+//	Material *material2 = new Material();
+//	BRDFCoefficients *brdf2 = new BRDFCoefficients();
+//
+//	// ka
+//	Color *color4 = new Color(25.5, 25.5, 25.5);
+//
+//	// kd
+//	Color *color5 = new Color(255, 255, 0);
+//
+//	// ks
+//	Color *color6 = new Color(255, 255, 255);
+//	brdf2->ka = *color4;
+//	brdf2->kd = *color5;
+//	brdf2->ks = *color6;
+//	brdf2->sp = 50;
+//
+//
+//	Sphere *sphere2 = new Sphere(-2, 2, -15, 1);
+//
+//	material2->constantBRDF = *brdf2;
+//
+//	GeometricPrimitive *primitive2 = new GeometricPrimitive();
+//
+//	primitive2->shape = sphere2;
+//	primitive2->material = material2;
+//
+//	aggregatePrimitive.addPrimitive(primitive2);
+//
+//	///////////////////////
+//
+//	Material *material3 = new Material();
+//	BRDFCoefficients *brdf3 = new BRDFCoefficients();
+//
+//	// ka
+//	Color *color7 = new Color(25.5, 25.5, 25.5);
+//
+//	// kd
+//	Color *color8 = new Color(0, 255, 255);
+//
+//	// ks
+//	Color *color9 = new Color(255, 255, 255);
+//	brdf3->ka = *color7;
+//	brdf3->kd = *color8;
+//	brdf3->ks = *color9;
+//	brdf3->sp = 50;
+//
+//	Sphere *sphere3 = new Sphere(-2, -2, -15, 1);
+//
+//	material3->constantBRDF = *brdf3;
+//
+//	GeometricPrimitive *primitive3 = new GeometricPrimitive();
+//
+//	primitive3->shape = sphere3;
+//	primitive3->material = material3;
+//
+//	aggregatePrimitive.addPrimitive(primitive3);
 
-	// ka
-	Color *color1 = new Color(25.5, 25.5, 25.5);
+	//	///////////////////////
 
-	// kd
-	Color *color2 = new Color(255, 0, 255);
+		Sphere *sphere1 = new Sphere(0, 0, -17, 2);
+		Material *material1 = new Material();
+		BRDFCoefficients *brdf = new BRDFCoefficients();
 
-	// ks
-	Color *color3 = new Color(255, 255, 255);
+		// ka
+		Color *color1 = new Color(25.5, 25.5, 25.5);
 
-	brdf->ka = *color1;
-	brdf->kd = *color2;
-	brdf->ks = *color3;
-	brdf->sp = 50;
-	material1->constantBRDF = *brdf;
+		// kd
+		Color *color2 = new Color(255, 0, 0);
 
-	GeometricPrimitive *primitive1 = new GeometricPrimitive();
-	primitive1->shape = sphere1;
-	primitive1->material = material1;
-	aggregatePrimitive.addPrimitive(primitive1);
+		// ks
+		Color *color3 = new Color(255, 255, 255);
 
-	///////////////////////
+		brdf->ka = *color1;
+		brdf->kd = *color2;
+		brdf->ks = *color3;
+		brdf->sp = 50;
+		material1->constantBRDF = *brdf;
 
-	Material *material2 = new Material();
-	BRDFCoefficients *brdf2 = new BRDFCoefficients();
+		GeometricPrimitive *primitive1 = new GeometricPrimitive();
+		primitive1->shape = sphere1;
+		primitive1->material = material1;
+		aggregatePrimitive.addPrimitive(primitive1);
 
-	// ka
-	Color *color4 = new Color(25.5, 25.5, 25.5);
+		Material *material2 = new Material();
+		BRDFCoefficients *brdf2 = new BRDFCoefficients();
 
-	// kd
-	Color *color5 = new Color(255, 255, 0);
+		// ka
+		Color *color4 = new Color(25.5, 25.5, 25.5);
 
-	// ks
-	Color *color6 = new Color(255, 255, 255);
-	brdf2->ka = *color4;
-	brdf2->kd = *color5;
-	brdf2->ks = *color6;
-	brdf2->sp = 50;
+		// kd
+		Color *color5 = new Color(0, 255, 0);
+
+		// ks
+		Color *color6 = new Color(255, 255, 255);
+		brdf2->ka = *color4;
+		brdf2->kd = *color5;
+		brdf2->ks = *color6;
+		brdf2->sp = 50;
 
 
-	Sphere *sphere2 = new Sphere(-2, 2, -15, 1);
+		Sphere *sphere2 = new Sphere(0, 4, -17, 1.5);
 
-	material2->constantBRDF = *brdf2;
+		material2->constantBRDF = *brdf2;
 
-	GeometricPrimitive *primitive2 = new GeometricPrimitive();
+		GeometricPrimitive *primitive2 = new GeometricPrimitive();
 
-	primitive2->shape = sphere2;
-	primitive2->material = material2;
+		primitive2->shape = sphere2;
+		primitive2->material = material2;
 
-	aggregatePrimitive.addPrimitive(primitive2);
+		aggregatePrimitive.addPrimitive(primitive2);
 
-	///////////////////////
+		///////////////////////
 
-	Material *material3 = new Material();
-	BRDFCoefficients *brdf3 = new BRDFCoefficients();
+		Material *material3 = new Material();
+		BRDFCoefficients *brdf3 = new BRDFCoefficients();
 
-	// ka
-	Color *color7 = new Color(25.5, 25.5, 25.5);
+		// ka
+		Color *color7 = new Color(25.5, 25.5, 25.5);
 
-	// kd
-	Color *color8 = new Color(0, 255, 255);
+		// kd
+		Color *color8 = new Color(0, 0, 255);
 
-	// ks
-	Color *color9 = new Color(255, 255, 255);
-	brdf3->ka = *color7;
-	brdf3->kd = *color8;
-	brdf3->ks = *color9;
-	brdf3->sp = 50;
+		// ks
+		Color *color9 = new Color(255, 255, 255);
+		brdf3->ka = *color7;
+		brdf3->kd = *color8;
+		brdf3->ks = *color9;
+		brdf3->sp = 50;
 
-	Sphere *sphere3 = new Sphere(-2, -2, -15, 1);
+		Sphere *sphere3 = new Sphere(0, -4, -17, 1.5);
 
-	material3->constantBRDF = *brdf3;
+		material3->constantBRDF = *brdf3;
 
-	GeometricPrimitive *primitive3 = new GeometricPrimitive();
+		GeometricPrimitive *primitive3 = new GeometricPrimitive();
 
-	primitive3->shape = sphere3;
-	primitive3->material = material3;
+		primitive3->shape = sphere3;
+		primitive3->material = material3;
 
-	aggregatePrimitive.addPrimitive(primitive3);
+		aggregatePrimitive.addPrimitive(primitive3);
+
+
+		Material *material4 = new Material();
+		BRDFCoefficients *brdf4 = new BRDFCoefficients();
+
+		// ka
+		Color *color10 = new Color(25.5, 25.5, 25.5);
+
+		// kd
+		Color *color11 = new Color(255, 255, 0);
+
+		// ks
+		Color *color12 = new Color(255, 255, 255);
+		brdf4->ka = *color10;
+		brdf4->kd = *color11;
+		brdf4->ks = *color12;
+		brdf4->sp = 50;
+
+
+		Sphere *sphere4 = new Sphere(4, 0, -17, 1.5);
+
+		material4->constantBRDF = *brdf4;
+
+		GeometricPrimitive *primitive4 = new GeometricPrimitive();
+
+		primitive4->shape = sphere4;
+		primitive4->material = material4;
+
+		aggregatePrimitive.addPrimitive(primitive4);
+
+		///////////////////////
+
+		Material *material5 = new Material();
+		BRDFCoefficients *brdf5 = new BRDFCoefficients();
+
+		// ka
+		Color *color13 = new Color(25.5, 25.5, 25.5);
+
+		// kd
+		Color *color14 = new Color(0, 255, 255);
+
+		// ks
+		Color *color15 = new Color(255, 255, 255);
+		brdf5->ka = *color13;
+		brdf5->kd = *color14;
+		brdf5->ks = *color15;
+		brdf5->sp = 50;
+
+		Sphere *sphere5 = new Sphere(-4, 0, -17, 1.5);
+
+		material5->constantBRDF = *brdf5;
+
+		GeometricPrimitive *primitive5 = new GeometricPrimitive();
+
+		primitive5->shape = sphere5;
+		primitive5->material = material5;
+
+		aggregatePrimitive.addPrimitive(primitive5);
 
 }
 

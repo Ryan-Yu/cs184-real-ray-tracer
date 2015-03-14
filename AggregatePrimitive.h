@@ -59,6 +59,21 @@ class AggregatePrimitive {
 		return false;
 	}
 
+	// Just loops through all the primitives in the list and calls the intersectP routine
+	// Returns true if our input ray hits ANY primitive, and false otherwise
+	// NOTE: Does not consider primitives in our aggregatePrimitive if they match 'sourcePrimitive'
+	bool intersectP(Ray& ray, GeometricPrimitive *sourcePrimitive) {
+		for (std::vector<GeometricPrimitive*>::size_type i = 0; i < listOfPrimitives.size(); i++) {
+			if (listOfPrimitives[i] == sourcePrimitive) {
+				continue;
+			}
+			if (listOfPrimitives[i]->intersectP(ray)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
 	// NOTE: This will never get called
 	void getBRDF(DifferentialGeometry& differentialGeometry, BRDFCoefficients* brdf) {
 		exit(1);

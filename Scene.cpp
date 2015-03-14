@@ -199,7 +199,6 @@ Color applyShadingModel(DifferentialGeometry differentialGeometry, BRDFCoefficie
 	// (?) is it (0, 0, 0) or
 	Vector3 viewer_vector = Vector3(0, 0, 0);
 	// (?) -1 * incoming_ray's_vector?
-//	Vector3 viewer_vector = Vector3(-1.0 * differentialGeometry.position.x, -1.0 * differentialGeometry.position.y, -1.0 * differentialGeometry.position.z);
 
 	// **************************************
     // For directional light
@@ -293,6 +292,12 @@ static void printRay(Ray ray) {
 static void printSample(Sample sample) {
 	if (debug) {
 		std::cout << "Sample: x = " << sample.x << "; y = " << sample.y << "\n";
+	}
+}
+
+static void printVector(Vector3 vector) {
+	if (debug) {
+		std::cout << "Vector: x = " << vector.x << "; y = " << vector.y << "; z = " << vector.z << "\n";
 	}
 }
 
@@ -460,7 +465,9 @@ void render() {
 		rayTracer.trace(currentRay, recursionDepth, &currentSampleColor);
 
 		// Commit the currentSampleColor for the currentSample onto our Film
+
 		film.commitColor(samples[i], currentSampleColor);
+
 	}
 
 }
@@ -471,10 +478,6 @@ void render() {
 //****************************************************
 void initializeSampler() {
 	float x, y;
-
-	float widthOfBucket = 2.0 / film.width;
-	float heightOfBucket = 2.0 / film.height;
-
 	// Generates samples in the FILM's coordinates
 	for (y = 0; y < film.height; y++) {
 		for (x = 0; x < film.width; x++) {

@@ -1,6 +1,12 @@
 #ifndef CAMERA_H_
 #define CAMERA_H_
 
+static void printRay(Ray ray);
+
+static void printSample(Sample sample);
+
+static void printVector(Vector3 vector);
+
 class Camera {
 	public:
 		// Note: Camera needs Film width and height to correctly compute viewing ray
@@ -31,6 +37,7 @@ class Camera {
 			Point imagePlaneTopRight = Point(1.0, 1.0, -3.0);
 			Point imagePlaneBottomRight = Point(1.0, -1.0, -3.0);
 
+			// Textbook page 75
 			ray->position = eye;
 
 			float rectangleWidth = imagePlaneTopRight.x - imagePlaneTopLeft.x;

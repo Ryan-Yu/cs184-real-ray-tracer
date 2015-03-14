@@ -61,19 +61,19 @@ class Film {
 	void commitColor(Sample& sample, Color& color) {
 		// Find the index of our 'buckets' array that corresponds with the sample's pixel, and add the 'color' to this index of the array
 		// NOTE: sample.x and sample.y are in the coordinate system of the viewing plane, i.e. [width -> height]
-		buckets[(width * sample.y) + sample.x].add(color);
+		buckets[width * sample.y + sample.x].add(color);
 	}
 
 
 	void convertToRawData() {
 		rawImage.resize(4 * width * height);
-		for (unsigned y = 0; y < height; y++) {
-			for (unsigned x = 0; x < width; x++) {
-				double numSamplesInBucket = buckets[(width * y) + x].numberOfSamples;
-				rawImage[(4 * width * y) + (4 * x) + 0] = std::min((buckets[(width * y) + x].color.r / numSamplesInBucket), 255.0);
-				rawImage[(4 * width * y) + (4 * x) + 1] = std::min((buckets[(width * y) + x].color.g / numSamplesInBucket), 255.0);
-				rawImage[(4 * width * y) + (4 * x) + 2] = std::min((buckets[(width * y) + x].color.b / numSamplesInBucket), 255.0);
-				rawImage[(4 * width * y) + (4 * x) + 3] = 255.0;
+		for (int y = 0; y < height; y++) {
+			for (int x = 0; x < width; x++) {
+				double numSamplesInBucket = buckets[width * y + x].numberOfSamples;
+				rawImage[4 * width * y + 4 * x + 0] = fmin((buckets[width * (height - y) + x].color.r / numSamplesInBucket), 255.0);
+				rawImage[4 * width * y + 4 * x + 1] = fmin((buckets[width * (height - y) + x].color.g / numSamplesInBucket), 255.0);
+				rawImage[4 * width * y + 4 * x + 2] = fmin((buckets[width * (height - y) + x].color.b / numSamplesInBucket), 255.0);
+				rawImage[4 * width * y + 4 * x + 3] = 255.0;
 			}
 		}
 

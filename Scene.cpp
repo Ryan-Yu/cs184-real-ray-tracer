@@ -181,7 +181,7 @@ Color applyShadingModel(DifferentialGeometry differentialGeometry, BRDFCoefficie
 	// (?) is it (0, 0, 0) or
 	Vector3 viewer_vector = Vector3(0, 0, 0);
 	// (?) -1 * incoming_ray's_vector?
-	// Vector3 viewer_vector = Vector3(-1.0 * differentialGeometry.position.x, -1.0 * differentialGeometry.position.y, -1.0 * differentialGeometry.position.z);
+//	 Vector3 viewer_vector = Vector3(-1.0 * differentialGeometry.position.x, -1.0 * differentialGeometry.position.y, -1.0 * differentialGeometry.position.z);
 
 	// **************************************
     // For directional light
@@ -438,7 +438,7 @@ void render() {
 
 		// Given the sample in Film-coordinates, tell the camera to generate a viewing ray in IMAGE PLANE [-1, 1] coordinates
 		camera.generateRay(samples[i], &currentRay);
-
+		printSample(samples[i]);
 		// Call the trace method to try to populate currentSampleColor for the currentSample
 		rayTracer.trace(currentRay, recursionDepth, &currentSampleColor);
 
@@ -489,7 +489,7 @@ void initializePrimitives() {
 	brdf->ka = *color1;
 	brdf->kd = *color2;
 	brdf->ks = *color3;
-	brdf->sp = 4.0;
+	brdf->sp = 128;
 	material1->constantBRDF = *brdf;
 
 	GeometricPrimitive *primitive1 = new GeometricPrimitive();
@@ -518,6 +518,9 @@ int main(int argc, char *argv[]) {
   render();
 
   film.writeImage("ray_tracer_output.png");
+
+  Vector3 result = Matrix4::multiplyMatrixByVector(Matrix4::createTranslationMatrix(6.0, 5.0, 9.0), Vector3(3.0, 4.0, 5.0));
+  cout << result.x << ", " << result.y << ", " << result.z;
   return 0;
 };
 

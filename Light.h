@@ -58,7 +58,8 @@ class DirectionalLight : public Light {
 
 	void generateLightRay(DifferentialGeometry& differentialGeometry, Ray* lightRay, Color* lightColor) {
 		lightRay->position = Point(differentialGeometry.position.x, differentialGeometry.position.y, differentialGeometry.position.z);
-		lightRay->direction = Vector3(this->x - differentialGeometry.position.x, this->y - differentialGeometry.position.y, this->z - differentialGeometry.position.z);
+		// Directional lights have constant direction.
+		lightRay->direction = Vector3(this->x, this->y, this->z);
 		lightRay->t_min = LDBL_EPSILON;
 		lightRay->t_max = FLT_MAX;
 		lightColor->r = this->r;

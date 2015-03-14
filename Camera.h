@@ -26,10 +26,10 @@ class Camera {
 			// Right coordinates must align vertically
 			// Top coordinates must align horizontally
 			// Bottom coordinates must align horizontally
-			Point imagePlaneTopLeft = Point(-1.0, 1.0, -1.0);
-			Point imagePlaneBottomLeft = Point(-1.0, -1.0, -1.0);
-			Point imagePlaneTopRight = Point(1.0, 1.0, -1.0);
-			Point imagePlaneBottomRight = Point(1.0, -1.0, -1.0);
+			Point imagePlaneTopLeft = Point(-1.0, 1.0, -3.0);
+			Point imagePlaneBottomLeft = Point(-1.0, -1.0, -3.0);
+			Point imagePlaneTopRight = Point(1.0, 1.0, -3.0);
+			Point imagePlaneBottomRight = Point(1.0, -1.0, -3.0);
 
 			ray->position = eye;
 

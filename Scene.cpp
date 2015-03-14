@@ -126,31 +126,29 @@ class RayTracer {
 				// from the position of the light (IN WORLD COORDINATES)
 				directional_lights[i].generateLightRay(intersection.differentialGeometry, &lightRay, &lightColor);
 
-				// if this light ray is not blocked, do:
-				//     *color += shading(intersection.differentialGeometry, brdf, lightRay, lightColor);
+				// If the light ray is not blocked, we apply our shading model
+				if (!aggregatePrimitive.intersectP(lightRay)) {
+					// For now, we just ignore shadows and reflections and just apply our shading model
+					Color colorToAdd = applyShadingModel(
+							intersection.differentialGeometry,
+							brdf,
+							lightRay,
+							Color(directional_lights[i].r, directional_lights[i].g, directional_lights[i].b));
 
-//				if (light ray not blocked) {
-//					// For now, we just ignore shadows and reflections and just apply our shading model
-//					Color colorToAdd = applyShadingModel(
-//							intersection.differentialGeometry,
-//							brdf,
-//							lightRay,
-//							Color(directional_lights[i].r, directional_lights[i].g, directional_lights[i].b));
+					color->r += colorToAdd.r;
+					color->g += colorToAdd.g;
+					color->b += colorToAdd.b;
+				}
+
+//				Color colorToAdd = applyShadingModel(
+//						intersection.differentialGeometry,
+//						brdf,
+//						lightRay,
+//						Color(directional_lights[i].r, directional_lights[i].g, directional_lights[i].b));
 //
-//					color->r += colorToAdd.r;
-//					color->g += colorToAdd.g;
-//					color->b += colorToAdd.b;
-//				}
-
-				Color colorToAdd = applyShadingModel(
-						intersection.differentialGeometry,
-						brdf,
-						lightRay,
-						Color(directional_lights[i].r, directional_lights[i].g, directional_lights[i].b));
-
-				color->r += colorToAdd.r;
-				color->g += colorToAdd.g;
-				color->b += colorToAdd.b;
+//				color->r += colorToAdd.r;
+//				color->g += colorToAdd.g;
+//				color->b += colorToAdd.b;
 
 			}
 
@@ -517,62 +515,62 @@ void initializePrimitives() {
 
 	///////////////////////
 
-	Material *material2 = new Material();
-	BRDFCoefficients *brdf2 = new BRDFCoefficients();
-
-	// ka
-	Color *color4 = new Color(25.5, 25.5, 25.5);
-
-	// kd
-	Color *color5 = new Color(255, 255, 0);
-
-	// ks
-	Color *color6 = new Color(255, 255, 255);
-	brdf2->ka = *color4;
-	brdf2->kd = *color5;
-	brdf2->ks = *color6;
-	brdf2->sp = 50;
-
-
-	Sphere *sphere2 = new Sphere(-2, 2, -15, 1);
-
-	material2->constantBRDF = *brdf2;
-
-	GeometricPrimitive *primitive2 = new GeometricPrimitive();
-
-	primitive2->shape = sphere2;
-	primitive2->material = material2;
-
-	aggregatePrimitive.addPrimitive(primitive2);
-
-	///////////////////////
-
-	Material *material3 = new Material();
-	BRDFCoefficients *brdf3 = new BRDFCoefficients();
-
-	// ka
-	Color *color7 = new Color(25.5, 25.5, 25.5);
-
-	// kd
-	Color *color8 = new Color(0, 255, 255);
-
-	// ks
-	Color *color9 = new Color(255, 255, 255);
-	brdf3->ka = *color7;
-	brdf3->kd = *color8;
-	brdf3->ks = *color9;
-	brdf3->sp = 50;
-
-	Sphere *sphere3 = new Sphere(-2, -2, -15, 1);
-
-	material3->constantBRDF = *brdf3;
-
-	GeometricPrimitive *primitive3 = new GeometricPrimitive();
-
-	primitive3->shape = sphere3;
-	primitive3->material = material3;
-
-	aggregatePrimitive.addPrimitive(primitive3);
+//	Material *material2 = new Material();
+//	BRDFCoefficients *brdf2 = new BRDFCoefficients();
+//
+//	// ka
+//	Color *color4 = new Color(25.5, 25.5, 25.5);
+//
+//	// kd
+//	Color *color5 = new Color(255, 255, 0);
+//
+//	// ks
+//	Color *color6 = new Color(255, 255, 255);
+//	brdf2->ka = *color4;
+//	brdf2->kd = *color5;
+//	brdf2->ks = *color6;
+//	brdf2->sp = 50;
+//
+//
+//	Sphere *sphere2 = new Sphere(-2, 2, -15, 1);
+//
+//	material2->constantBRDF = *brdf2;
+//
+//	GeometricPrimitive *primitive2 = new GeometricPrimitive();
+//
+//	primitive2->shape = sphere2;
+//	primitive2->material = material2;
+//
+//	aggregatePrimitive.addPrimitive(primitive2);
+//
+//	///////////////////////
+//
+//	Material *material3 = new Material();
+//	BRDFCoefficients *brdf3 = new BRDFCoefficients();
+//
+//	// ka
+//	Color *color7 = new Color(25.5, 25.5, 25.5);
+//
+//	// kd
+//	Color *color8 = new Color(0, 255, 255);
+//
+//	// ks
+//	Color *color9 = new Color(255, 255, 255);
+//	brdf3->ka = *color7;
+//	brdf3->kd = *color8;
+//	brdf3->ks = *color9;
+//	brdf3->sp = 50;
+//
+//	Sphere *sphere3 = new Sphere(-2, -2, -15, 1);
+//
+//	material3->constantBRDF = *brdf3;
+//
+//	GeometricPrimitive *primitive3 = new GeometricPrimitive();
+//
+//	primitive3->shape = sphere3;
+//	primitive3->material = material3;
+//
+//	aggregatePrimitive.addPrimitive(primitive3);
 
 }
 

@@ -51,11 +51,15 @@ class AggregatePrimitive {
 	// Just loops through all the primitives in the list and calls the intersectP routine
 	// Returns true if our input ray hits ANY primitive, and false otherwise
 	bool intersectP(Ray& ray) {
+		printf("In intersectP in AggregatePrimitive");
+		printRay(ray);
 		for (std::vector<GeometricPrimitive*>::size_type i = 0; i < listOfPrimitives.size(); i++) {
 			if (listOfPrimitives[i]->intersectP(ray)) {
+				std::cout << "I just intersected something!\n\n\n";
 				return true;
 			}
 		}
+		std::cout << "I DID NOT INTERSECT ANYTHING!!!\n\n\n";
 		return false;
 	}
 

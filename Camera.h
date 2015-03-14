@@ -51,7 +51,7 @@ class Camera {
 
 			ray->direction = Vector3(imagePlaneX, imagePlaneY, imagePlaneTopLeft.z);
 
-			ray->t_min = LDBL_EPSILON;
+			ray->t_min = 0.001;
 			ray->t_max = FLT_MAX;
 		}
 };

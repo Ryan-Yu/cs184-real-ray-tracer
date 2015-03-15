@@ -103,14 +103,6 @@ class RayTracer {
 				return;
 			}
 
-			if (depth == 1) {
-				printf("The reflected ray was: ");
-				printRay(ray);
-				printf("Hit at t = %f. KD of the primitive that the reflected ray hits: ", tHit);
-				printColor(intersection.primitive->material->constantBRDF.kd);
-				cout << "\n\n\n";
-			}
-
 			BRDFCoefficients brdf;
 			// This method will populate the brdf variable with the brdf values of the intersection primitive.
 			brdf = intersection.primitive->getBRDF(intersection.differentialGeometry, &brdf);

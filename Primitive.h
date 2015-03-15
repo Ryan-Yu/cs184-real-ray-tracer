@@ -55,6 +55,28 @@ class GeometricPrimitive : public Primitive {
 			return true;
 		}
 
+		// This method is identical to the method above, except it ONLY populates the intersection 'in'
+		// if the tHit discovered is less than maxT
+		bool intersectWithMaxT(Ray& ray, float* tHit, Intersection* in, float maxT) {
+
+			// TODO: Ray THIS-IS-OUR-REAL-RAY = worldToObj(*ray);
+			DifferentialGeometry differentialGeometry; //creates new DifferentialGeometry to populate
+			// This method call populates the variable "differentialGeometry".
+			if (!shape->intersect(ray, tHit, &differentialGeometry)) {
+				return false;
+			}
+
+			// Only populate 'in' if the tHit we found is less than the maxT given
+			if (*tHit < maxT) {
+				in->primitive = this;
+				in->differentialGeometry = differentialGeometry;
+			}
+
+			// TODO: Instead of the previous line, we want:
+			// in->differentialGeometry = objToWorld(*differentialGeometry);
+			return true;
+		}
+
 		bool intersectP(Ray& ray) {
 			return shape->intersectP(ray);
 		}

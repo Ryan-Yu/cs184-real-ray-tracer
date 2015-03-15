@@ -1,6 +1,8 @@
 #ifndef AGGREGATEPRIMITIVE_H_
 #define AGGREGATEPRIMITIVE_H_
 
+static void printColor(Color color);
+
 class AggregatePrimitive {
 	public:
 		std::vector<GeometricPrimitive*> listOfPrimitives;
@@ -25,36 +27,59 @@ class AggregatePrimitive {
 		float smallestTSeenSoFar = FLT_MAX;
 		float* pointerOfSmallestTSeenSoFar;
 		Intersection* pointerOfClosestIntersectionSoFar;
+		bool foundAnIntersection = false;
+
 		// For each primitive...
 		for (std::vector<GeometricPrimitive*>::size_type i = 0; i < listOfPrimitives.size(); i++) {
-			// Find whether the primitive hits the ray...
-			if (listOfPrimitives[i]->intersect(ray, tHit, in)) {
-				printf("We just saw a hit at %f! The smallest-t-pointer points to %f. The smallest t seen before this is %f!\n", *tHit, *pointerOfSmallestTSeenSoFar, smallestTSeenSoFar);
-				hit = true;
-				// ... if it does, then update points for "lowest" t-value and corresponding intersection object
-				if (*tHit < smallestTSeenSoFar) {
-					printf("Our hit, %f, is smaller than smallestTSeenSoFar so we're going to update smallestTSeenSOFar\n", *tHit);
-					smallestTSeenSoFar = *tHit;
-					pointerOfSmallestTSeenSoFar = tHit;
-					pointerOfClosestIntersectionSoFar = in;
-					printf("After the update, smallestTSeenSoFar is: %f and the corresponding pointer is %f\n", smallestTSeenSoFar, *pointerOfSmallestTSeenSoFar);
-				} else {
-					// since listOfPrimitives[i]->intersect(ray, tHit, in) actually POPULATES tHit and in,
-					// we need to reset the pointers to our currently "smallest T" and "primitive of smallest T"
-					// if the currently iterated primitive was NOT the smallest T seen so far
-					// TODO: reset pointer to intersection...
-					pointerOfSmallestTSeenSoFar = &smallestTSeenSoFar;
+			if (foundAnIntersection) {
+				// Find whether the current primitive hits the ray...
+				// ONLY populate 'in' if the tHit of the current primitive is smaller than the last argument passed in
+				// In this situation, we want our tHit of the current primitive to be smaller than the previous tHit,
+				// which by logic below, ends up being the smallest tHit seen so far
+				if (listOfPrimitives[i]->intersectWithMaxT(ray, tHit, in, *tHit)) {
+					hit = true;
+					// ... if it does, then update points for "lowest" t-value and corresponding intersection object
+					if (*tHit < smallestTSeenSoFar) {
+						smallestTSeenSoFar = *tHit;
+						pointerOfSmallestTSeenSoFar = tHit;
+						pointerOfClosestIntersectionSoFar = in;
+					} else {
+						// since listOfPrimitives[i]->intersect(ray, tHit, in) actually POPULATES tHit and in,
+						// we need to reset the pointers to our currently "smallest T" and "primitive of smallest T"
+						// if the currently iterated primitive was NOT the smallest T seen so far
+
+						// However, since an Intersection isn't a primitive object, you can't maintain an
+						// Intersection closestIntersectionSoFar.
+						// Instead, one way is to separate the logic into the Primitive class.
+						// (see above comment about intersectWithMaxT)
+						pointerOfSmallestTSeenSoFar = &smallestTSeenSoFar;
+					}
+				}
+			} else {
+				// Find whether the current primitive hits the ray...
+				if (listOfPrimitives[i]->intersect(ray, tHit, in)) {
+					printf("We just saw a hit at %f! The smallest-t-pointer points to %f. The smallest t seen before this is %f!\n", *tHit, *pointerOfSmallestTSeenSoFar, smallestTSeenSoFar);
+					hit = true;
+					// ... if it does, then update points for "lowest" t-value and corresponding intersection object
+					if (*tHit < smallestTSeenSoFar) {
+						printf("Our hit, %f, is smaller than smallestTSeenSoFar so we're going to update smallestTSeenSOFar\n", *tHit);
+						smallestTSeenSoFar = *tHit;
+						pointerOfSmallestTSeenSoFar = tHit;
+
+						pointerOfClosestIntersectionSoFar = in;
+						printf("After the update, smallestTSeenSoFar is: %f and the corresponding pointer is %f\n", smallestTSeenSoFar, *pointerOfSmallestTSeenSoFar);
+					} else {
+						pointerOfSmallestTSeenSoFar = &smallestTSeenSoFar;
+					}
+					foundAnIntersection = true;
 				}
 			}
-
 		}
 
 
 		// After we've checked all of our primitives, update our 'tHit' and 'in' to the nearest combination
 		*tHit = *pointerOfSmallestTSeenSoFar;
 		in = pointerOfClosestIntersectionSoFar;
-
-		printf("At the end of AggregatePrimitive's intersect method, tHit is: %f and its corresponding pointer is %f\n", *tHit, *pointerOfSmallestTSeenSoFar);
 
 		// Return whether our ray hit any of our primitives
 		return hit;

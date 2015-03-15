@@ -41,6 +41,13 @@ class Vector3 {
     float magnitude = sqrt(pow(vector_to_normalize.x, 2) + pow(vector_to_normalize.y, 2) + pow(vector_to_normalize.z, 2));
     return Vector3(vector_to_normalize.x / magnitude, vector_to_normalize.y / magnitude, vector_to_normalize.z / magnitude);
   }
+
+  Vector3 crossProduct(Vector3 other) {
+    float i = this->y * other.z - this->z * other.y;
+    float j = this->z * other.x - this->x * other.z;
+    float k = this->x * other.y - this->y * other.x;
+    return Vector3(i, j, k);
+  }
 };
 
 #endif /* VECTOR3_H_ */

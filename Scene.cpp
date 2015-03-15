@@ -71,6 +71,7 @@ std::vector<DirectionalLight> directional_lights;
 class RayTracer {
 	public:
 		void trace(Ray& ray, int depth, Color* color) {
+
 			if (depth > recursionDepth) {
 				color->r = 0;
 				color->g = 0;
@@ -147,8 +148,9 @@ class RayTracer {
 					color->g += colorToAdd.g;
 					color->b += colorToAdd.b;
 				}
-
 			}
+
+
 
 			for (std::vector<PointLight>::size_type i = 0; i < point_lights.size(); i++) {
 				// TODO:
@@ -208,9 +210,9 @@ class RayTracer {
 				// Recursively call trace()
 				trace(reflectionRay, depth + 1, &tempColor);
 
-				color->r += brdf.kr.r * (tempColor.r / 255.0);
-				color->g += brdf.kr.g * (tempColor.g / 255.0);
-				color->b += brdf.kr.b * (tempColor.b / 255.0);
+				color->r += brdf.kr.r * tempColor.r;
+				color->g += brdf.kr.g * tempColor.g;
+				color->b += brdf.kr.b * tempColor.b;
 
 			}
 		}
@@ -339,11 +341,6 @@ static void printPoint(Point point) {
 	}
 }
 
-Point eye;
-Point imagePlaneTopLeft;
-Point imagePlaneBottomLeft;
-Point imagePlaneTopRight;
-Point imagePlaneBottomRight;
 
 void printGlobalVariables()
 {
@@ -429,107 +426,11 @@ void printSamples() {
 
 
 //****************************************************
-// Parsing of command line options, with options:
-// (1) -dimensions width height
-//     adds viewport width and height attributes to Viewport global variable
-// (2) -depth n
-//     sets recursion depth
-// (3) -dl x y z r g b
-//     (directional lights)
-// (4) -pl x y z r g b
-//     (point lights)
-//
-// NOTE: also performs proper initialization of Film and Camera global variables
-//****************************************************
-void parseCommandLineOptions(int argc, char *argv[])
-{
-  string flag;
-
-  int i = 1;
-  while (i <= argc - 1) {
-    flag = argv[i];
-
-    if (flag == "-dimensions")
-	{
-	  // Check that -dimensions has enough option parameters
-	  if ((i + 2) > (argc - 1))
-	  {
-		std::cout << "Invalid number of parameters for -dimensions.";
-		exit(1);
-	  }
-
-	  int widthOfFilm = stoi(argv[i+1]);
-	  int heightOfFilm = stoi(argv[i+2]);
-
-//	  if (widthOfFilm < 1000 || heightOfFilm < 500 || widthOfFilm > 3000 || heightOfFilm > 3000) {
-//		  std::cout << "Dimensions of output file must be at least 1000x500 and no more than 3000x3000.";
-//		  exit(1);
-//	  }
-
-	  film = Film(widthOfFilm, heightOfFilm);
-
-	  camera = Camera(widthOfFilm, heightOfFilm, 0.0, 0.0, 0.0,
-			  -1.0, -1.0, -3.0,
-			  1.0, -1.0, -3.0,
-			  1.0, 1.0, -3.0,
-			  -1.0, 1.0, -3.0);
-
-	  i += 2;
-	}
-    else if (flag == "-depth")
-	{
-	  // Check that -depth has enough option parameters
-	  if ((i + 1) > (argc - 1))
-	  {
-		std::cout << "Invalid number of parameters for -depth.";
-		exit(1);
-	  }
-	  recursionDepth = stoi(argv[i+1]);
-	  i += 1;
-	}
-    else if (flag == "-dl")
-    {
-      // Check that -dl has enough option parameters
-      if ((i + 6) > (argc - 1))
-      {
-        std::cout << "Invalid number of parameters for -dl.";
-        exit(1);
-      }
-
-      // Add directional lights to our directional lights list
-      directional_lights.push_back( DirectionalLight( stof(argv[i+1]), stof(argv[i+2]), stof(argv[i+3]), stof(argv[i+4]), stof(argv[i+5]), stof(argv[i+6]) ) );
-      i += 6;
-    }
-    else if (flag == "-pl")
-    {
-      // Check that -pl has enough option parameters
-      if ((i + 6) > (argc - 1))
-      {
-        std::cout << "Invalid number of parameters for -pl.";
-        exit(1);
-      }
-
-      point_lights.push_back( PointLight( stof(argv[i+1]), stof(argv[i+2]), stof(argv[i+3]), stof(argv[i+4]), stof(argv[i+5]), stof(argv[i+6]) ) );
-      i += 6;
-    }
-    else
-    {
-      std::cout << "Extra parameters in command line options; terminating program.";
-      exit(1);
-    }
-
-    // Advance to next flag, if one exists
-    i++;
-  }
-}
-
-
-
-//****************************************************
 // Parsing scene file from command line
 //****************************************************
 
 void parseSceneFile(string filename) {
+
 	ifstream file(filename);
 	string str;
 
@@ -575,9 +476,7 @@ void parseSceneFile(string filename) {
 				currentlyParsing = currentWord;
 			} else if ((i == 0) && (currentWord == "tri")) {
 				currentlyParsing = currentWord;
-
-
-			// TODO: .obj, Transformation, reset transformation identifier
+			// TODO: Add .obj, Transformation, reset transformation identifier here
 
 			// We've found an unspecified identifier as the first word on our line
 			} else if (i == 0) {
@@ -592,11 +491,6 @@ void parseSceneFile(string filename) {
 				i++;
 				continue;
 			}
-
-
-
-
-
 
 
 			// ********** After we've figured out the first word in each line, parse the rest of the line ********** //
@@ -702,17 +596,50 @@ void parseSceneFile(string filename) {
 					primitiveToAdd->shape = sphereToAdd;
 					aggregatePrimitive.addPrimitive(primitiveToAdd);
 				}
+
+			} else if (currentlyParsing == "tri") {
+				float ax, ay, az, bx, by, bz, cx, cy, cz;
+				if (i == 0) { }
+				else if (i == 1) { ax = stof(currentWord); }
+				else if (i == 2) { ay = stof(currentWord); }
+				else if (i == 3) { az = stof(currentWord); }
+				else if (i == 4) { bx = stof(currentWord); }
+				else if (i == 5) { by = stof(currentWord); }
+				else if (i == 6) { bz = stof(currentWord); }
+				else if (i == 7) { cx = stof(currentWord); }
+				else if (i == 8) { cy = stof(currentWord); }
+				else if (i == 9) { cz = stof(currentWord); }
+				else if (i > 9) {
+					cerr << "Extra parameters for " << currentlyParsing << ". Ignoring them. i is : " << i << "\n";
+				}
+				if (i == 9) {
+					GeometricPrimitive* primitiveToAdd = new GeometricPrimitive();
+					Triangle* triangleToAdd = new Triangle(ax, ay, az, bx, by, bz, cx, cy, cz);
+					BRDFCoefficients *brdfToAdd = new BRDFCoefficients();
+					Color* kaToAdd = new Color(kar, kag, kab);
+					Color* kdToAdd = new Color(kdr, kdg, kdb);
+					Color* ksToAdd = new Color(ksr, ksg, ksb);
+					Color* krToAdd = new Color(krr, krg, krb);
+					brdfToAdd->ka = *kaToAdd;
+					brdfToAdd->kd = *kdToAdd;
+					brdfToAdd->ks = *ksToAdd;
+					brdfToAdd->kr = *krToAdd;
+					brdfToAdd->sp = ksp;
+					Material* materialToAdd = new Material();
+					materialToAdd->constantBRDF = *brdfToAdd;
+					primitiveToAdd->material = materialToAdd;
+					primitiveToAdd->shape = triangleToAdd;
+					aggregatePrimitive.addPrimitive(primitiveToAdd);
+				}
 			}
+			// TODO: Add more parsing here
 
 			i++;
 		}
 
-
-
 		if (!validLine) {
 			cerr << "Unsupported feature: " << currentlyParsing << ". Ignoring line.\n";
 		}
-
 
 	}
 
@@ -722,6 +649,63 @@ void parseSceneFile(string filename) {
 
 
 
+//****************************************************
+// Parsing of command line options, with options:
+// (1) -dimensions width height
+//     adds viewport width and height attributes to Viewport global variable
+// (2) -depth n
+//     sets recursion depth
+//
+// NOTE: first command line option must be .scene file
+//
+// NOTE: also performs proper initialization of Film global variable
+//****************************************************
+void parseCommandLineOptions(int argc, char *argv[]) {
+
+  // Parse scene file
+  parseSceneFile(argv[1]);
+  string flag;
+
+  int i = 2;
+  while (i <= argc - 1) {
+    flag = argv[i];
+
+    if (flag == "-dimensions") {
+	  // Check that -dimensions has enough option parameters
+	  if ((i + 2) > (argc - 1)) {
+		std::cout << "Invalid number of parameters for -dimensions.";
+		exit(1);
+	  }
+
+	  int widthOfFilm = stoi(argv[i+1]);
+	  int heightOfFilm = stoi(argv[i+2]);
+
+	  if (widthOfFilm < 1000 || heightOfFilm < 500 || widthOfFilm > 3000 || heightOfFilm > 3000) {
+		  std::cout << "Dimensions of output file must be at least 1000x500 and no more than 3000x3000.";
+		  exit(1);
+	  }
+
+	  film = Film(widthOfFilm, heightOfFilm);
+	  i += 2;
+
+	} else if (flag == "-depth") {
+	  // Check that -depth has enough option parameters
+	  if ((i + 1) > (argc - 1))
+	  {
+		std::cout << "Invalid number of parameters for -depth.";
+		exit(1);
+	  }
+	  recursionDepth = stoi(argv[i+1]);
+	  i += 1;
+	} else {
+      std::cout << "Extra parameters in command line options; terminating program.";
+      exit(1);
+    }
+
+    // Advance to next flag, if one exists
+    i++;
+  }
+}
 
 
 
@@ -748,7 +732,6 @@ void render() {
 		rayTracer.trace(currentRay, 0, &currentSampleColor);
 
 		// Commit the currentSampleColor for the currentSample onto our Film
-
 		film.commitColor(samples[i], currentSampleColor);
 
 	}
@@ -771,272 +754,6 @@ void initializeSampler() {
 }
 
 
-//****************************************************
-// Initializes primitives for our scene
-//****************************************************
-void initializePrimitives() {
-	// Must use 'new', as need to store pointers to variables that will live outside of the scope of this function
-//	Sphere *sphere1 = new Sphere(0, 0, -20, 3);
-//	Material *material1 = new Material();
-//	BRDFCoefficients *brdf = new BRDFCoefficients();
-//
-//	// ka
-//	Color *color1 = new Color(25.5, 25.5, 25.5);
-//
-//	// kd
-//	Color *color2 = new Color(255, 0, 255);
-//
-//	// ks
-//	Color *color3 = new Color(255, 255, 255);
-//
-//	brdf->ka = *color1;
-//	brdf->kd = *color2;
-//	brdf->ks = *color3;
-//	brdf->sp = 50;
-//	material1->constantBRDF = *brdf;
-//
-//	GeometricPrimitive *primitive1 = new GeometricPrimitive();
-//	primitive1->shape = sphere1;
-//	primitive1->material = material1;
-//	aggregatePrimitive.addPrimitive(primitive1);
-//
-//	///////////////////////
-//
-//	Material *material2 = new Material();
-//	BRDFCoefficients *brdf2 = new BRDFCoefficients();
-//
-//	// ka
-//	Color *color4 = new Color(25.5, 25.5, 25.5);
-//
-//	// kd
-//	Color *color5 = new Color(255, 255, 0);
-//
-//	// ks
-//	Color *color6 = new Color(255, 255, 255);
-//	brdf2->ka = *color4;
-//	brdf2->kd = *color5;
-//	brdf2->ks = *color6;
-//	brdf2->sp = 50;
-//
-//
-//	Sphere *sphere2 = new Sphere(-2, 2, -15, 1);
-//
-//	material2->constantBRDF = *brdf2;
-//
-//	GeometricPrimitive *primitive2 = new GeometricPrimitive();
-//
-//	primitive2->shape = sphere2;
-//	primitive2->material = material2;
-//
-//	aggregatePrimitive.addPrimitive(primitive2);
-//
-//	///////////////////////
-//
-//	Material *material3 = new Material();
-//	BRDFCoefficients *brdf3 = new BRDFCoefficients();
-//
-//	// ka
-//	Color *color7 = new Color(25.5, 25.5, 25.5);
-//
-//	// kd
-//	Color *color8 = new Color(0, 255, 255);
-//
-//	// ks
-//	Color *color9 = new Color(255, 255, 255);
-//	brdf3->ka = *color7;
-//	brdf3->kd = *color8;
-//	brdf3->ks = *color9;
-//	brdf3->sp = 50;
-//
-//	Sphere *sphere3 = new Sphere(-2, -2, -15, 1);
-//
-//	material3->constantBRDF = *brdf3;
-//
-//	GeometricPrimitive *primitive3 = new GeometricPrimitive();
-//
-//	primitive3->shape = sphere3;
-//	primitive3->material = material3;
-//
-//	aggregatePrimitive.addPrimitive(primitive3);
-
-	//	///////////////////////
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-	Sphere *sphere1 = new Sphere(0, 0, -17, 2);
-	Material *material1 = new Material();
-	BRDFCoefficients *brdf = new BRDFCoefficients();
-
-	// ka
-	Color *color1 = new Color(25.5, 25.5, 25.5);
-
-	// kd
-	Color *color2 = new Color(255, 0, 0);
-
-	// ks
-	Color *color3 = new Color(255, 255, 255);
-
-	// kr
-	Color *color50 = new Color(229.5, 229.5, 229.5);
-
-	brdf->ka = *color1;
-	brdf->kd = *color2;
-	brdf->ks = *color3;
-	brdf->kr = *color50;
-	brdf->sp = 50;
-	material1->constantBRDF = *brdf;
-
-	GeometricPrimitive *primitive1 = new GeometricPrimitive();
-	primitive1->shape = sphere1;
-	primitive1->material = material1;
-	aggregatePrimitive.addPrimitive(primitive1);
-
-
-	//////////////////////
-
-	Material *material2 = new Material();
-	BRDFCoefficients *brdf2 = new BRDFCoefficients();
-
-	// ka
-	Color *color4 = new Color(25.5, 25.5, 25.5);
-
-	// kd
-	Color *color5 = new Color(0, 255, 0);
-
-	// ks
-	Color *color6 = new Color(255, 255, 255);
-
-	// kr
-	Color *color51 = new Color(229.5, 229.5, 229.5);
-	brdf2->ka = *color4;
-	brdf2->kd = *color5;
-	brdf2->ks = *color6;
-	brdf2->kr = *color51;
-	brdf2->sp = 50;
-
-
-	Sphere *sphere2 = new Sphere(0, 4, -17, 1.5);
-
-	material2->constantBRDF = *brdf2;
-
-	GeometricPrimitive *primitive2 = new GeometricPrimitive();
-
-	primitive2->shape = sphere2;
-	primitive2->material = material2;
-
-	aggregatePrimitive.addPrimitive(primitive2);
-
-	///////////////////////
-
-	Material *material3 = new Material();
-	BRDFCoefficients *brdf3 = new BRDFCoefficients();
-
-	// ka
-	Color *color7 = new Color(25.5, 25.5, 25.5);
-
-	// kd
-	Color *color8 = new Color(0, 0, 255);
-
-	// ks
-	Color *color9 = new Color(255, 255, 255);
-
-	// kr
-	brdf3->ka = *color7;
-	brdf3->kd = *color8;
-	brdf3->ks = *color9;
-	brdf3->kr = *color51;
-	brdf3->sp = 50;
-
-	Sphere *sphere3 = new Sphere(0, -4, -17, 1.5);
-
-	material3->constantBRDF = *brdf3;
-
-	GeometricPrimitive *primitive3 = new GeometricPrimitive();
-
-	primitive3->shape = sphere3;
-	primitive3->material = material3;
-
-	aggregatePrimitive.addPrimitive(primitive3);
-
-
-	Material *material4 = new Material();
-	BRDFCoefficients *brdf4 = new BRDFCoefficients();
-
-	// ka
-	Color *color10 = new Color(25.5, 25.5, 25.5);
-
-	// kd
-	Color *color11 = new Color(255, 255, 0);
-
-	// ks
-	Color *color12 = new Color(255, 255, 255);
-	brdf4->ka = *color10;
-	brdf4->kd = *color11;
-	brdf4->ks = *color12;
-	brdf4->kr = *color51;
-	brdf4->sp = 50;
-
-
-	Sphere *sphere4 = new Sphere(4, 0, -17, 1.5);
-
-	material4->constantBRDF = *brdf4;
-
-	GeometricPrimitive *primitive4 = new GeometricPrimitive();
-
-	primitive4->shape = sphere4;
-	primitive4->material = material4;
-
-	aggregatePrimitive.addPrimitive(primitive4);
-
-	///////////////////////
-
-	Material *material5 = new Material();
-	BRDFCoefficients *brdf5 = new BRDFCoefficients();
-
-	// ka
-	Color *color13 = new Color(25.5, 25.5, 25.5);
-
-	// kd
-	Color *color14 = new Color(0, 255, 255);
-
-	// ks
-	Color *color15 = new Color(255, 255, 255);
-	brdf5->ka = *color13;
-	brdf5->kd = *color14;
-	brdf5->ks = *color15;
-	brdf5->kr = *color51;
-	brdf5->sp = 50;
-
-	Sphere *sphere5 = new Sphere(-4, 0, -17, 1.5);
-
-	material5->constantBRDF = *brdf5;
-
-	GeometricPrimitive *primitive5 = new GeometricPrimitive();
-
-	primitive5->shape = sphere5;
-	primitive5->material = material5;
-
-	aggregatePrimitive.addPrimitive(primitive5);
-
-}
-
 
 //****************************************************
 // Main function
@@ -1046,16 +763,11 @@ int main(int argc, char *argv[]) {
   debug = true;
 
   // Parse command line options
-  film = Film(1000, 1000);
-  recursionDepth = 5;
-  parseSceneFile(argv[1]);
-
-  cout << "Just finished parsing scene file.\n";
+  parseCommandLineOptions(argc, argv);
   printGlobalVariables();
 
   // Initializes list of buckets; Buckets have a list of samples
   initializeSampler();
-//  initializePrimitives();
   render();
 
   film.writeImage("ray_tracer_output.png");

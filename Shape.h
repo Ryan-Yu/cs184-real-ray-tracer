@@ -238,6 +238,27 @@ class Triangle : public Shape {
 		this->v3 = v3;
 	}
 
+	Triangle(float ax, float ay, float az,
+			float bx, float by, float bz,
+			float cx, float cy, float cz) {
+		this->v1 = Point(ax, ay, az);
+		this->v2 = Point(bx, by, bz);
+		this->v3 = Point(cx, cy, cz);
+	}
+
+	Normal computeNormal() {
+		// Calculate triangle edge vectors to calculate the normal
+
+		// u = T.v2 - T.v1
+		Vector3 *u = new Vector3(this->v2.x - this->v1.x, this->v2.y - this->v1.y, this->v2.z - this->v1.z);
+		// v = T.v3 - T.v1
+		Vector3 *v = new Vector3(this->v3.x - this->v1.x, this->v3.y - this->v1.y, this->v3.z - this->v1.z);
+
+		// normal = u x v
+		Vector3 normal = u->crossProduct(*v);
+		return Normal::normalizeNormal(Normal(normal.x, normal.y, normal.z));
+	}
+
 	// Test if ray intersects with the shape or not (in object space).
 	// If so, return intersection point and normal.
 	// This method is passed up to the geometric primitive class, which owns a method
@@ -246,14 +267,184 @@ class Triangle : public Shape {
 	// NOTE: Intersection object comprises of a DifferentialGeometry and a Primitive.
 	// NOTE: This method must populate tHit and differentialGeometry.
 	bool intersect(Ray &ray, float* tHit, DifferentialGeometry* differentialGeometry) {
-		return false;
+		// The triangle intersection occurs when:
+		// F(t) = v1 + intersectionPoint1(v2 - v1) + intersectionPoint2(v3 - v1)
+		// for some t, intersectionPoint1, intersectionPoint2. The intersection p = F(t)
+		// intersectionPoint1 > 0, intersectionPoint2 > 0, intersectionPoint1 + intersectionPoint2 < 1 must be satisfied, otherwise the ray has hit ...
+		//the plane outside of the triangle
+
+		// Ray equations
+		// x(t) = ft + g
+		float f = ray.direction.x;
+		float g = ray.position.x;
+
+		// y(t) = ht + i
+		float h = ray.direction.y;
+		float i = ray.position.y;
+
+		// z(t) = jt + k
+		float j = ray.direction.z;
+		float k = ray.position.z;
+
+
+		// Calculate the triangle edge vectors
+		// u = T.v2 - T.v1
+		Vector3 *u = new Vector3(this->v2.x - this->v1.x, this->v2.y - this->v1.y, this->v2.z - this->v1.z);
+		// v = T.v3 - T.v1
+		Vector3 *v = new Vector3(this->v3.x - this->v1.x, this->v3.y - this->v1.y, this->v3.z - this->v1.z);
+
+		// Calculuate plane normal
+		// normal = u x v
+		Normal normal = this->computeNormal();
+		Vector3 *normalVector = new Vector3(normal.x, normal.y, normal.z);
+
+		// If normal = (0, 0, 0), the triangle is degenerate, so return false
+		if (normal.x == 0 && normal.y == 0 && normal.z == 0) {
+			return false;
+		}
+
+		Vector3 *rayTrianglePositionVector = new Vector3(this->v1.x, this->v1.y, this->v1.z);
+
+		Vector3 *rayDirectionVector = new Vector3(f, h, j);
+
+		float rayInsideTriangle = normalVector->dotProduct(*rayTrianglePositionVector);
+		float rayParallelTriangle = normalVector->dotProduct(*rayDirectionVector);
+
+		// If the ray is parallel to the triangle, return false
+		if (std::fabs(rayParallelTriangle) < 0.001) {
+			return false;
+		}
+
+		float tIntersection = rayInsideTriangle/rayParallelTriangle;
+		// If the ray is heading away from the triangle, return false
+		if (tIntersection < 0.0) {
+			return false;
+		}
+
+		// Now, find the (xCoor, yCoor, zCoor) that tIntersection corresponds to
+		float xCoor = (f * tIntersection) + g;
+		float yCoor = (h * tIntersection) + i;
+		float zCoor = (j * tIntersection) + k;
+
+		// Is the intersection inside the triangle?
+		float uu = u->dotProduct(*u);
+		float uv = u->dotProduct(*v);
+		float vv = v->dotProduct(*v);
+
+		Vector3 *w = new Vector3(xCoor - this->v1.x, yCoor - this->v1.y, zCoor - this->v1.z);
+
+		float wu = w->dotProduct(*u);
+		float wv = w->dotProduct(*v);
+
+		float discriminant = uv * uv - uu * vv;
+
+		// Check parametric coordinates
+		if (tIntersection < ray.t_min || tIntersection > ray.t_max) {
+			return false;
+		}
+		float intersectionPoint1 = (uv * wv - vv * wu) / discriminant;
+		float intersectionPoint2 = (uv * wu - uu * wv) / discriminant;
+
+		if (intersectionPoint1 < 0.0 || intersectionPoint1 > 1.0) {
+			return false;
+		}
+		if (intersectionPoint2 < 0.0 || (intersectionPoint1 + intersectionPoint2) > 1.0) {
+			return false;
+		}
+
+		differentialGeometry->normal = normal;
+		differentialGeometry->position = Point(xCoor, yCoor, zCoor);
+
+		*tHit = tIntersection;
+		return true;
 	}
 
 	//Test if ray intersects with the shape or not.
 	//This method is passed up to the geometric primitive class, which owns a method
 	//of the same signature.
 	bool intersectP(Ray &ray) {
-		return false;
+		// Ray equations
+		// x(t) = ft + g
+		float f = ray.direction.x;
+		float g = ray.position.x;
+
+		// y(t) = ht + i
+		float h = ray.direction.y;
+		float i = ray.position.y;
+
+		// z(t) = jt + k
+		float j = ray.direction.z;
+		float k = ray.position.z;
+
+
+		// Calculate the triangle edge vectors
+		// u = T.v2 - T.v1
+		Vector3 *u = new Vector3(this->v2.x - this->v1.x, this->v2.y - this->v1.y, this->v2.z - this->v1.z);
+		// v = T.v3 - T.v1
+		Vector3 *v = new Vector3(this->v3.x - this->v1.x, this->v3.y - this->v1.y, this->v3.z - this->v1.z);
+
+		// Calculuate plane normal
+		// normal = u x v
+		Normal normal = this->computeNormal();
+		Vector3 *normalVector = new Vector3(normal.x, normal.y, normal.z);
+
+		// If normal = (0, 0, 0), the triangle is degenerate, so return false
+		if (normal.x == 0 && normal.y == 0 && normal.z == 0) {
+			return false;
+		}
+
+		// rayTrianglePositionVector = StartingRayPosition - TriangleV1Position
+		Vector3 *rayTrianglePositionVector = new Vector3(this->v1.x, this->v1.y, this->v1.z);
+
+		// rayDirectionVector = RayDirection
+		Vector3 *rayDirectionVector = new Vector3(f, h, j);
+
+		float rayInsideTriangle = normalVector->dotProduct(*rayTrianglePositionVector);
+		float rayParallelTriangle = normalVector->dotProduct(*rayDirectionVector);
+
+		// If the ray is parallel to the triangle, return false
+		if (std::fabs(rayParallelTriangle) < 0.001) {
+			return false;
+		}
+
+		float tIntersection = rayInsideTriangle/rayParallelTriangle;
+		// If the ray is heading away from the triangle, return false
+		if (tIntersection < 0.0) {
+			return false;
+		}
+
+		// Now, find the (xCoor, yCoor, zCoor) that tIntersection corresponds to
+		float xCoor = (f * tIntersection) + g;
+		float yCoor = (h * tIntersection) + i;
+		float zCoor = (j * tIntersection) + k;
+
+		// Is the intersection inside the triangle?
+		float uu = u->dotProduct(*u);
+		float uv = u->dotProduct(*v);
+		float vv = v->dotProduct(*v);
+
+		Vector3 *w = new Vector3(this->v1.x - xCoor, this->v1.y - yCoor, this->v1.z - zCoor);
+
+		float wu = w->dotProduct(*u);
+		float wv = w->dotProduct(*v);
+
+		float discriminant = uv * uv - uu * vv;
+
+		// Check parametric coordinates
+		if (tIntersection < ray.t_min || tIntersection > ray.t_max) {
+			return false;
+		}
+		float intersectionPoint1 = (uv * wv - vv * wu) / discriminant;
+		float intersectionPoint2 = (uv * wu - uu * wv) / discriminant;
+
+		if (intersectionPoint1 < 0.0 || intersectionPoint1 > 1.0) {
+			return false;
+		}
+		if (intersectionPoint2 < 0.0 || (intersectionPoint1 + intersectionPoint2) > 1.0) {
+			return false;
+		}
+
+		return true;
 	}
 
 	std::string shapeType() {

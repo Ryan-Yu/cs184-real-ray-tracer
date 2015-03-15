@@ -380,6 +380,8 @@ void printSamples() {
 }
 
 
+
+
 //****************************************************
 // Parsing of command line options, with options:
 // (1) -dimensions width height
@@ -412,12 +414,20 @@ void parseCommandLineOptions(int argc, char *argv[])
 
 	  int widthOfFilm = stoi(argv[i+1]);
 	  int heightOfFilm = stoi(argv[i+2]);
+
 //	  if (widthOfFilm < 1000 || heightOfFilm < 500 || widthOfFilm > 3000 || heightOfFilm > 3000) {
 //		  std::cout << "Dimensions of output file must be at least 1000x500 and no more than 3000x3000.";
 //		  exit(1);
 //	  }
+
 	  film = Film(widthOfFilm, heightOfFilm);
-	  camera = Camera(widthOfFilm, heightOfFilm);
+
+	  camera = Camera(widthOfFilm, heightOfFilm, 0.0, 0.0, 0.0,
+			  -1.0, -1.0, -3.0,
+			  1.0, -1.0, -3.0,
+			  1.0, 1.0, -3.0,
+			  -1.0, 1.0, -3.0);
+
 	  i += 2;
 	}
     else if (flag == "-depth")
@@ -873,19 +883,19 @@ int main(int argc, char *argv[]) {
   // Turns debug mode ON or OFF
   debug = true;
 
-//  // Parse command line options
-//  parseCommandLineOptions(argc, argv);
-//  printCommandLineOptionVariables();
-//
-//  // Initializes list of buckets; Buckets have a list of samples
-//  initializeSampler();
-//  initializePrimitives();
-//  render();
-//
-//  film.writeImage("ray_tracer_output.png");
+  // Parse command line options
+  parseCommandLineOptions(argc, argv);
+  printCommandLineOptionVariables();
+
+  // Initializes list of buckets; Buckets have a list of samples
+  initializeSampler();
+  initializePrimitives();
+  render();
+
+  film.writeImage("ray_tracer_output.png");
 
   // DEBUGGING ONLY
-  parseSceneFile(argv[1]);
+//  parseSceneFile(argv[1]);
 
   return 0;
 };

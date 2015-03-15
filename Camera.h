@@ -12,6 +12,18 @@ class Camera {
 		// Note: Camera needs Film width and height to correctly compute viewing ray
 		int viewingPlaneWidth, viewingPlaneHeight;
 
+		// z-coordinates must be the same
+		// Left coordinates must align vertically
+		// Right coordinates must align vertically
+		// Top coordinates must align horizontally
+		// Bottom coordinates must align horizontally
+		Point eye;
+		Point imagePlaneTopLeft;
+		Point imagePlaneBottomLeft;
+		Point imagePlaneTopRight;
+		Point imagePlaneBottomRight;
+
+
 		Camera() {
 
 		}
@@ -21,21 +33,24 @@ class Camera {
 			this->viewingPlaneHeight = heightOfFilm;
 		}
 
+		Camera(int widthOfFilm, int heightOfFilm,
+				float ex, float ey, float ez,
+				float llx, float lly, float llz,
+				float lrx, float lry, float lrz,
+				float urx, float ury, float urz,
+				float ulx, float uly, float ulz) {
+			this->viewingPlaneWidth = widthOfFilm;
+			this->viewingPlaneHeight = heightOfFilm;
+			this->eye = Point(ex, ey, ez);
+			this->imagePlaneTopLeft = Point(ulx, uly, ulz);
+			this->imagePlaneBottomLeft = Point(llx, lly, llz);
+			this->imagePlaneTopRight = Point(urx, ury, urz);
+			this->imagePlaneBottomRight = Point(lrx, lry, lrz);
+		}
+
 		// Given a sample in FILM coordinates, this method generates a ray from the eye (0, 0, 0)
 		// to the sample in IMAGE PLANE coordinates (i.e. [-1, 1])
 		void generateRay(Sample& sample, Ray* ray) {
-
-			Point eye = Point(0.0, 0.0, 0.0);
-
-			// z-coordinates must be the same
-			// Left coordinates must align vertically
-			// Right coordinates must align vertically
-			// Top coordinates must align horizontally
-			// Bottom coordinates must align horizontally
-			Point imagePlaneTopLeft = Point(-1.0, 1.0, -3.0);
-			Point imagePlaneBottomLeft = Point(-1.0, -1.0, -3.0);
-			Point imagePlaneTopRight = Point(1.0, 1.0, -3.0);
-			Point imagePlaneBottomRight = Point(1.0, -1.0, -3.0);
 
 			// Textbook page 75
 			ray->position = eye;

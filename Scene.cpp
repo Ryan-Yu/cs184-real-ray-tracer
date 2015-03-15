@@ -1,5 +1,6 @@
 #include <vector>
 #include <iostream>
+#include <sstream>
 #include <fstream>
 #include <cmath>
 #include <string>
@@ -467,6 +468,91 @@ void parseCommandLineOptions(int argc, char *argv[])
 }
 
 
+
+//****************************************************
+// Parsing scene file from command line
+//****************************************************
+
+void parseSceneFile(string filename) {
+	ifstream file(filename);
+	string str;
+
+	// The identifier that we're currently parsing
+	string currentlyParsing;
+
+	// current word that we're parsing on a line
+	string currentWord;
+
+	// Index of a word on each specific line
+	int i = 0;
+
+	// Indicates whether the current line being read is valid
+	bool validLine = true;
+
+	while (getline(file, str)) {
+		// str represents the current line of the file
+
+		validLine = true;
+		i = 0;
+		istringstream iss(str);
+		while (iss >> currentWord) {
+
+			cout << "We are currently processing the term: " << currentlyParsing << "\n";
+
+			// ***** Figure out what the first word of each line is ***** //
+			if ((i == 0) && (currentWord == "cam")) {
+				currentlyParsing = currentWord;
+			} else if ((i == 0) && (currentWord == "ltd")) {
+				currentlyParsing = currentWord;
+			} else if ((i == 0) && (currentWord == "ltp")) {
+				currentlyParsing = currentWord;
+			} else if ((i == 0) && (currentWord == "lta")) {
+				currentlyParsing = currentWord;
+			} else if ((i == 0) && (currentWord == "mat")) {
+				currentlyParsing = currentWord;
+
+			// TODO: Sphere, Triangle, .obj, Transformation, reset transformation identifier
+
+
+
+			// We've found an unspecified identifier as the first word on our line
+			} else if (i == 0) {
+				currentlyParsing = currentWord;
+				validLine = false;
+			}
+
+
+			// If the current line is not valid, then just keep skipping every word in the line
+			if (!validLine) {
+				// Since currentlyParsing is a pointer to currentWord, currentlyParsing changes whenever currentWord
+				// gets updated by iss, so must advance i to make sure currentlyParsing
+				i++;
+				continue;
+			}
+
+
+			// ***** After we've figured out the first word in each line, parse the rest of the line ***** //
+			// If we've hit here, then we're NOT on the first word of the line anymore
+			if (currentlyParsing == "cam") {
+
+			}
+
+			i++;
+		}
+
+		if (!validLine) {
+			cerr << "Unsupported feature: " << currentlyParsing << ". Ignoring line.\n";
+		}
+
+
+	}
+}
+
+
+
+
+
+
 //****************************************************
 // Main rendering loop
 //
@@ -787,16 +873,19 @@ int main(int argc, char *argv[]) {
   // Turns debug mode ON or OFF
   debug = true;
 
-  // Parse command line options
-  parseCommandLineOptions(argc, argv);
-  printCommandLineOptionVariables();
+//  // Parse command line options
+//  parseCommandLineOptions(argc, argv);
+//  printCommandLineOptionVariables();
+//
+//  // Initializes list of buckets; Buckets have a list of samples
+//  initializeSampler();
+//  initializePrimitives();
+//  render();
+//
+//  film.writeImage("ray_tracer_output.png");
 
-  // Initializes list of buckets; Buckets have a list of samples
-  initializeSampler();
-  initializePrimitives();
-  render();
-
-  film.writeImage("ray_tracer_output.png");
+  // DEBUGGING ONLY
+  parseSceneFile(argv[1]);
 
   return 0;
 };

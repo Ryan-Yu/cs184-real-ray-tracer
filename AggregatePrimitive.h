@@ -58,16 +58,13 @@ class AggregatePrimitive {
 			} else {
 				// Find whether the current primitive hits the ray...
 				if (listOfPrimitives[i]->intersect(ray, tHit, in)) {
-					printf("We just saw a hit at %f! The smallest-t-pointer points to %f. The smallest t seen before this is %f!\n", *tHit, *pointerOfSmallestTSeenSoFar, smallestTSeenSoFar);
 					hit = true;
 					// ... if it does, then update points for "lowest" t-value and corresponding intersection object
 					if (*tHit < smallestTSeenSoFar) {
-						printf("Our hit, %f, is smaller than smallestTSeenSoFar so we're going to update smallestTSeenSOFar\n", *tHit);
 						smallestTSeenSoFar = *tHit;
 						pointerOfSmallestTSeenSoFar = tHit;
 
 						pointerOfClosestIntersectionSoFar = in;
-						printf("After the update, smallestTSeenSoFar is: %f and the corresponding pointer is %f\n", smallestTSeenSoFar, *pointerOfSmallestTSeenSoFar);
 					} else {
 						pointerOfSmallestTSeenSoFar = &smallestTSeenSoFar;
 					}

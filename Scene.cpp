@@ -333,14 +333,39 @@ static void printColor(Color color) {
 	}
 }
 
-void printCommandLineOptionVariables( )
+static void printPoint(Point point) {
+	if (debug) {
+		printf("Point: (x, y, z) = (%f, %f, %f)\n", point.x, point.y, point.z);
+	}
+}
+
+Point eye;
+Point imagePlaneTopLeft;
+Point imagePlaneBottomLeft;
+Point imagePlaneTopRight;
+Point imagePlaneBottomRight;
+
+void printGlobalVariables()
 {
   if (debug)
   {
-    std::cout << "\n***** BEGIN PRINTING COMMAND LINE OPTION VARIABLES *****\n";
+    std::cout << "\n***** BEGIN PRINTING GLOBAL VARIABLES *****\n";
     std::cout << "  " << "Film Width: " << film.width << "\n";
     std::cout << "  " << "Film Height: " << film.height << "\n\n";
     std::cout << "  Recursion Depth: " << recursionDepth << "\n\n";
+
+    std::cout << "  Camera:\n";
+    std::cout << "    Eye: ";
+    printPoint(camera.eye);
+    std::cout << "    Bottom Left Corner: ";
+    printPoint(camera.imagePlaneBottomLeft);
+    std::cout << "    Top Left Corner: ";
+    printPoint(camera.imagePlaneTopLeft);
+    std::cout << "    Bottom Right: ";
+    printPoint(camera.imagePlaneBottomRight);
+    std::cout << "    Top Right: ";
+    printPoint(camera.imagePlaneTopRight);
+    std::cout << "\n";
 
     std::cout << "Directional Lights:\n";
     if (directional_lights.size() == 0)
@@ -349,7 +374,7 @@ void printCommandLineOptionVariables( )
     }
     for (std::vector<DirectionalLight>::size_type i = 0; i < directional_lights.size(); i++)
     {
-      std::cout << "  " << "Light " << (i + 1) << " (index " << i << " of list):\n";
+      std::cout << "  " << "Light " << (i + 1) << "\n";
       std::cout << "     " << "x: " << directional_lights[i].x << " y: " << directional_lights[i].x << " z: " << directional_lights[i].x << "\n";
       std::cout << "     " << "r: " << directional_lights[i].r << " g: " << directional_lights[i].g << " b: " << directional_lights[i].b << "\n";
     }
@@ -361,12 +386,33 @@ void printCommandLineOptionVariables( )
     }
     for (std::vector<PointLight>::size_type i = 0; i < point_lights.size(); i++)
     {
-      std::cout << "  " << "Light " << (i + 1) << " (index " << i << " of list):\n";
+      std::cout << "  " << "Light " << (i + 1) << "\n";
       std::cout << "     " << "x: " << point_lights[i].x << " y: " << point_lights[i].x << " z: " << point_lights[i].x << "\n";
       std::cout << "     " << "r: " << point_lights[i].r << " g: " << point_lights[i].g << " b: " << point_lights[i].b << "\n";
     }
 
-    std::cout << "***** FINISH PRINTING COMMAND LINE OPTION VARIABLES *****\n\n";
+    std::cout << "\n";
+
+    std::cout << "Number of primitives: " << aggregatePrimitive.listOfPrimitives.size() << "\n\n";
+    for (std::vector<GeometricPrimitive*>::size_type i = 0; i < aggregatePrimitive.listOfPrimitives.size(); i++) {
+    	GeometricPrimitive* currentPrimitive = aggregatePrimitive.listOfPrimitives[i];
+    	std::string shapeType = currentPrimitive->shape->shapeType();
+    	cout << shapeType << "\n";
+
+    	cout << currentPrimitive->shape->printShapeInformation();
+
+    	cout << "  KA: ";
+    	printColor(currentPrimitive->material->constantBRDF.ka);
+    	cout << "  KD: ";
+    	printColor(currentPrimitive->material->constantBRDF.kd);
+    	cout << "  KR: ";
+    	printColor(currentPrimitive->material->constantBRDF.kr);
+    	cout << "  KS: ";
+    	printColor(currentPrimitive->material->constantBRDF.ks);
+    	cout << "  SP: " << currentPrimitive->material->constantBRDF.sp << "\n\n";
+    }
+
+    std::cout << "***** FINISH PRINTING GLOBAL VARIABLES *****\n\n";
   }
 }
 
@@ -499,6 +545,13 @@ void parseSceneFile(string filename) {
 	// Indicates whether the current line being read is valid
 	bool validLine = true;
 
+	// ***** Variables for object creation *****//
+	// Camera
+	float ex, ey, ez, llx, lly, llz, lrx, lry, lrz, ulx, uly, ulz, urx, ury, urz;
+	// Most recently seen material
+	float kar, kag, kab, kdr, kdg, kdb, ksr, ksg, ksb, ksp, krr, krg, krb;
+
+
 	while (getline(file, str)) {
 		// str represents the current line of the file
 
@@ -507,9 +560,7 @@ void parseSceneFile(string filename) {
 		istringstream iss(str);
 		while (iss >> currentWord) {
 
-			cout << "We are currently processing the term: " << currentlyParsing << "\n";
-
-			// ***** Figure out what the first word of each line is ***** //
+			// ********** Figure out what the first word of each line is ********** //
 			if ((i == 0) && (currentWord == "cam")) {
 				currentlyParsing = currentWord;
 			} else if ((i == 0) && (currentWord == "ltd")) {
@@ -520,17 +571,19 @@ void parseSceneFile(string filename) {
 				currentlyParsing = currentWord;
 			} else if ((i == 0) && (currentWord == "mat")) {
 				currentlyParsing = currentWord;
+			} else if ((i == 0) && (currentWord == "sph")) {
+				currentlyParsing = currentWord;
+			} else if ((i == 0) && (currentWord == "tri")) {
+				currentlyParsing = currentWord;
 
-			// TODO: Sphere, Triangle, .obj, Transformation, reset transformation identifier
 
-
+			// TODO: .obj, Transformation, reset transformation identifier
 
 			// We've found an unspecified identifier as the first word on our line
 			} else if (i == 0) {
 				currentlyParsing = currentWord;
 				validLine = false;
 			}
-
 
 			// If the current line is not valid, then just keep skipping every word in the line
 			if (!validLine) {
@@ -541,14 +594,120 @@ void parseSceneFile(string filename) {
 			}
 
 
-			// ***** After we've figured out the first word in each line, parse the rest of the line ***** //
+
+
+
+
+
+			// ********** After we've figured out the first word in each line, parse the rest of the line ********** //
 			// If we've hit here, then we're NOT on the first word of the line anymore
 			if (currentlyParsing == "cam") {
+				if (i == 0) { }
+				else if (i == 1) { ex = stof(currentWord); }
+				else if (i == 2) { ey = stof(currentWord); }
+				else if (i == 3) { ez = stof(currentWord); }
+				else if (i == 4) { llx = stof(currentWord); }
+				else if (i == 5) { lly = stof(currentWord); }
+				else if (i == 6) { llz = stof(currentWord); }
+				else if (i == 7) { lrx = stof(currentWord); }
+				else if (i == 8) { lry = stof(currentWord); }
+				else if (i == 9) { lrz = stof(currentWord); }
+				else if (i == 10) { ulx = stof(currentWord); }
+				else if (i == 11) { uly = stof(currentWord); }
+				else if (i == 12) { ulz = stof(currentWord); }
+				else if (i == 13) { urx = stof(currentWord); }
+				else if (i == 14) { ury = stof(currentWord); }
+				else if (i == 15) { urz = stof(currentWord); }
+				else { cerr << "Extra parameters for " << currentlyParsing << ". Ignoring them.\n"; }
 
+			} else if (currentlyParsing == "ltd") {
+				float dx, dy, dz, r, g, b;
+				if (i == 0) { }
+				else if (i == 1) { dx = stof(currentWord); }
+				else if (i == 2) { dy = stof(currentWord); }
+				else if (i == 3) { dz = stof(currentWord); }
+				else if (i == 4) { r = stof(currentWord); }
+				else if (i == 5) { g = stof(currentWord); }
+				else if (i == 6) { b = stof(currentWord); }
+				else if (i > 6) {
+					cerr << "Extra parameters for " << currentlyParsing << ". Ignoring them.\n";
+				}
+				if (i == 6) {
+					// Add directional light to global list
+					directional_lights.push_back(DirectionalLight(dx, dy, dz, r, g, b));
+				}
+
+			} else if (currentlyParsing == "ltp") {
+				float px, py, pz, r, g, b, falloff;
+				if (i == 0) { }
+				else if (i == 1) { px = stof(currentWord); }
+				else if (i == 2) { py = stof(currentWord); }
+				else if (i == 3) { pz = stof(currentWord); }
+				else if (i == 4) { r = stof(currentWord); }
+				else if (i == 5) { g = stof(currentWord); }
+				else if (i == 6) { b = stof(currentWord); }
+				else if (i == 7) { falloff = stof(currentWord); }
+				else if (i > 7) {
+					cerr << "Extra parameters for " << currentlyParsing << ". Ignoring them.\n";
+				}
+				if (i == 6) {
+					// Add point light to global list
+					point_lights.push_back(PointLight(px, py, pz, r, g, b, falloff));
+				}
+
+			} else if (currentlyParsing == "mat") {
+				if (i == 0) { }
+				else if (i == 1) { kar = stof(currentWord); }
+				else if (i == 2) { kag = stof(currentWord); }
+				else if (i == 3) { kab = stof(currentWord); }
+				else if (i == 4) { kdr = stof(currentWord); }
+				else if (i == 5) { kdg = stof(currentWord); }
+				else if (i == 6) { kdb = stof(currentWord); }
+				else if (i == 7) { ksr = stof(currentWord); }
+				else if (i == 8) { ksg = stof(currentWord); }
+				else if (i == 9) { ksb = stof(currentWord); }
+				else if (i == 10) { ksp = stof(currentWord); }
+				else if (i == 11) { krr = stof(currentWord); }
+				else if (i == 12) { krg = stof(currentWord); }
+				else if (i == 13) { krb = stof(currentWord); }
+				else { cerr << "Extra parameters for " << currentlyParsing << ". Ignoring them. i is : " << i << "\n"; }
+
+			} else if (currentlyParsing == "sph") {
+				float cx, cy, cz, r;
+				if (i == 0) { }
+				else if (i == 1) { cx = stof(currentWord); }
+				else if (i == 2) { cy = stof(currentWord); }
+				else if (i == 3) { cz = stof(currentWord); }
+				else if (i == 4) { r = stof(currentWord); }
+				else if (i > 4) {
+					cerr << "Extra parameters for " << currentlyParsing << ". Ignoring them. i is : " << i << "\n";
+				}
+				if (i == 4) {
+					// Initialize our sphere, with the last seen material
+					GeometricPrimitive* primitiveToAdd = new GeometricPrimitive();
+					Sphere* sphereToAdd = new Sphere(cx, cy, cz, r);
+					BRDFCoefficients *brdfToAdd = new BRDFCoefficients();
+					Color* kaToAdd = new Color(kar, kag, kab);
+					Color* kdToAdd = new Color(kdr, kdg, kdb);
+					Color* ksToAdd = new Color(ksr, ksg, ksb);
+					Color* krToAdd = new Color(krr, krg, krb);
+					brdfToAdd->ka = *kaToAdd;
+					brdfToAdd->kd = *kdToAdd;
+					brdfToAdd->ks = *ksToAdd;
+					brdfToAdd->kr = *krToAdd;
+					brdfToAdd->sp = ksp;
+					Material* materialToAdd = new Material();
+					materialToAdd->constantBRDF = *brdfToAdd;
+					primitiveToAdd->material = materialToAdd;
+					primitiveToAdd->shape = sphereToAdd;
+					aggregatePrimitive.addPrimitive(primitiveToAdd);
+				}
 			}
 
 			i++;
 		}
+
+
 
 		if (!validLine) {
 			cerr << "Unsupported feature: " << currentlyParsing << ". Ignoring line.\n";
@@ -556,6 +715,9 @@ void parseSceneFile(string filename) {
 
 
 	}
+
+	// ***** Initialize Camera global variable ***** //
+	camera = Camera(1000, 1000, ex, ey, ez, llx, lly, llz, lrx, lry, lrz, urx, ury, urz, ulx, uly, ulz);
 }
 
 
@@ -884,18 +1046,19 @@ int main(int argc, char *argv[]) {
   debug = true;
 
   // Parse command line options
-  parseCommandLineOptions(argc, argv);
-  printCommandLineOptionVariables();
+  film = Film(1000, 1000);
+  recursionDepth = 5;
+  parseSceneFile(argv[1]);
+
+  cout << "Just finished parsing scene file.\n";
+  printGlobalVariables();
 
   // Initializes list of buckets; Buckets have a list of samples
   initializeSampler();
-  initializePrimitives();
+//  initializePrimitives();
   render();
 
   film.writeImage("ray_tracer_output.png");
-
-  // DEBUGGING ONLY
-//  parseSceneFile(argv[1]);
 
   return 0;
 };

@@ -12,7 +12,7 @@ class Light {
 
 class PointLight : public Light {
 	public:
-		float x, y, z, r, g, b;
+		float x, y, z, r, g, b, falloff;
 
 	PointLight() {
 
@@ -25,6 +25,17 @@ class PointLight : public Light {
 		this->r = r;
 		this->g = g;
 		this->b = b;
+		this->falloff = 0.0;
+	}
+
+	PointLight(float x, float y, float z, float r, float g, float b, float falloff) {
+		this->x = x;
+		this->y = y;
+		this->z = z;
+		this->r = r;
+		this->g = g;
+		this->b = b;
+		this->falloff = falloff;
 	}
 
 	void generateLightRay(DifferentialGeometry& differentialGeometry, Ray* lightRay, Color* lightColor) {

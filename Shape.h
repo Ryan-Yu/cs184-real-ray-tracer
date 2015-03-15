@@ -2,7 +2,14 @@
 #define SHAPE_H_
 
 #include "Matrix4.h"
+
 static void printRay(Ray ray);
+// Converts float to string
+std::string convertFloatToString(float number){
+    std::ostringstream buff;
+    buff<<number;
+    return buff.str();
+}
 
 // NOTE: A Primitive object has both a Material and a Shape
 class Shape {
@@ -13,6 +20,12 @@ class Shape {
 		}
 		virtual bool intersectP(Ray &ray) {
 			return false;
+		}
+		virtual std::string shapeType() {
+			return "";
+		}
+		virtual std::string printShapeInformation() {
+			return "";
 		}
 
 		virtual ~Shape() {
@@ -198,6 +211,21 @@ class Sphere : public Shape {
 
 		return false;
 	}
+
+	std::string shapeType() {
+		return "Sphere";
+	}
+
+	std::string printShapeInformation() {
+		std::string xCoor = convertFloatToString(x);
+		std::string yCoor = convertFloatToString(y);
+		std::string zCoor = convertFloatToString(z);
+		std::string radius = convertFloatToString(r);
+
+		std::string toReturn = "Center is (";
+		toReturn.append(xCoor).append(", ").append(yCoor).append(", ").append(zCoor).append(") with radius ").append(radius).append("\n");
+		return toReturn;
+	}
 };
 
 class Triangle : public Shape {
@@ -226,6 +254,10 @@ class Triangle : public Shape {
 	//of the same signature.
 	bool intersectP(Ray &ray) {
 		return false;
+	}
+
+	std::string shapeType() {
+		return "Triangle";
 	}
 };
 

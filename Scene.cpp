@@ -103,6 +103,14 @@ class RayTracer {
 				return;
 			}
 
+			if (depth == 1) {
+				printf("The reflected ray was: ");
+				printRay(ray);
+				printf("Hit at t = %f. KD of the primitive that the reflected ray hits: ", tHit);
+				printColor(intersection.primitive->material->constantBRDF.kd);
+				cout << "\n\n\n";
+			}
+
 			BRDFCoefficients brdf;
 			// This method will populate the brdf variable with the brdf values of the intersection primitive.
 			brdf = intersection.primitive->getBRDF(intersection.differentialGeometry, &brdf);
@@ -177,16 +185,21 @@ class RayTracer {
 
 				// n
 				Vector3 directional_normal_vector =
-						Vector3(intersection.differentialGeometry.normal.x, intersection.differentialGeometry.normal.y, intersection.differentialGeometry.normal.z);
+						Vector3::normalizeVector(Vector3(intersection.differentialGeometry.normal.x, intersection.differentialGeometry.normal.y, intersection.differentialGeometry.normal.z));
 
-				// d (view vector)
+				Point intersectionMinusRaySource = intersection.differentialGeometry.position.subtractPoint(ray.position);
+
+				// d (view vector) = intersection coordinate - source of ray
+				// (we can't just use the intersection point, because our view is relative from the LAST HIT primitive)
 				Vector3 view_vector = Vector3::normalizeVector(
-						Vector3(1.0 * intersection.differentialGeometry.position.x,
-								1.0 * intersection.differentialGeometry.position.y,
-								1.0 * intersection.differentialGeometry.position.z));
+						Vector3(intersectionMinusRaySource.x, intersectionMinusRaySource.y, intersectionMinusRaySource.z));
 
-				Vector3 directional_reflective_vector = Vector3::normalizeVector(view_vector.subtractVector(
-						directional_normal_vector.scaleVector((view_vector.dotProduct(directional_normal_vector) * 2))));
+
+				float dDotN = view_vector.dotProduct(directional_normal_vector);
+				Vector3 twoTimesdDotNTimesN = directional_normal_vector.scaleVector(dDotN * 2.0);
+				Vector3 directional_reflective_vector_prenormalize = view_vector.subtractVector(twoTimesdDotNTimesN);
+				// r
+				Vector3 directional_reflective_vector = Vector3::normalizeVector(directional_reflective_vector_prenormalize);
 
 				// NOTE: Not sure if this is right...
 				// Offset our reflection ray's position a tiny bit in the direction of the normal
@@ -202,9 +215,9 @@ class RayTracer {
 				// Recursively call trace()
 				trace(reflectionRay, depth + 1, &tempColor);
 
-				color->r += (brdf.kr.r / 255.0) * tempColor.r;
-				color->g += (brdf.kr.g / 255.0) * tempColor.g;
-				color->b += (brdf.kr.b / 255.0) * tempColor.b;
+				color->r += brdf.kr.r * (tempColor.r / 255.0);
+				color->g += brdf.kr.g * (tempColor.g / 255.0);
+				color->b += brdf.kr.b * (tempColor.b / 255.0);
 
 			}
 		}

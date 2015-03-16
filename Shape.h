@@ -145,7 +145,7 @@ class Sphere : public Shape {
 		// Compute normal of the sphere and the intersection point in WORLD coordinates
 		// This is NOT equal to the position of the intersection point
 
-		differentialGeometry->normal = Normal::normalizeNormal(Normal(xCoor - this->x, yCoor - this->y, zCoor - this->z));
+		differentialGeometry->normal = Normal(xCoor - this->x, yCoor - this->y, zCoor - this->z);
 
 		differentialGeometry->position = Point(xCoor, yCoor, zCoor);
 

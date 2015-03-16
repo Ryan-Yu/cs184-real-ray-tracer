@@ -108,6 +108,9 @@ class RayTracer {
 				return;
 			}
 
+			printf("\nWe've hit this object: ");
+			cout << intersection.primitive->shape->shapeType() << "\n";
+
 			BRDFCoefficients brdf;
 			// This method will populate the brdf variable with the brdf values of the intersection primitive.
 			brdf = intersection.primitive->getBRDF(intersection.differentialGeometry, &brdf);
@@ -168,6 +171,15 @@ class RayTracer {
 				point_lights[i].generateLightRay(intersection.differentialGeometry, &lightRay, &lightColor);
 
 				if (!aggregatePrimitive.intersectP(lightRay)) {
+
+
+					std::string objectWeAreShootingLightRayFrom = intersection.primitive->shape->shapeType();
+
+
+					printf("From the shape listed on the previous line, we generated a ray from the intersection point ");
+					printPoint(intersection.differentialGeometry.position);
+					cout << "and we did NOT hit an object.\n";
+
 					// For now, we just ignore shadows and reflections and just apply our shading model
 					// i.e. just call:
 					Color colorToAdd = applyShadingModel(
@@ -176,10 +188,22 @@ class RayTracer {
 							Color(point_lights[i].r, point_lights[i].g, point_lights[i].b),
 							ray.position);
 
+					if (objectWeAreShootingLightRayFrom == "Sphere") {
+						cout << "The point light from the sphere contributed this color: ";
+						printColor(colorToAdd);
+					}
+
 					color->r += colorToAdd.r;
 					color->g += colorToAdd.g;
 					color->b += colorToAdd.b;
 				}
+				// DEBUGGING PRINT STATEMENTS
+				else {
+					printf("From the shape listed on the previous line, we generated a ray from the intersection point ");
+					printPoint(intersection.differentialGeometry.position);
+					cout << "and we DID hit an object" << " from " << intersection.primitive->shape->shapeType() << "\n";
+				}
+
 			}
 
 			// ***** Mirror reflection *****
@@ -292,11 +316,10 @@ Color applyShadingModel(DifferentialGeometry differentialGeometry, BRDFCoefficie
 		// Calculate diffuse term
 
 		// Location of point light given by command line options (i.e. x, y, z)
-		Vector3 normalized_point_light_location = lightRay.direction;
 
-		Vector3 point_normal_vector = Vector3(differentialGeometry.normal.x, differentialGeometry.normal.y, differentialGeometry.normal.z);
+		Vector3 point_normal_vector = Vector3::normalizeVector(Vector3(differentialGeometry.normal.x, differentialGeometry.normal.y, differentialGeometry.normal.z));
 
-		Vector3 prenormalized_point_light_vector = normalized_point_light_location.subtractVector(point_normal_vector).scaleVector(1);
+		Vector3 prenormalized_point_light_vector = lightRay.direction;
 		Vector3 point_light_vector = Vector3::normalizeVector(prenormalized_point_light_vector);
 
 		float point_diffuse_dot_product = fmax(point_light_vector.dotProduct(point_normal_vector), 0);
@@ -873,9 +896,9 @@ void render() {
 	// Loop through all of the samples...
 	for (vector<Sample>::size_type i = 0; i < samples.size(); i++) {
 
-		if (debug) {
-			std::cout << "Currently processing sample " << i << " out of " << samples.size() << ".\n";
-		}
+//		if (debug) {
+//			std::cout << "Currently processing sample " << i << " out of " << samples.size() << ".\n";
+//		}
 
 		// For each sample, generate a ray from the eye to the sample location
 		Ray currentRay;

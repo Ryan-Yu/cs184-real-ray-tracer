@@ -53,7 +53,7 @@ static void printColor(Color color);
 static void printPoint(Point point);
 void printCommandLineOptionVariables();
 void printSamples();
-Color applyShadingModel(DifferentialGeometry differentialGeometry, BRDFCoefficients brdf, Ray lightRay, Color lightColor);
+Color applyShadingModel(DifferentialGeometry differentialGeometry, BRDFCoefficients brdf, Ray lightRay, Color lightColor, Point raySource);
 class RayTracer;
 
 
@@ -143,29 +143,21 @@ class RayTracer {
 				// from the position of the light (IN WORLD COORDINATES)
 				directional_lights[i].generateLightRay(intersection.differentialGeometry, &lightRay, &lightColor);
 
-//				Ray reversedLightRay = Ray(lightRay.position, lightRay.direction.scaleVector(-1.0), lightRay.t_min, lightRay.t_max);
+				Ray reversedLightRay = Ray(lightRay.position, lightRay.direction.scaleVector(-1.0), lightRay.t_min, lightRay.t_max);
 
 				// ***** Regular shading + shadows *****
 				// If the light ray is not blocked, we apply our shading model
-				if (!aggregatePrimitive.intersectP(lightRay)) {
+				if (!aggregatePrimitive.intersectP(reversedLightRay)) {
 					Color colorToAdd = applyShadingModel(
 							intersection.differentialGeometry,
 							brdf,
 							lightRay,
-							Color(directional_lights[i].r, directional_lights[i].g, directional_lights[i].b));
-
-//					std::cout << "The color BEFORE we applied the shading model was: ";
-//					printColor(*color);
-//					std::cout << "The color that the shading model contributed was: ";
-//					printColor(colorToAdd);
+							Color(directional_lights[i].r, directional_lights[i].g, directional_lights[i].b),
+							ray.position);
 
 					color->r += colorToAdd.r;
 					color->g += colorToAdd.g;
 					color->b += colorToAdd.b;
-
-//					std::cout << "The color AFTER we applied the shading model was: ";
-//					printColor(*color);
-//					std::cout << "\n\n";
 
 				}
 			}
@@ -180,7 +172,8 @@ class RayTracer {
 					Color colorToAdd = applyShadingModel(
 							intersection.differentialGeometry,
 							brdf, lightRay,
-							Color(point_lights[i].r, point_lights[i].g, point_lights[i].b));
+							Color(point_lights[i].r, point_lights[i].g, point_lights[i].b),
+							ray.position);
 
 					color->r += colorToAdd.r;
 					color->g += colorToAdd.g;
@@ -240,7 +233,7 @@ RayTracer rayTracer;
 //****************************************************
 // applies Phong shading model to differentialGeometry.position
 //****************************************************
-Color applyShadingModel(DifferentialGeometry differentialGeometry, BRDFCoefficients brdf, Ray lightRay, Color lightColor) {
+Color applyShadingModel(DifferentialGeometry differentialGeometry, BRDFCoefficients brdf, Ray lightRay, Color lightColor, Point raySource) {
 
 	// ***** BEGIN COMPUTATION OF PHONG SHADING MODEL ***** //
 	// NOTE: Ambient term (ka) is appended outisde of this model
@@ -250,14 +243,16 @@ Color applyShadingModel(DifferentialGeometry differentialGeometry, BRDFCoefficie
 	float resultant_rgb_sum_of_pixel_b = 0;
 
 	// Set viewer vector to -1 * incoming_ray's_vector
+//	Vector3 viewer_vector = Vector3::normalizeVector(
+//			Vector3(differentialGeometry.position.x - raySource.x, differentialGeometry.position.y - raySource.y, differentialGeometry.position.z - raySource.z)
+//			);
+
 	Vector3 viewer_vector = Vector3::normalizeVector(Vector3(-1.0 * differentialGeometry.position.x, -1.0 * differentialGeometry.position.y, -1.0 * differentialGeometry.position.z));
 
 	// **************************************
     // For directional light
 	// **************************************
 	if (lightRay.t_max == FLT_MAX) {
-
-
 
 		// Direction of light ray computed in 'generateLightRay()'
 		Vector3 prenormalized_directional_light_vector = lightRay.direction;
@@ -269,14 +264,7 @@ Color applyShadingModel(DifferentialGeometry differentialGeometry, BRDFCoefficie
 		// NOTE: we should defer this logic to Sphere/Triangle, as follows:
 		Vector3 directional_normal_vector = Vector3(differentialGeometry.normal.x, differentialGeometry.normal.y, differentialGeometry.normal.z);
 
-//		cout << "directional_normal_vector: ";
-//		printVector(directional_normal_vector);
-//		cout << "directional_light_vector: ";
-//		printVector(directional_light_vector);
-
 		float directional_diffuse_dot_product = fmax(directional_light_vector.dotProduct(directional_normal_vector), 0);
-
-//		cout << "In shading model for directional light. directional diffuse dot product is: " << directional_diffuse_dot_product << "\n";
 
 		float directional_diffuse_r = brdf.kd.r * lightColor.r * directional_diffuse_dot_product;
 		float directional_diffuse_g = brdf.kd.g * lightColor.g * directional_diffuse_dot_product;

@@ -1,0 +1,160 @@
+
+***** BEGIN PRINTING GLOBAL VARIABLES *****
+  Film Width: 500
+  Film Height: 500
+
+  Recursion Depth: 4
+
+  Camera:
+    Eye: Point: (x, y, z) = (0.000000, 0.000000, 5.000000)
+    Bottom Left Corner: Point: (x, y, z) = (-2.000000, -2.000000, 0.000000)
+    Top Left Corner: Point: (x, y, z) = (-2.000000, 2.000000, 0.000000)
+    Bottom Right: Point: (x, y, z) = (2.000000, -2.000000, 0.000000)
+    Top Right: Point: (x, y, z) = (2.000000, 2.000000, 0.000000)
+
+Directional Lights:
+  Light 1
+     x: -1 y: -1 z: -1
+     r: 0.5 g: 0 b: 0.5
+
+Point Lights:
+  Light 1
+     x: 0 y: 0 z: 0
+     r: 0 g: 0.7 b: 0.7
+  Light 2
+     x: 0 y: 0 z: 0
+     r: 0.7 g: 0.1 b: 0.1
+
+Number of primitives: 16
+
+Triangle
+Vertex 1 is (-2, -2, 0).  Vertex 3 is (-2, -2, -10).  Vertex 3 is (2, -2, -10).
+  KA: Color: (r, g, b) = (1.000000, 1.000000, 1.000000)
+  KD: Color: (r, g, b) = (0.250000, 0.500000, 0.500000)
+  KR: Color: (r, g, b) = (0.000000, 0.000000, 0.000000)
+  KS: Color: (r, g, b) = (0.250000, 0.500000, 0.500000)
+  SP: 64
+
+Triangle
+Vertex 1 is (-2, -2, 0).  Vertex 3 is (2, -2, -10).  Vertex 3 is (2, -2, 0).
+  KA: Color: (r, g, b) = (1.000000, 1.000000, 1.000000)
+  KD: Color: (r, g, b) = (0.250000, 0.500000, 0.500000)
+  KR: Color: (r, g, b) = (0.000000, 0.000000, 0.000000)
+  KS: Color: (r, g, b) = (0.250000, 0.500000, 0.500000)
+  SP: 64
+
+Triangle
+Vertex 1 is (-2, -2, -10).  Vertex 3 is (2, 3, -10).  Vertex 3 is (-2, 3, -10).
+  KA: Color: (r, g, b) = (1.000000, 1.000000, 1.000000)
+  KD: Color: (r, g, b) = (0.000000, 0.000000, 0.000000)
+  KR: Color: (r, g, b) = (1.000000, 1.000000, 1.000000)
+  KS: Color: (r, g, b) = (0.000000, 0.000000, 0.000000)
+  SP: 1
+
+Triangle
+Vertex 1 is (-2, -2, -10).  Vertex 3 is (2, -2, -10).  Vertex 3 is (2, 3, -10).
+  KA: Color: (r, g, b) = (1.000000, 1.000000, 1.000000)
+  KD: Color: (r, g, b) = (0.000000, 0.000000, 0.000000)
+  KR: Color: (r, g, b) = (1.000000, 1.000000, 1.000000)
+  KS: Color: (r, g, b) = (0.000000, 0.000000, 0.000000)
+  SP: 1
+
+Triangle
+Vertex 1 is (-2, -2, 0).  Vertex 3 is (-2, 3, 0).  Vertex 3 is (-2, 3, -10).
+  KA: Color: (r, g, b) = (1.000000, 1.000000, 1.000000)
+  KD: Color: (r, g, b) = (0.250000, 0.500000, 0.500000)
+  KR: Color: (r, g, b) = (0.000000, 0.000000, 0.000000)
+  KS: Color: (r, g, b) = (0.250000, 0.500000, 0.500000)
+  SP: 64
+
+Triangle
+Vertex 1 is (-2, -2, 0).  Vertex 3 is (-2, 3, -10).  Vertex 3 is (-2, -2, -10).
+  KA: Color: (r, g, b) = (1.000000, 1.000000, 1.000000)
+  KD: Color: (r, g, b) = (0.250000, 0.500000, 0.500000)
+  KR: Color: (r, g, b) = (0.000000, 0.000000, 0.000000)
+  KS: Color: (r, g, b) = (0.250000, 0.500000, 0.500000)
+  SP: 64
+
+Triangle
+Vertex 1 is (2, -2, 0).  Vertex 3 is (2, -2, -10).  Vertex 3 is (2, 3, -10).
+  KA: Color: (r, g, b) = (1.000000, 1.000000, 1.000000)
+  KD: Color: (r, g, b) = (0.250000, 0.500000, 0.500000)
+  KR: Color: (r, g, b) = (0.000000, 0.000000, 0.000000)
+  KS: Color: (r, g, b) = (0.250000, 0.500000, 0.500000)
+  SP: 64
+
+Triangle
+Vertex 1 is (2, -2, 0).  Vertex 3 is (2, 3, -10).  Vertex 3 is (2, 3, 0).
+  KA: Color: (r, g, b) = (1.000000, 1.000000, 1.000000)
+  KD: Color: (r, g, b) = (0.250000, 0.500000, 0.500000)
+  KR: Color: (r, g, b) = (0.000000, 0.000000, 0.000000)
+  KS: Color: (r, g, b) = (0.250000, 0.500000, 0.500000)
+  SP: 64
+
+Sphere
+Center is (0, 0, -10) with radius 1
+  KA: Color: (r, g, b) = (1.000000, 1.000000, 1.000000)
+  KD: Color: (r, g, b) = (0.700000, 0.100000, 0.600000)
+  KR: Color: (r, g, b) = (1.000000, 1.000000, 1.000000)
+  KS: Color: (r, g, b) = (1.000000, 1.000000, 1.000000)
+  SP: 32
+
+Sphere
+Center is (2, 0.5, -5) with radius 1
+  KA: Color: (r, g, b) = (1.000000, 1.000000, 1.000000)
+  KD: Color: (r, g, b) = (0.700000, 0.100000, 0.600000)
+  KR: Color: (r, g, b) = (0.000000, 0.000000, 0.000000)
+  KS: Color: (r, g, b) = (1.000000, 1.000000, 1.000000)
+  SP: 32
+
+Sphere
+Center is (-0.75, -1.75, -4) with radius 0.25
+  KA: Color: (r, g, b) = (1.000000, 1.000000, 1.000000)
+  KD: Color: (r, g, b) = (0.250000, 0.900000, 0.100000)
+  KR: Color: (r, g, b) = (0.000000, 0.000000, 0.000000)
+  KS: Color: (r, g, b) = (0.900000, 0.100000, 0.250000)
+  SP: 3
+
+Sphere
+Center is (-1.75, -1.75, -2) with radius 0.25
+  KA: Color: (r, g, b) = (1.000000, 1.000000, 1.000000)
+  KD: Color: (r, g, b) = (0.100000, 0.200000, 0.300000)
+  KR: Color: (r, g, b) = (0.000000, 0.000000, 0.000000)
+  KS: Color: (r, g, b) = (0.400000, 0.500000, 0.600000)
+  SP: 7
+
+Sphere
+Center is (1.215, -1.875, -3) with radius 0.125
+  KA: Color: (r, g, b) = (1.000000, 1.000000, 1.000000)
+  KD: Color: (r, g, b) = (0.100000, 0.200000, 0.300000)
+  KR: Color: (r, g, b) = (0.000000, 0.000000, 0.000000)
+  KS: Color: (r, g, b) = (0.400000, 0.500000, 0.600000)
+  SP: 7
+
+Sphere
+Center is (1, -1.875, -4) with radius 0.125
+  KA: Color: (r, g, b) = (1.000000, 1.000000, 1.000000)
+  KD: Color: (r, g, b) = (0.250000, 0.900000, 0.100000)
+  KR: Color: (r, g, b) = (0.000000, 0.000000, 0.000000)
+  KS: Color: (r, g, b) = (0.900000, 0.100000, 0.250000)
+  SP: 3
+
+Sphere
+Center is (1.9, -1.875, -1) with radius 0.125
+  KA: Color: (r, g, b) = (1.000000, 1.000000, 1.000000)
+  KD: Color: (r, g, b) = (0.250000, 0.900000, 0.100000)
+  KR: Color: (r, g, b) = (0.000000, 0.000000, 0.000000)
+  KS: Color: (r, g, b) = (0.900000, 0.100000, 0.250000)
+  SP: 3
+
+Sphere
+Center is (1, 1.5, -4.5) with radius 0.25
+  KA: Color: (r, g, b) = (1.000000, 1.000000, 1.000000)
+  KD: Color: (r, g, b) = (0.900000, 0.800000, 0.700000)
+  KR: Color: (r, g, b) = (0.000000, 0.000000, 0.000000)
+  KS: Color: (r, g, b) = (0.600000, 0.500000, 0.400000)
+  SP: 3
+
+***** FINISH PRINTING GLOBAL VARIABLES *****
+
+Done writing.

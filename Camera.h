@@ -64,7 +64,8 @@ class Camera {
 			float imagePlaneX = imagePlaneTopLeft.x + ((rectangleWidth * (sample.x + 0.5)) / viewingPlaneWidth);
 			float imagePlaneY = imagePlaneBottomLeft.y + ((rectangleHeight * (sample.y + 0.5)) / viewingPlaneHeight);
 
-			ray->direction = Vector3(imagePlaneX, imagePlaneY, imagePlaneTopLeft.z);
+			ray->direction = Vector3(imagePlaneX - eye.x, imagePlaneY - eye.y, imagePlaneTopLeft.z - eye.z);
+//			ray->direction = Vector3(imagePlaneX, imagePlaneY, eye.z - imagePlaneTopLeft.z);
 
 			ray->t_min = 0.001;
 			ray->t_max = FLT_MAX;

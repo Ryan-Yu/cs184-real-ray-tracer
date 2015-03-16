@@ -72,6 +72,8 @@ class RayTracer {
 	public:
 		void trace(Ray& ray, int depth, Color* color) {
 
+//			printRay(ray);
+
 			if (depth > recursionDepth) {
 				color->r = 0;
 				color->g = 0;
@@ -161,16 +163,18 @@ class RayTracer {
 
 				point_lights[i].generateLightRay(intersection.differentialGeometry, &lightRay, &lightColor);
 
-				// For now, we just ignore shadows and reflections and just apply our shading model
-				// i.e. just call:
-				Color colorToAdd = applyShadingModel(
-						intersection.differentialGeometry,
-						brdf, lightRay,
-						Color(point_lights[i].r, point_lights[i].g, point_lights[i].b));
+				if (!aggregatePrimitive.intersectP(lightRay)) {
+					// For now, we just ignore shadows and reflections and just apply our shading model
+					// i.e. just call:
+					Color colorToAdd = applyShadingModel(
+							intersection.differentialGeometry,
+							brdf, lightRay,
+							Color(point_lights[i].r, point_lights[i].g, point_lights[i].b));
 
-				color->r += colorToAdd.r;
-				color->g += colorToAdd.g;
-				color->b += colorToAdd.b;
+					color->r += colorToAdd.r;
+					color->g += colorToAdd.g;
+					color->b += colorToAdd.b;
+				}
 			}
 
 			// ***** Mirror reflection *****

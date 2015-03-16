@@ -62,6 +62,7 @@ class Film {
 		color.r = color.r * 255.0;
 		color.g = color.g * 255.0;
 		color.b = color.b * 255.0;
+
 		// Find the index of our 'buckets' array that corresponds with the sample's pixel, and add the 'color' to this index of the array
 		// NOTE: sample.x and sample.y are in the coordinate system of the viewing plane, i.e. [width -> height]
 		buckets[width * sample.y + sample.x].add(color);

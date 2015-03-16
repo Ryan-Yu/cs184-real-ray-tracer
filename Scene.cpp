@@ -108,9 +108,6 @@ class RayTracer {
 				return;
 			}
 
-			printf("\nWe've hit this object: ");
-			cout << intersection.primitive->shape->shapeType() << "\n";
-
 			BRDFCoefficients brdf;
 			// This method will populate the brdf variable with the brdf values of the intersection primitive.
 			brdf = intersection.primitive->getBRDF(intersection.differentialGeometry, &brdf);
@@ -162,23 +159,12 @@ class RayTracer {
 					color->r += colorToAdd.r;
 					color->g += colorToAdd.g;
 					color->b += colorToAdd.b;
-
 				}
 			}
 
 			for (std::vector<PointLight>::size_type i = 0; i < point_lights.size(); i++) {
-
 				point_lights[i].generateLightRay(intersection.differentialGeometry, &lightRay, &lightColor);
-
 				if (!aggregatePrimitive.intersectP(lightRay)) {
-
-
-					std::string objectWeAreShootingLightRayFrom = intersection.primitive->shape->shapeType();
-
-
-					printf("From the shape listed on the previous line, we generated a ray from the intersection point ");
-					printPoint(intersection.differentialGeometry.position);
-					cout << "and we did NOT hit an object.\n";
 
 					// For now, we just ignore shadows and reflections and just apply our shading model
 					// i.e. just call:
@@ -188,22 +174,10 @@ class RayTracer {
 							Color(point_lights[i].r, point_lights[i].g, point_lights[i].b),
 							ray.position);
 
-					if (objectWeAreShootingLightRayFrom == "Sphere") {
-						cout << "The point light from the sphere contributed this color: ";
-						printColor(colorToAdd);
-					}
-
 					color->r += colorToAdd.r;
 					color->g += colorToAdd.g;
 					color->b += colorToAdd.b;
 				}
-				// DEBUGGING PRINT STATEMENTS
-				else {
-					printf("From the shape listed on the previous line, we generated a ray from the intersection point ");
-					printPoint(intersection.differentialGeometry.position);
-					cout << "and we DID hit an object" << " from " << intersection.primitive->shape->shapeType() << "\n";
-				}
-
 			}
 
 			// ***** Mirror reflection *****
@@ -280,9 +254,10 @@ Color applyShadingModel(DifferentialGeometry differentialGeometry, BRDFCoefficie
 	if (lightRay.t_max == FLT_MAX) {
 
 		// Direction of light ray computed in 'generateLightRay()'
+		// Pointing from "the light" (it exists at infinity though) TOWARDS the surface
 		Vector3 prenormalized_directional_light_vector = lightRay.direction;
 
-		// Change orientation of light vector to point inwards to sphere
+		// Change orientation of light vector to point outwards to "the light"
 		Vector3 directional_light_vector = Vector3::normalizeVector(prenormalized_directional_light_vector.scaleVector(-1));
 
 		// NOTE: (x, y, z) is in world coordinates now, not relative to center of sphere
@@ -431,7 +406,7 @@ void printGlobalVariables()
     for (std::vector<GeometricPrimitive*>::size_type i = 0; i < aggregatePrimitive.listOfPrimitives.size(); i++) {
     	GeometricPrimitive* currentPrimitive = aggregatePrimitive.listOfPrimitives[i];
     	std::string shapeType = currentPrimitive->shape->shapeType();
-    	cout << shapeType << " (Shape number " << i << " out of " << aggregatePrimitive.listOfPrimitives.size() << " total shapes)\n";
+    	cout << shapeType << " (Shape number " << (i + 1) << " out of " << aggregatePrimitive.listOfPrimitives.size() << " total shapes)\n";
 
     	cout << currentPrimitive->shape->printShapeInformation();
 

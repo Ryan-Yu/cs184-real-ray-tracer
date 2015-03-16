@@ -258,8 +258,8 @@ class Triangle : public Shape {
 
 		// normal = u x v
 		Vector3 normal = u->crossProduct(*v);
-//		return Normal::normalizeNormal(Normal(normal.x, normal.y, normal.z));
-		return Normal::normalizeNormal(Normal(-1.0 * normal.x, -1.0 * normal.y, -1.0 * normal.z));
+		return Normal::normalizeNormal(Normal(normal.x, normal.y, normal.z));
+//		return Normal::normalizeNormal(Normal(-1.0 * normal.x, -1.0 * normal.y, -1.0 * normal.z));
 	}
 
 	// Test if ray intersects with the shape or not (in object space).

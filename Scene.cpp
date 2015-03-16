@@ -69,6 +69,7 @@ AggregatePrimitive aggregatePrimitive;
 std::vector<PointLight> point_lights;
 std::vector<DirectionalLight> directional_lights;
 std::vector<AmbientLight> ambient_lights;
+std::vector<Point> objFileVertices;
 
 class RayTracer {
 	public:
@@ -407,7 +408,7 @@ void printGlobalVariables()
     for (std::vector<GeometricPrimitive*>::size_type i = 0; i < aggregatePrimitive.listOfPrimitives.size(); i++) {
     	GeometricPrimitive* currentPrimitive = aggregatePrimitive.listOfPrimitives[i];
     	std::string shapeType = currentPrimitive->shape->shapeType();
-    	cout << shapeType << "\n";
+    	cout << shapeType << " (Shape number " << i << " out of " << aggregatePrimitive.listOfPrimitives.size() << " total shapes)\n";
 
     	cout << currentPrimitive->shape->printShapeInformation();
 
@@ -435,6 +436,112 @@ void printSamples() {
 	}
 }
 
+
+//****************************************************
+// Parsing .OBJ file specified in scene file
+//****************************************************
+void parseObjFile(string filename) {
+
+	string str;
+	ifstream file(filename);
+
+	// The identifier that we're currently parsing
+	string currentlyParsing;
+
+	// current word that we're parsing on a line
+	string currentWord;
+
+	bool validLine = true;
+
+	// TODO: Change this. Right now, all of our OBJ triangles will have this same BRDF
+	BRDFCoefficients *brdfToAdd = new BRDFCoefficients();
+	Color* kaToAdd = new Color(0, 0, 0);
+	Color* kdToAdd = new Color(0.8, 0.8, 0.8);
+	Color* ksToAdd = new Color(0.1, 0.1, 0.1);
+	Color* krToAdd = new Color(0.1, 0.1, 0.1);
+	brdfToAdd->ka = *kaToAdd;
+	brdfToAdd->kd = *kdToAdd;
+	brdfToAdd->ks = *ksToAdd;
+	brdfToAdd->kr = *krToAdd;
+	brdfToAdd->sp = 50.0;
+	Material* materialToAdd = new Material();
+	materialToAdd->constantBRDF = *brdfToAdd;
+
+	while (getline(file, str)) {
+		// str represents the current line of the file
+
+		validLine = true;
+		int i = 0;
+		istringstream iss(str);
+		while (iss >> currentWord) {
+
+			// ********** Figure out what the first word of each line is ********** //
+			// We currently support:
+			// (1) v ... (vertex definitions)
+			// (2) f ... (face definitions)
+
+			if ((i == 0) && (currentWord == "v")) {
+				currentlyParsing = currentWord;
+
+			} else if ((i == 0) && (currentWord == "f")) {
+				currentlyParsing = currentWord;
+
+			} else if (i == 0) {
+				currentlyParsing = currentWord;
+				validLine = false;
+			}
+
+			// If the current line is not valid, then just keep skipping every word in the line
+			if (!validLine) {
+				i++;
+				continue;
+			}
+
+			// ********** After we've figured out the first word in each line, parse the rest of the line ********** //
+			// If we've hit here, then we're NOT on the first word of the line anymore
+
+			if (currentlyParsing == "v") {
+				float xCoor, yCoor, zCoor;
+				if (i == 0) { }
+				else if (i == 1) { xCoor = stof(currentWord); }
+				else if (i == 2) { yCoor = stof(currentWord); }
+				else if (i == 3) { zCoor = stof(currentWord); }
+				else if (i > 3) {
+					cerr << "Extra parameters for " << currentlyParsing << ". Ignoring them.\n";
+				}
+				if (i == 3) {
+					objFileVertices.push_back(Point(xCoor, yCoor, zCoor));
+				}
+
+			} else if (currentlyParsing == "f") {
+				int vertexIndex1, vertexIndex2, vertexIndex3;
+				if (i == 0) {}
+				else if (i == 1) { vertexIndex1 = stoi(currentWord) - 1; }
+				else if (i == 2) { vertexIndex2 = stoi(currentWord) - 1; }
+				else if (i == 3) { vertexIndex3 = stoi(currentWord) - 1; }
+				else if (i > 3) {
+					cerr << "Extra parameters for " << currentlyParsing << ". Ignoring them.\n";
+				}
+
+				// Push our triangle onto the list of aggregate primitives
+				// TODO: integrate .mtl files
+				if (i == 3 && vertexIndex1 < objFileVertices.size() && vertexIndex2 < objFileVertices.size() && vertexIndex3 < objFileVertices.size()) {
+					GeometricPrimitive* primitiveToAdd = new GeometricPrimitive();
+					Triangle* triangleToAdd = new Triangle(
+							objFileVertices[vertexIndex1].x, objFileVertices[vertexIndex1].y, objFileVertices[vertexIndex1].z,
+							objFileVertices[vertexIndex2].x, objFileVertices[vertexIndex2].y, objFileVertices[vertexIndex2].z,
+							objFileVertices[vertexIndex3].x, objFileVertices[vertexIndex3].y, objFileVertices[vertexIndex3].z);
+
+					primitiveToAdd->material = materialToAdd;
+					primitiveToAdd->shape = triangleToAdd;
+					aggregatePrimitive.addPrimitive(primitiveToAdd);
+				}
+			}
+
+			i++;
+		}
+	}
+}
 
 
 
@@ -465,6 +572,9 @@ void parseSceneFile(string filename) {
 	// Most recently seen material
 	float kar, kag, kab, kdr, kdg, kdb, ksr, ksg, ksb, ksp, krr, krg, krb;
 
+	// .obj filename that we've found
+	string objFilename;
+	bool foundObjFile = false;
 
 	while (getline(file, str)) {
 		// str represents the current line of the file
@@ -489,6 +599,9 @@ void parseSceneFile(string filename) {
 				currentlyParsing = currentWord;
 			} else if ((i == 0) && (currentWord == "tri")) {
 				currentlyParsing = currentWord;
+			} else if ((i == 0) && (currentWord == "obj")) {
+				currentlyParsing = currentWord;
+
 			// TODO: Add .obj, Transformation, reset transformation identifier here
 
 			// We've found an unspecified identifier as the first word on our line
@@ -499,8 +612,6 @@ void parseSceneFile(string filename) {
 
 			// If the current line is not valid, then just keep skipping every word in the line
 			if (!validLine) {
-				// Since currentlyParsing is a pointer to currentWord, currentlyParsing changes whenever currentWord
-				// gets updated by iss, so must advance i to make sure currentlyParsing
 				i++;
 				continue;
 			}
@@ -657,6 +768,14 @@ void parseSceneFile(string filename) {
 					primitiveToAdd->shape = triangleToAdd;
 					aggregatePrimitive.addPrimitive(primitiveToAdd);
 				}
+			} else if (currentlyParsing == "obj") {
+				if (i == 0) { }
+				else if (i == 1) {
+					objFilename = currentWord;
+					foundObjFile = true;
+				} else if (i > 1) {
+					cerr << "Extra parameters for " << currentlyParsing << ". Ignoring them. i is : " << i << "\n";
+				}
 			}
 			// TODO: Add more parsing here
 
@@ -666,12 +785,17 @@ void parseSceneFile(string filename) {
 		if (!validLine) {
 			cerr << "Unsupported feature: " << currentlyParsing << ". Ignoring line.\n";
 		}
+		if (foundObjFile) {
+			parseObjFile(objFilename);
+		}
 
 	}
 
 	// ***** Initialize Camera global variable ***** //
 	// NOTE: Film width and height MUST already be initialized
 	camera = Camera(film.width, film.height, ex, ey, ez, llx, lly, llz, lrx, lry, lrz, urx, ury, urz, ulx, uly, ulz);
+
+
 }
 
 
@@ -748,6 +872,10 @@ void parseCommandLineOptions(int argc, char *argv[]) {
 void render() {
 	// Loop through all of the samples...
 	for (vector<Sample>::size_type i = 0; i < samples.size(); i++) {
+
+		if (debug) {
+			std::cout << "Currently processing sample " << i << " out of " << samples.size() << ".\n";
+		}
 
 		// For each sample, generate a ray from the eye to the sample location
 		Ray currentRay;

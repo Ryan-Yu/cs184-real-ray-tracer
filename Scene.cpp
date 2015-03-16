@@ -50,6 +50,7 @@ using namespace std;
 static void printRay(Ray ray);
 static void printSample(Sample sample);
 static void printColor(Color color);
+static void printPoint(Point point);
 void printCommandLineOptionVariables();
 void printSamples();
 Color applyShadingModel(DifferentialGeometry differentialGeometry, BRDFCoefficients brdf, Ray lightRay, Color lightColor);
@@ -67,6 +68,7 @@ int recursionDepth;
 AggregatePrimitive aggregatePrimitive;
 std::vector<PointLight> point_lights;
 std::vector<DirectionalLight> directional_lights;
+std::vector<AmbientLight> ambient_lights;
 
 class RayTracer {
 	public:
@@ -106,6 +108,13 @@ class RayTracer {
 				color->b = 0;
 				return;
 			}
+			// DEBUGGING!
+			else {
+				cout << "The shape that was hit was a: " << intersection.primitive->shape->shapeType() << "\n";
+				cout << "The point of the intersection was: ";
+				printPoint(intersection.differentialGeometry.position);
+				cout << "\n\n";
+			}
 
 			BRDFCoefficients brdf;
 			// This method will populate the brdf variable with the brdf values of the intersection primitive.
@@ -122,9 +131,11 @@ class RayTracer {
 			float intersectionZCoor = intersection.differentialGeometry.position.z;
 
 			// We want to add the ambient term even if our shape is blocked by a light
-			color->r += brdf.ka.r;
-			color->g += brdf.ka.g;
-			color->b += brdf.ka.b;
+			for (std::vector<AmbientLight>::size_type i = 0; i < ambient_lights.size(); i++) {
+				color->r += (brdf.ka.r * ambient_lights[i].r);
+				color->g += (brdf.ka.g * ambient_lights[i].g);
+				color->b += (brdf.ka.b * ambient_lights[i].b);
+			}
 
 			// There is an intersection, so we have to loop through all the light source
 			// and consider their contributions to the intersection pixel
@@ -552,6 +563,19 @@ void parseSceneFile(string filename) {
 					// Add point light to global list
 					point_lights.push_back(PointLight(px, py, pz, r, g, b, falloff));
 				}
+			} else if (currentlyParsing == "lta") {
+				float r, g, b;
+				if (i == 0) { }
+				else if (i == 1) { r = stof(currentWord); }
+				else if (i == 2) { g = stof(currentWord); }
+				else if (i == 3) { b = stof(currentWord); }
+				else if (i > 3) {
+					cerr << "Extra parameters for " << currentlyParsing << ". Ignoring them.\n";
+				}
+				if (i == 3) {
+					// Add ambient light to ambient light list
+					ambient_lights.push_back(AmbientLight(r, g, b));
+				}
 
 			} else if (currentlyParsing == "mat") {
 				if (i == 0) { }
@@ -648,7 +672,8 @@ void parseSceneFile(string filename) {
 	}
 
 	// ***** Initialize Camera global variable ***** //
-	camera = Camera(1000, 1000, ex, ey, ez, llx, lly, llz, lrx, lry, lrz, urx, ury, urz, ulx, uly, ulz);
+	// NOTE: Film width and height MUST already be initialized
+	camera = Camera(film.width, film.height, ex, ey, ez, llx, lly, llz, lrx, lry, lrz, urx, ury, urz, ulx, uly, ulz);
 }
 
 
@@ -666,8 +691,6 @@ void parseSceneFile(string filename) {
 //****************************************************
 void parseCommandLineOptions(int argc, char *argv[]) {
 
-  // Parse scene file
-  parseSceneFile(argv[1]);
   string flag;
 
   int i = 2;
@@ -684,10 +707,10 @@ void parseCommandLineOptions(int argc, char *argv[]) {
 	  int widthOfFilm = stoi(argv[i+1]);
 	  int heightOfFilm = stoi(argv[i+2]);
 
-	  if (widthOfFilm < 1000 || heightOfFilm < 500 || widthOfFilm > 3000 || heightOfFilm > 3000) {
-		  std::cout << "Dimensions of output file must be at least 1000x500 and no more than 3000x3000.";
-		  exit(1);
-	  }
+//	  if (widthOfFilm < 1000 || heightOfFilm < 500 || widthOfFilm > 3000 || heightOfFilm > 3000) {
+//		  std::cout << "Dimensions of output file must be at least 1000x500 and no more than 3000x3000.";
+//		  exit(1);
+//	  }
 
 	  film = Film(widthOfFilm, heightOfFilm);
 	  i += 2;
@@ -709,6 +732,9 @@ void parseCommandLineOptions(int argc, char *argv[]) {
     // Advance to next flag, if one exists
     i++;
   }
+
+  // Parse scene file
+  parseSceneFile(argv[1]);
 }
 
 

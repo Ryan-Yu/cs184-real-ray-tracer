@@ -10,6 +10,21 @@ class Light {
 		}
 };
 
+class AmbientLight : public Light {
+	public:
+		float r, g, b;
+
+	AmbientLight() {
+
+	}
+
+	AmbientLight(float r, float g, float b) {
+		this->r = r;
+		this->g = g;
+		this->b = b;
+	}
+};
+
 class PointLight : public Light {
 	public:
 		float x, y, z, r, g, b, falloff;

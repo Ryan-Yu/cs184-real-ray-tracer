@@ -2,6 +2,7 @@
 #define AGGREGATEPRIMITIVE_H_
 
 static void printColor(Color color);
+static void printRay(Ray ray);
 
 class AggregatePrimitive {
 	public:
@@ -23,6 +24,9 @@ class AggregatePrimitive {
 	// Compare tHit of all the intersections and return that of the nearest one (we want the first hit)
 	// NOTE: in->primitive should be set to the pointer to that primitive
 	bool intersect(Ray& ray, float* tHit, Intersection* in) {
+
+		printRay(ray);
+
 		bool hit = false;
 		float smallestTSeenSoFar = FLT_MAX;
 		float* pointerOfSmallestTSeenSoFar;
@@ -37,6 +41,8 @@ class AggregatePrimitive {
 				// In this situation, we want our tHit of the current primitive to be smaller than the previous tHit,
 				// which by logic below, ends up being the smallest tHit seen so far
 				if (listOfPrimitives[i]->intersectWithMaxT(ray, tHit, in, *tHit)) {
+					printf("We just saw a hit at %f!\n", *tHit);
+//					printf("We just saw a hit at %f! The smallest-t-pointer points to %f. The smallest t seen before this is %f!\n", *tHit, *pointerOfSmallestTSeenSoFar, smallestTSeenSoFar);
 					hit = true;
 					// ... if it does, then update points for "lowest" t-value and corresponding intersection object
 					if (*tHit < smallestTSeenSoFar) {
@@ -58,6 +64,8 @@ class AggregatePrimitive {
 			} else {
 				// Find whether the current primitive hits the ray...
 				if (listOfPrimitives[i]->intersect(ray, tHit, in)) {
+					printf("We just saw a hit at %f!\n", *tHit);
+//					printf("We just saw a hit at %f! The smallest-t-pointer points to %f. The smallest t seen before this is %f!\n", *tHit, *pointerOfSmallestTSeenSoFar, smallestTSeenSoFar);
 					hit = true;
 					// ... if it does, then update points for "lowest" t-value and corresponding intersection object
 					if (*tHit < smallestTSeenSoFar) {
@@ -77,6 +85,12 @@ class AggregatePrimitive {
 		// After we've checked all of our primitives, update our 'tHit' and 'in' to the nearest combination
 		*tHit = *pointerOfSmallestTSeenSoFar;
 		in = pointerOfClosestIntersectionSoFar;
+
+		// DEBUGGING
+		Intersection testIntersection = *pointerOfClosestIntersectionSoFar;
+		GeometricPrimitive* testPrimitive = testIntersection.primitive;
+
+		printf("At the end of the intersect method, the t that was chosen is: %f\n", *tHit);
 
 		// Return whether our ray hit any of our primitives
 		return hit;

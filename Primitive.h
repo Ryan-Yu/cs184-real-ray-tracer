@@ -85,6 +85,7 @@ class GeometricPrimitive : public Primitive {
 		BRDFCoefficients getBRDF(DifferentialGeometry& differentialGeometry, BRDFCoefficients* brdf) {
 			return material->getBRDF(differentialGeometry, brdf);
 		}
+
 };
 
 #endif /* PRIMITIVE_H_ */

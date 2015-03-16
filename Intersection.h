@@ -1,6 +1,8 @@
 #ifndef INTERSECTION_H_
 #define INTERSECTION_H_
 
+#include "Primitive.h"
+
 // Forward declaration
 // http://stackoverflow.com/questions/28925071/c-confusion-with-forward-declaring-classes-and-using-include-statements
 class GeometricPrimitive;
@@ -19,6 +21,7 @@ class Intersection {
 			this->differentialGeometry = differentialGeometry;
 			this->primitive = primitive;
 		}
+
 };
 
 #endif /* INTERSECTION_H_ */

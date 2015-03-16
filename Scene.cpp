@@ -74,8 +74,6 @@ class RayTracer {
 	public:
 		void trace(Ray& ray, int depth, Color* color) {
 
-//			printRay(ray);
-
 			if (depth > recursionDepth) {
 				color->r = 0;
 				color->g = 0;
@@ -108,13 +106,6 @@ class RayTracer {
 				color->b = 0;
 				return;
 			}
-			// DEBUGGING!
-			else {
-				cout << "The shape that was hit was a: " << intersection.primitive->shape->shapeType() << "\n";
-				cout << "The point of the intersection was: ";
-				printPoint(intersection.differentialGeometry.position);
-				cout << "\n\n";
-			}
 
 			BRDFCoefficients brdf;
 			// This method will populate the brdf variable with the brdf values of the intersection primitive.
@@ -130,11 +121,17 @@ class RayTracer {
 			float intersectionYCoor = intersection.differentialGeometry.position.y;
 			float intersectionZCoor = intersection.differentialGeometry.position.z;
 
-			// We want to add the ambient term even if our shape is blocked by a light
-			for (std::vector<AmbientLight>::size_type i = 0; i < ambient_lights.size(); i++) {
-				color->r += (brdf.ka.r * ambient_lights[i].r);
-				color->g += (brdf.ka.g * ambient_lights[i].g);
-				color->b += (brdf.ka.b * ambient_lights[i].b);
+			if (ambient_lights.size() > 0) {
+				// We want to add the ambient term even if our shape is blocked by a light
+				for (std::vector<AmbientLight>::size_type i = 0; i < ambient_lights.size(); i++) {
+					color->r += (brdf.ka.r * ambient_lights[i].r);
+					color->g += (brdf.ka.g * ambient_lights[i].g);
+					color->b += (brdf.ka.b * ambient_lights[i].b);
+				}
+			} else {
+				color->r += brdf.ka.r;
+				color->g += brdf.ka.g;
+				color->b += brdf.ka.b;
 			}
 
 			// There is an intersection, so we have to loop through all the light source
@@ -146,31 +143,34 @@ class RayTracer {
 				// from the position of the light (IN WORLD COORDINATES)
 				directional_lights[i].generateLightRay(intersection.differentialGeometry, &lightRay, &lightColor);
 
-				Ray reversedLightRay = Ray(lightRay.position, lightRay.direction.scaleVector(-1.0), lightRay.t_min, lightRay.t_max);
+//				Ray reversedLightRay = Ray(lightRay.position, lightRay.direction.scaleVector(-1.0), lightRay.t_min, lightRay.t_max);
 
 				// ***** Regular shading + shadows *****
 				// If the light ray is not blocked, we apply our shading model
-				if (!aggregatePrimitive.intersectP(reversedLightRay)) {
+				if (!aggregatePrimitive.intersectP(lightRay)) {
 					Color colorToAdd = applyShadingModel(
 							intersection.differentialGeometry,
 							brdf,
 							lightRay,
 							Color(directional_lights[i].r, directional_lights[i].g, directional_lights[i].b));
 
+//					std::cout << "The color BEFORE we applied the shading model was: ";
+//					printColor(*color);
+//					std::cout << "The color that the shading model contributed was: ";
+//					printColor(colorToAdd);
+
 					color->r += colorToAdd.r;
 					color->g += colorToAdd.g;
 					color->b += colorToAdd.b;
+
+//					std::cout << "The color AFTER we applied the shading model was: ";
+//					printColor(*color);
+//					std::cout << "\n\n";
+
 				}
 			}
 
-
-
 			for (std::vector<PointLight>::size_type i = 0; i < point_lights.size(); i++) {
-				// TODO:
-				// Generate light ray from the intersection point to the light position
-				// point_lights[i].generateLightRay(intersection.differentialGeometry, &lightRay, &lightColor);
-				// if this light ray is not blocked, do:
-				//     *color += shading(intersection.differentialGeometry, brdf, lightRay, lightColor);
 
 				point_lights[i].generateLightRay(intersection.differentialGeometry, &lightRay, &lightColor);
 
@@ -257,6 +257,8 @@ Color applyShadingModel(DifferentialGeometry differentialGeometry, BRDFCoefficie
 	// **************************************
 	if (lightRay.t_max == FLT_MAX) {
 
+
+
 		// Direction of light ray computed in 'generateLightRay()'
 		Vector3 prenormalized_directional_light_vector = lightRay.direction;
 
@@ -267,7 +269,15 @@ Color applyShadingModel(DifferentialGeometry differentialGeometry, BRDFCoefficie
 		// NOTE: we should defer this logic to Sphere/Triangle, as follows:
 		Vector3 directional_normal_vector = Vector3(differentialGeometry.normal.x, differentialGeometry.normal.y, differentialGeometry.normal.z);
 
+//		cout << "directional_normal_vector: ";
+//		printVector(directional_normal_vector);
+//		cout << "directional_light_vector: ";
+//		printVector(directional_light_vector);
+
 		float directional_diffuse_dot_product = fmax(directional_light_vector.dotProduct(directional_normal_vector), 0);
+
+//		cout << "In shading model for directional light. directional diffuse dot product is: " << directional_diffuse_dot_product << "\n";
+
 		float directional_diffuse_r = brdf.kd.r * lightColor.r * directional_diffuse_dot_product;
 		float directional_diffuse_g = brdf.kd.g * lightColor.g * directional_diffuse_dot_product;
 		float directional_diffuse_b = brdf.kd.b * lightColor.b * directional_diffuse_dot_product;

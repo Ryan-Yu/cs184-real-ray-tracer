@@ -4,6 +4,8 @@
 #include "Matrix4.h"
 
 static void printRay(Ray ray);
+static void printVector(Vector3 vector);
+
 // Converts float to string
 std::string convertFloatToString(float number){
     std::ostringstream buff;
@@ -256,7 +258,8 @@ class Triangle : public Shape {
 
 		// normal = u x v
 		Vector3 normal = u->crossProduct(*v);
-		return Normal::normalizeNormal(Normal(normal.x, normal.y, normal.z));
+//		return Normal::normalizeNormal(Normal(normal.x, normal.y, normal.z));
+		return Normal::normalizeNormal(Normal(-1.0 * normal.x, -1.0 * normal.y, -1.0 * normal.z));
 	}
 
 	// Test if ray intersects with the shape or not (in object space).
@@ -267,6 +270,7 @@ class Triangle : public Shape {
 	// NOTE: Intersection object comprises of a DifferentialGeometry and a Primitive.
 	// NOTE: This method must populate tHit and differentialGeometry.
 	bool intersect(Ray &ray, float* tHit, DifferentialGeometry* differentialGeometry) {
+
 		// The triangle intersection occurs when:
 		// F(t) = v1 + intersectionPoint1(v2 - v1) + intersectionPoint2(v3 - v1)
 		// for some t, intersectionPoint1, intersectionPoint2. The intersection p = F(t)
@@ -303,11 +307,11 @@ class Triangle : public Shape {
 			return false;
 		}
 
-		Vector3 *rayTrianglePositionVector = new Vector3(this->v1.x, this->v1.y, this->v1.z);
+		Vector3 *rayTrianglePositionVector = new Vector3(g - this->v1.x, i - this->v1.y, k - this->v1.z);
 
 		Vector3 *rayDirectionVector = new Vector3(f, h, j);
 
-		float rayInsideTriangle = normalVector->dotProduct(*rayTrianglePositionVector);
+		float rayInsideTriangle = -1.0 * (normalVector->dotProduct(*rayTrianglePositionVector));
 		float rayParallelTriangle = normalVector->dotProduct(*rayDirectionVector);
 
 		// If the ray is parallel to the triangle, return false
@@ -394,12 +398,12 @@ class Triangle : public Shape {
 		}
 
 		// rayTrianglePositionVector = StartingRayPosition - TriangleV1Position
-		Vector3 *rayTrianglePositionVector = new Vector3(this->v1.x, this->v1.y, this->v1.z);
+		Vector3 *rayTrianglePositionVector = new Vector3(g - this->v1.x, i - this->v1.y, k - this->v1.z);
 
 		// rayDirectionVector = RayDirection
 		Vector3 *rayDirectionVector = new Vector3(f, h, j);
 
-		float rayInsideTriangle = normalVector->dotProduct(*rayTrianglePositionVector);
+		float rayInsideTriangle = -1.0 * normalVector->dotProduct(*rayTrianglePositionVector);
 		float rayParallelTriangle = normalVector->dotProduct(*rayDirectionVector);
 
 		// If the ray is parallel to the triangle, return false

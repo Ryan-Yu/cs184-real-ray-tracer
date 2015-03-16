@@ -450,6 +450,35 @@ class Triangle : public Shape {
 	std::string shapeType() {
 		return "Triangle";
 	}
+
+	std::string printShapeInformation() {
+		float ax = v1.x;
+		float ay = v1.y;
+		float az = v1.z;
+		float bx = v2.x;
+		float by = v2.y;
+		float bz = v2.z;
+		float cx = v3.x;
+		float cy = v3.y;
+		float cz = v3.z;
+
+		std::string axString = convertFloatToString(ax);
+		std::string ayString = convertFloatToString(ay);
+		std::string azString = convertFloatToString(az);
+		std::string bxString = convertFloatToString(bx);
+		std::string byString = convertFloatToString(by);
+		std::string bzString = convertFloatToString(bz);
+		std::string cxString = convertFloatToString(cx);
+		std::string cyString = convertFloatToString(cy);
+		std::string czString = convertFloatToString(cz);
+
+		std::string toReturn = "Vertex 1 is (";
+		toReturn.append(axString).append(", ").append(ayString).append(", ").append(azString).append(").  ");
+		toReturn.append("Vertex 3 is (").append(bxString).append(", ").append(byString).append(", ").append(bzString).append(").  ");
+		toReturn.append("Vertex 3 is (").append(cxString).append(", ").append(cyString).append(", ").append(czString).append(").\n");
+
+		return toReturn;
+	}
 };
 
 #endif /* SHAPE_H_ */

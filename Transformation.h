@@ -7,14 +7,34 @@ class Transformation {
 	public:
 		Eigen::Matrix4f m;
 		Eigen::Matrix4f minvt;
+		int numberOfMatrices;
 
 	Transformation() {
-
+		this->m = Matrix4::createIdentityMatrix();
+		this->minvt = Matrix4::createIdentityMatrix();
+		numberOfMatrices = 0;
 	}
 
 	Transformation(Eigen::Matrix4f transformationMatrix) {
 		this->m = transformationMatrix;
 		this->minvt = transformationMatrix.inverse().transpose();
+		numberOfMatrices = 1;
+	}
+
+	void appendTransformation(Eigen::Matrix4f transformationToAppend) {
+		this->m *= transformationToAppend;
+		this->minvt = this->m.inverse().transpose();
+		numberOfMatrices++;
+	}
+
+	void resetTransformation() {
+		this->m = Matrix4::createIdentityMatrix();
+		this->minvt = Matrix4::createIdentityMatrix();
+		numberOfMatrices = 0;
+	}
+
+	Eigen::Matrix4f returnInverse() {
+		return this->m.inverse();
 	}
 
 	// TODO: This may not be correct due to homogenizing points and vectors differently.

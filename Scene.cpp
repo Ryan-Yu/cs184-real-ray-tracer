@@ -139,6 +139,7 @@ std::vector<PointLight> point_lights;
 std::vector<DirectionalLight> directional_lights;
 std::vector<AmbientLight> ambient_lights;
 std::vector<Point> objFileVertices;
+Transformation currentlySeenTransformation;
 
 class RayTracer {
 	public:
@@ -490,6 +491,10 @@ void printGlobalVariables()
     	cout << "  SP: " << currentPrimitive->material->constantBRDF.sp << "\n\n";
     }
 
+    std::cout << "We have " << currentlySeenTransformation.numberOfMatrices << " matrices in our transformation. Current transformation is: \n";
+    std::cout << currentlySeenTransformation.m << "\n";
+
+
     std::cout << "***** FINISH PRINTING GLOBAL VARIABLES *****\n\n";
   }
 }
@@ -668,8 +673,14 @@ void parseSceneFile(string filename) {
 				currentlyParsing = currentWord;
 			} else if ((i == 0) && (currentWord == "obj")) {
 				currentlyParsing = currentWord;
+			} else if ((i == 0) && (currentWord == "xft")) {
+				currentlyParsing = currentWord;
+			} else if ((i == 0) && (currentWord == "xfs")) {
+				currentlyParsing = currentWord;
+			} else if ((i == 0) && (currentWord == "xfz")) {
+				currentlyParsing = currentWord;
 
-			// TODO: Add .obj, Transformation, reset transformation identifier here
+			// TODO: Add Transformation, reset transformation identifier here
 
 			// We've found an unspecified identifier as the first word on our line
 			} else if (i == 0) {
@@ -843,6 +854,32 @@ void parseSceneFile(string filename) {
 				} else if (i > 1) {
 					cerr << "Extra parameters for " << currentlyParsing << ". Ignoring them. i is : " << i << "\n";
 				}
+			} else if (currentlyParsing == "xft") {
+				float x, y, z;
+				if (i == 0) { }
+				else if (i == 1) {x = stof(currentWord); }
+				else if (i == 2) {y = stof(currentWord); }
+				else if (i == 3) {z = stof(currentWord); }
+				else if (i > 3) {
+					cerr << "Extra parameters for " << currentlyParsing << ". Ignoring them. i is : " << i << "\n";
+				}
+				if (i == 3) {
+					currentlySeenTransformation.appendTransformation(Matrix4::createTranslationMatrix(x, y, z));
+				}
+			} else if (currentlyParsing == "xfs") {
+				float x, y, z;
+				if (i == 0) { }
+				else if (i == 1) {x = stof(currentWord); }
+				else if (i == 2) {y = stof(currentWord); }
+				else if (i == 3) {z = stof(currentWord); }
+				else if (i > 3) {
+					cerr << "Extra parameters for " << currentlyParsing << ". Ignoring them. i is : " << i << "\n";
+				}
+				if (i == 3) {
+					currentlySeenTransformation.appendTransformation(Matrix4::createScalingMatrix(x, y, z));
+				}
+			} else if (currentlyParsing == "xfz") {
+				if (i == 0) { currentlySeenTransformation.resetTransformation(); }
 			}
 			// TODO: Add more parsing here
 

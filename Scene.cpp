@@ -488,12 +488,10 @@ void printGlobalVariables()
     	printColor(currentPrimitive->material->constantBRDF.kr);
     	cout << "  KS: ";
     	printColor(currentPrimitive->material->constantBRDF.ks);
-    	cout << "  SP: " << currentPrimitive->material->constantBRDF.sp << "\n\n";
+    	cout << "  SP: " << currentPrimitive->material->constantBRDF.sp << "\n";
+    	cout << " This primitive's transformation is: \n";
+    	currentPrimitive->printTransformation();
     }
-
-    std::cout << "We have " << currentlySeenTransformation.numberOfMatrices << " matrices in our transformation. Current transformation is: \n";
-    std::cout << currentlySeenTransformation.m << "\n";
-
 
     std::cout << "***** FINISH PRINTING GLOBAL VARIABLES *****\n\n";
   }
@@ -809,6 +807,7 @@ void parseSceneFile(string filename) {
 					materialToAdd->constantBRDF = *brdfToAdd;
 					primitiveToAdd->material = materialToAdd;
 					primitiveToAdd->shape = sphereToAdd;
+					primitiveToAdd->transformation = currentlySeenTransformation;
 					aggregatePrimitive.addPrimitive(primitiveToAdd);
 				}
 

@@ -22,6 +22,7 @@ class GeometricPrimitive : public Primitive {
 	public:
 		Shape* shape;
 		Material* material;
+		Transformation transformation;
 		// TODO: Transformation objToWorld, worldToObj;
 
 		// This populates method an empty Intersection object "in" and an empty time
@@ -84,6 +85,10 @@ class GeometricPrimitive : public Primitive {
 		// Simply returns the BRDFCoefficients object of 'this' Primitive
 		BRDFCoefficients getBRDF(DifferentialGeometry& differentialGeometry, BRDFCoefficients* brdf) {
 			return material->getBRDF(differentialGeometry, brdf);
+		}
+
+		void printTransformation() {
+			std::cout << transformation.m << "\n\n";
 		}
 
 };

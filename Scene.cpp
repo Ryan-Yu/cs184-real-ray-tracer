@@ -677,6 +677,8 @@ void parseSceneFile(string filename) {
 				currentlyParsing = currentWord;
 			} else if ((i == 0) && (currentWord == "xfz")) {
 				currentlyParsing = currentWord;
+			} else if ((i == 0) && (currentWord == "xfr")) {
+				currentlyParsing = currentWord;
 
 			// TODO: Add Transformation, reset transformation identifier here
 
@@ -886,7 +888,24 @@ void parseSceneFile(string filename) {
 				}
 			} else if (currentlyParsing == "xfz") {
 				if (i == 0) { currentlySeenTransformation.resetTransformation(); }
+				else if (i > 0) {
+					cerr << "Extra parameters for " << currentlyParsing << ". Ignoring them. i is : " << i << "\n";
+				}
+			} else if (currentlyParsing == "xfr") {
+				float x, y, z;
+				if (i == 0) { }
+				else if (i == 1) {x = stof(currentWord); }
+				else if (i == 2) {y = stof(currentWord); }
+				else if (i == 3) {z = stof(currentWord); }
+				else if (i > 3) {
+					cerr << "Extra parameters for " << currentlyParsing << ". Ignoring them. i is : " << i << "\n";
+				}
+				if (i == 3) {
+					currentlySeenTransformation.appendTransformation(Matrix4::createRotationMatrix(x, y, z));
+				}
 			}
+
+
 			// TODO: Add more parsing here
 
 			i++;
@@ -895,10 +914,11 @@ void parseSceneFile(string filename) {
 		if (!validLine) {
 			cerr << "Unsupported feature: " << currentlyParsing << ". Ignoring line.\n";
 		}
-		if (foundObjFile) {
-			parseObjFile(objFilename);
-		}
 
+	}
+
+	if (foundObjFile) {
+		parseObjFile(objFilename);
 	}
 
 	// ***** Initialize Camera global variable ***** //
@@ -983,9 +1003,9 @@ void render() {
 	// Loop through all of the samples...
 	for (vector<Sample>::size_type i = 0; i < samples.size(); i++) {
 
-//		if (debug) {
-//			std::cout << "Currently processing sample " << i << " out of " << samples.size() << ".\n";
-//		}
+		if (debug) {
+			std::cout << "Currently processing sample " << i << " out of " << samples.size() << ".\n";
+		}
 
 		// For each sample, generate a ray from the eye to the sample location
 		Ray currentRay;
@@ -1037,6 +1057,7 @@ int main(int argc, char *argv[]) {
 	  render();
 
 	  film.writeImage("ray_tracer_output.png");
+
 
 	 return 0;
 };

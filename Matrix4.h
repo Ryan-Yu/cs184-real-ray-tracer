@@ -65,6 +65,24 @@ class Matrix4 {
 	bool isIdentity(Eigen::Matrix4f matrix) {
 		return matrix == Matrix4::createIdentityMatrix();
 	}
+
+	static Eigen::Matrix4f createRotationMatrix(float rx, float ry, float rz) {
+		float degrees = sqrt(pow(rx, 2) + pow(ry, 2) + pow(rz, 2));
+		float radians = degrees * M_PI/180.0;
+		Eigen::Vector3f axisOfRotation = Eigen::Vector3f(rx, ry, rz);
+		axisOfRotation.normalize();
+		Eigen::AngleAxisf angleAxis  = Eigen::AngleAxisf(radians, axisOfRotation);
+		Eigen::Matrix3f rotationMatrix3 = angleAxis.matrix();
+		std::cout << rotationMatrix3 << "\n";
+		Eigen::Matrix4f rotationMatrix4;
+		rotationMatrix4 << rotationMatrix3(0, 0), rotationMatrix3(0, 1), rotationMatrix3(0, 2), 0,
+						   rotationMatrix3(1, 0), rotationMatrix3(1, 1), rotationMatrix3(1, 2), 0,
+						   rotationMatrix3(2, 0), rotationMatrix3(2, 1), rotationMatrix3(2, 2), 0,
+						   0, 0, 0, 1;
+
+		std::cout << rotationMatrix4 << "\n";
+		return rotationMatrix4;
+	}
 };
 
 #endif /* MATRIX_H_ */

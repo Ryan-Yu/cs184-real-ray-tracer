@@ -37,22 +37,31 @@ class GeometricPrimitive : public Primitive {
 			// Then, when we are done calculating the intersection of the ray and the primitive,
 			// we can transform the intersection's local geometry back into global coordinates.
 
-
-			// TODO: Ray THIS-IS-OUR-REAL-RAY = worldToObj(*ray);
+			// Transform ray with inverse transformation
+			Ray oray = transformation.transformRay(ray);
 
 			DifferentialGeometry differentialGeometry; //creates new DifferentialGeometry to populate
 			// This method call populates the variable "differentialGeometry".
-			if (!shape->intersect(ray, tHit, &differentialGeometry)) {
+			if (!shape->intersect(oray, tHit, &differentialGeometry)) {
 				return false;
 			}
 
 			// If we find an intersection point, populate our "in" attributes with
 			// intersection information.
 			in->primitive = this;
+
+			// This differential geometry is still in the object (sphere) space
 			in->differentialGeometry = differentialGeometry;
 
-			// TODO: Instead of the previous line, we want:
-			// in->differentialGeometry = objToWorld(*differentialGeometry);
+
+			// These two lines transform the intersection back into the world (ellipsoid) space
+
+			// Transform using transformation matrix
+			in->differentialGeometry.position = transformation.transformPoint(in->differentialGeometry.position);
+			// Transform using inverse transpose transformation matrix
+			in->differentialGeometry.normal = transformation.transformNormal(in->differentialGeometry.normal);
+
+
 			return true;
 		}
 
@@ -60,10 +69,12 @@ class GeometricPrimitive : public Primitive {
 		// if the tHit discovered is less than maxT
 		bool intersectWithMaxT(Ray& ray, float* tHit, Intersection* in, float maxT) {
 
-			// TODO: Ray THIS-IS-OUR-REAL-RAY = worldToObj(*ray);
+			// Transform ray with inverse transformation
+			Ray oray = transformation.transformRay(ray);
+
 			DifferentialGeometry differentialGeometry; //creates new DifferentialGeometry to populate
 			// This method call populates the variable "differentialGeometry".
-			if (!shape->intersect(ray, tHit, &differentialGeometry)) {
+			if (!shape->intersect(oray, tHit, &differentialGeometry)) {
 				return false;
 			}
 
@@ -71,15 +82,27 @@ class GeometricPrimitive : public Primitive {
 			if (*tHit < maxT) {
 				in->primitive = this;
 				in->differentialGeometry = differentialGeometry;
+
+				// This differential geometry is still in the object (sphere) space
+				in->differentialGeometry = differentialGeometry;
+
+				// These two lines transform the intersection back into the world (ellipsoid) space
+
+				// Transform using transformation matrix
+				in->differentialGeometry.position = transformation.transformPoint(in->differentialGeometry.position);
+				// Transform using inverse transpose transformation matrix
+				in->differentialGeometry.normal = transformation.transformNormal(in->differentialGeometry.normal);
 			}
 
-			// TODO: Instead of the previous line, we want:
-			// in->differentialGeometry = objToWorld(*differentialGeometry);
 			return true;
 		}
 
 		bool intersectP(Ray& ray) {
-			return shape->intersectP(ray);
+
+			// Transform ray with inverse transformation
+			Ray oray = transformation.transformRay(ray);
+
+			return shape->intersectP(oray);
 		}
 
 		// Simply returns the BRDFCoefficients object of 'this' Primitive

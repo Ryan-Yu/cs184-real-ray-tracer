@@ -790,9 +790,8 @@ void parseSceneFile(string filename) {
 					cerr << "Extra parameters for " << currentlyParsing << ". Ignoring them. i is : " << i << "\n";
 				}
 				if (i == 4) {
-					// Initialize our sphere, with the last seen material
+					// Initialize our object, with the last seen material
 					GeometricPrimitive* primitiveToAdd = new GeometricPrimitive();
-					Sphere* sphereToAdd = new Sphere(cx, cy, cz, r);
 					BRDFCoefficients *brdfToAdd = new BRDFCoefficients();
 					Color* kaToAdd = new Color(kar, kag, kab);
 					Color* kdToAdd = new Color(kdr, kdg, kdb);
@@ -806,8 +805,16 @@ void parseSceneFile(string filename) {
 					Material* materialToAdd = new Material();
 					materialToAdd->constantBRDF = *brdfToAdd;
 					primitiveToAdd->material = materialToAdd;
-					primitiveToAdd->shape = sphereToAdd;
 					primitiveToAdd->transformation = currentlySeenTransformation;
+
+					if (!currentlySeenTransformation.m.isIdentity()) {
+						Ellipsoid* ellipsoidToAdd = new Ellipsoid(cx, cy, cz, r);
+						std::cout << ellipsoidToAdd->x;
+						primitiveToAdd->shape = ellipsoidToAdd;
+					} else {
+						Sphere* sphereToAdd = new Sphere(cx, cy, cz, r);
+						primitiveToAdd->shape = sphereToAdd;
+					}
 					aggregatePrimitive.addPrimitive(primitiveToAdd);
 				}
 
@@ -1030,7 +1037,6 @@ int main(int argc, char *argv[]) {
 	  render();
 
 	  film.writeImage("ray_tracer_output.png");
-
 
 	 return 0;
 };

@@ -61,6 +61,10 @@ class Matrix4 {
 	  Point resultPoint = Point(resultVector4[0], resultVector4[1], resultVector4[2]);
 	  return resultPoint;
   }
+
+	bool isIdentity(Eigen::Matrix4f matrix) {
+		return matrix == Matrix4::createIdentityMatrix();
+	}
 };
 
 #endif /* MATRIX_H_ */

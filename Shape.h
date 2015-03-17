@@ -236,18 +236,13 @@ class Sphere : public Shape {
 
 class Ellipsoid : public Sphere {
 public:
-	std::vector<Transformation> transformations;
 	float x, y, z, r;
 
-	Ellipsoid() {
-
+	Ellipsoid() : Sphere() {
 	}
 
-	Ellipsoid(float x, float y, float z, float r) {
-		this->x = x;
-		this->y = y;
-		this->z = z;
-		this->r = r;
+	Ellipsoid(float x, float y, float z, float r) : Sphere(x, y, z, r) {
+
 	}
 
 	// If these two methods are called, then ray represents the transformed ray that has
@@ -258,6 +253,10 @@ public:
 
 	bool intersectP(Ray &ray) {
 		return Sphere::intersectP(ray);
+	}
+
+	std::string shapeType() {
+		return "Ellipsoid";
 	}
 
 };

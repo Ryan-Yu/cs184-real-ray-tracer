@@ -29,6 +29,8 @@
 
 #include "lodepng.h"
 
+#include "Eigen/Dense"
+
 #ifdef _WIN32
 #include <windows.h>
 #else
@@ -994,6 +996,6 @@ int main(int argc, char *argv[]) {
 
   film.writeImage("ray_tracer_output.png");
 
-  return 0;
+	 return 0;
 };
 

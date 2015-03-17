@@ -14,13 +14,15 @@ endif
 
 all: scene 
 scene: scene.o 
-	$(CC) $(CFLAGS) -o scene scene.o lodepng.o $(LDFLAGS) 	
+	$(CC) $(CFLAGS) -o scene scene.o lodepng.o $(LDFLAGS)	
 
 scene.o: Scene.cpp
 	$(CC) $(CFLAGS) -c Scene.cpp -o scene.o
 	
 lodepng.o: lodepng.cpp lodepng.h
 	$(CC) $(CFLAGS) -c lodepng.cpp -o lodepng.o
+
+	g++ -I Eigen/ Scene.cpp -o scene 
 
 clean: 
 	$(RM) *.o scene

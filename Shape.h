@@ -40,6 +40,10 @@ class Sphere : public Shape {
 	public:
 		float x, y, z, r;
 
+	Sphere() {
+
+	}
+
 	Sphere(float x, float y, float z, float r) {
 		this->x = x;
 		this->y = y;
@@ -230,9 +234,41 @@ class Sphere : public Shape {
 	}
 };
 
+class Ellipsoid : public Sphere {
+public:
+	std::vector<Transformation> transformations;
+	float x, y, z, r;
+
+	Ellipsoid() {
+
+	}
+
+	Ellipsoid(float x, float y, float z, float r) {
+		this->x = x;
+		this->y = y;
+		this->z = z;
+		this->r = r;
+	}
+
+	// If these two methods are called, then ray represents the transformed ray that has
+	// been transformed into object coordinates; i.e. original sphere coordinates.
+	bool intersect(Ray &ray, float* tHit, DifferentialGeometry* differentialGeometry) {
+		return Sphere::intersect(ray, tHit, differentialGeometry);
+	}
+
+	bool intersectP(Ray &ray) {
+		return Sphere::intersectP(ray);
+	}
+
+};
+
 class Triangle : public Shape {
 	public:
 		Point v1, v2, v3;
+
+	Triangle() {
+
+	}
 
 	Triangle(Point v1, Point v2, Point v3) {
 		this->v1 = v1;

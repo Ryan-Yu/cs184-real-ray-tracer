@@ -6,6 +6,7 @@
 #include <string>
 #include <limits>
 #include <cfloat>
+#include "Eigen/Geometry"
 
 #include "Vector3.h"
 #include "Vector4.h"
@@ -28,8 +29,6 @@
 #include "Light.h"
 
 #include "lodepng.h"
-
-#include "Eigen/Dense"
 
 #ifdef _WIN32
 #include <windows.h>
@@ -983,18 +982,19 @@ void initializeSampler() {
 // Main function
 //****************************************************
 int main(int argc, char *argv[]) {
-  // Turns debug mode ON or OFF
-  debug = true;
+	  // Turns debug mode ON or OFF
+	  debug = true;
 
-  // Parse command line options
-  parseCommandLineOptions(argc, argv);
-  printGlobalVariables();
+	  // Parse command line options
+	  parseCommandLineOptions(argc, argv);
+	  printGlobalVariables();
 
-  // Initializes list of buckets; Buckets have a list of samples
-  initializeSampler();
-  render();
+	  // Initializes list of buckets; Buckets have a list of samples
+	  initializeSampler();
+	  render();
 
-  film.writeImage("ray_tracer_output.png");
+	  film.writeImage("ray_tracer_output.png");
+
 
 	 return 0;
 };

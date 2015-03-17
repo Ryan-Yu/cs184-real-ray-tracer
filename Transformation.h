@@ -5,23 +5,23 @@
 
 class Transformation {
 	public:
-		Matrix4 m;
-		Matrix4 minvt;
+		Eigen::Matrix4f m;
+		Eigen::Matrix4f minvt;
 
 	Transformation() {
 
 	}
 
-	Transformation(Matrix4 transformationMatrix) {
+	Transformation(Eigen::Matrix4f transformationMatrix) {
 		this->m = transformationMatrix;
+		this->minvt = transformationMatrix.inverse().transpose();
 	}
 
-
-
+	// TODO: This may not be correct due to homogenizing points and vectors differently.
 	Ray transformRay(Ray ray) {
 		Ray rayToReturn = Ray();
 		rayToReturn.position = Matrix4::multiplyMatrixByPoint(this->m, ray.position);
-		rayToReturn.direction = ray.direction;
+		rayToReturn.direction = Matrix4::multiplyMatrixByVector(this->m, ray.direction);
 		rayToReturn.t_min = ray.t_min;
 		//TODO: Determine what t_max equals for different lights.
 		rayToReturn.t_max = ray.t_max;

@@ -4,95 +4,51 @@
 // Class that represents homogenized 3D matrices
 class Matrix4 {
   public:
-    float matrix[4][4];
 
   Matrix4() {
   }
+
 
   // TODO: Rotation matrix
   // TODO: SVD?
 
   // Creates a homogenized 3D translation matrix that translates by (x, y, z)
-  static Matrix4 createTranslationMatrix(float x, float y, float z) {
-	  Matrix4 matrixToReturn = Matrix4();
-	  int i, j;
-	  for (i = 0; i < 4; i++) {
-		  for (j = 0; j < 4; j++) {
-			  if (i == j) {
-				  matrixToReturn.matrix[i][j] = 1.0;
-			  } else {
-				  matrixToReturn.matrix[i][j] = 0;
-			  }
-		  }
-	  }
-	  matrixToReturn.matrix[0][3] = x;
-	  matrixToReturn.matrix[1][3] = y;
-	  matrixToReturn.matrix[2][3] = z;
-	  return matrixToReturn;
+  static Eigen::Matrix4f createTranslationMatrix(float x, float y, float z) {
+	  Eigen::Matrix4f m;
+	  m << 1, 0, 0, x,
+		   0, 1, 0, y,
+		   0, 0, 1, z,
+		   0, 0, 0, 1;
+	  return m;
   }
 
   // Creates a homogenized 3D scaling matrix that scales by (x, y, z)
-  static Matrix4 createScalingMatrix(float x, float y, float z) {
-	  Matrix4 matrixToReturn = Matrix4();
-	  int i, j;
-	  for (i = 0; i < 4; i++) {
-		  for (j = 0; j < 4; j++) {
-			  matrixToReturn.matrix[i][j] = 0;
-		  }
-	  }
-	  matrixToReturn.matrix[0][0] = x;
-	  matrixToReturn.matrix[1][1] = y;
-	  matrixToReturn.matrix[2][2] = z;
-	  matrixToReturn.matrix[3][3] = 1.0;
-	  return matrixToReturn;
+  static Eigen::Matrix4f createScalingMatrix(float x, float y, float z) {
+	  Eigen::Matrix4f m;
+	  m << x, 0, 0, 0,
+		   0, y, 0, 0,
+		   0, 0, z, 0,
+		   0, 0, 0, 1;
+	  return m;
   }
 
-  static Matrix4 multiplyMatrices(Matrix4 matrix1, Matrix4 matrix2) {
-
+  static Eigen::Matrix4f composeMatrices(Eigen::Matrix4f matrix1, Eigen::Matrix4f matrix2) {
+	  return matrix1*matrix2;
   }
+  // TODO: Might need to change homogenized coordinate from a 0 to a 1.
+  static Vector3 multiplyMatrixByVector(Eigen::Matrix4f matrix, Vector3 vector) {
+	  Eigen::Vector4f vector4(vector.x, vector.y, vector.z, 0.0);
+	  Eigen::Vector4f resultVector4 = matrix*vector4;
+	  Vector3 resultVector3 = Vector3(resultVector4(0, 0), resultVector4(1, 0), resultVector4(2, 0));
 
-  static Vector3 multiplyMatrixByVector(Matrix4 matrix, Vector3 vector) {
-	  Vector3 vectorToReturn = Vector3();
-	  int i;
-	  for (i = 0; i < 4; i++) {
-		  float currentSum = 0.0;
-		  currentSum += matrix.matrix[i][0] * vector.x;
-		  currentSum += matrix.matrix[i][1] * vector.y;
-		  currentSum += matrix.matrix[i][2] * vector.z;
-		  currentSum += matrix.matrix[i][3] * 1.0;
-		  if (i == 0) {
-			  vectorToReturn.x = currentSum;
-		  }
-		  else if (i == 1) {
-			  vectorToReturn.y = currentSum;
-		  }
-		  else if (i == 2) {
-			  vectorToReturn.z = currentSum;
-		  }
-	  }
-	  return vectorToReturn;
+	  return resultVector3;
   }
-
-  static Point multiplyMatrixByPoint(Matrix4 matrix, Point point) {
-	  Point pointToReturn = Point();
-	  int i;
-	  for (i = 0; i < 4; i++) {
-		  float currentSum = 0.0;
-		  currentSum += matrix.matrix[i][0] * point.x;
-		  currentSum += matrix.matrix[i][1] * point.y;
-		  currentSum += matrix.matrix[i][2] * point.z;
-		  currentSum += matrix.matrix[i][3] * 1.0;
-		  if (i == 0) {
-			  pointToReturn.x = currentSum;
-		  }
-		  else if (i == 1) {
-			  pointToReturn.y = currentSum;
-		  }
-		  else if (i == 2) {
-			  pointToReturn.z = currentSum;
-		  }
-	  }
-	  return pointToReturn;
+  // TODO: Might need to change homogenized coordinate from a 1 to a 0.
+  static Point multiplyMatrixByPoint(Eigen::Matrix4f matrix, Point point) {
+	  Eigen::Vector4f vector4(point.x, point.y, point.z, 1.0);
+	  Eigen::Vector4f resultVector4 = matrix*vector4;
+	  Point resultPoint = Point(resultVector4[0], resultVector4[1], resultVector4[2]);
+	  return resultPoint;
   }
 };
 

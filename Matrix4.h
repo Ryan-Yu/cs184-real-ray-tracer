@@ -12,6 +12,17 @@ class Matrix4 {
   // TODO: Rotation matrix
   // TODO: SVD?
 
+
+  // Creates an identity matrix
+  static Eigen::Matrix4f createIdentityMatrix() {
+	  Eigen::Matrix4f m;
+	  m << 1, 0, 0, 0,
+		   0, 1, 0, 0,
+		   0, 0, 1, 0,
+		   0, 0, 0, 1;
+	  return m;
+  }
+
   // Creates a homogenized 3D translation matrix that translates by (x, y, z)
   static Eigen::Matrix4f createTranslationMatrix(float x, float y, float z) {
 	  Eigen::Matrix4f m;

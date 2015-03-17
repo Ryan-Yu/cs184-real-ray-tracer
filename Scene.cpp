@@ -44,6 +44,74 @@
 using namespace std;
 
 
+/*
+ * Scene file has:
+ *   transformation1
+ *   transformation2
+ *   sph 0 0 0 2
+ *
+ *   i.e. transformation 1 and 2 transform the SPHERE INTO THE ELLIPSOID
+ *
+ * (1) Store an ELLIPSOID object that has scaledX, scaledY, scaledZ, translateX, translateY, translateZ, rotationObject;
+ *     populate these attributes based on the transformations given.
+ *
+ *     Also store a vector<transformations> = [transformation1, transformation2] = M   to indicate how the sphere was transformed
+ *     into the ellipsoid
+ *
+ * (2) In the intersect() method, transform the original input ray in world coordinates (i.e. ellipsoid coordinates)
+ *     with the INVERSE transformations (M^ -1) to send the ray into OBJECT coordinates (i.e. sphere coordinates)
+ *
+ * (3) In the intersect() method, call the ellipsoid's PARENT's (i.e. it's corresponding sphere's) intersection method
+ *     with the TRANSFORMED ray to find the intersection point of the TRANSFORMED ray and the ORIGINAL SPHERE.
+ *     This intersection point is in OBJECT coordinates.
+ *
+ *     (NOTE: do this with super.
+ *
+ * (4) Perform the original stored transformation (i.e. M) on the intersection point to transform the intersection point
+ *     back into WORLD (i.e. ellipsoid) coordinates.
+ *
+ * (5) Done.
+ *
+ */
+
+/*
+
+GeometricPrimitive
+	Members:
+		Transformation objToWorld, worldToObj;
+		Shape* shape;
+		Material* mat;
+
+	Methods:
+		bool intersect(Ray& ray, float* thit, Intersection* in)  {
+			// Set worldToObj and objToWorld as identity by default
+			Ray oray = worldToObj*ray;
+			LocalGeo olocal;
+
+			// If 'shape' is of type ellipsoid, then simply call its parent routine
+			// with Sphere::intersect()
+
+			// If 'shape' was of type sphere, then it will just operate as normal,
+			// and oray will be the original ray anyway
+			if (!shape->intersect(oray, thit, &olocal))  return false;
+			in->primitive = this;
+			in->local = objToWorld*olocal;
+			return true;
+		}
+
+		bool intersectP(Ray& ray) {
+			Ray oray = worldToObj*ray;
+			return shape->intersectP(oray);
+		}
+
+		void getBRDF(LocalGeo& local, BRDF* brdf) {
+			material->getBRDF(local, brdf);
+		}
+
+ */
+
+
+
 //****************************************************
 // Forward Declarations
 //****************************************************

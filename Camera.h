@@ -50,7 +50,7 @@ class Camera {
 
 		// Given a sample in FILM coordinates, this method generates a ray from the eye (0, 0, 0)
 		// to the sample in IMAGE PLANE coordinates (i.e. [-1, 1])
-		void generateRay(Sample& sample, Ray* ray) {
+		void generateRay(Sample& sample, Ray* ray, bool distributedRayTracing) {
 
 			// Textbook page 75
 			ray->position = eye;
@@ -61,11 +61,21 @@ class Camera {
 			float horizontalSampleDistance = rectangleWidth / viewingPlaneWidth;
 			float verticalSampleDistance = rectangleHeight / viewingPlaneHeight;
 
-			float imagePlaneX = imagePlaneTopLeft.x + ((rectangleWidth * (sample.x + 0.5)) / viewingPlaneWidth);
-			float imagePlaneY = imagePlaneBottomLeft.y + ((rectangleHeight * (sample.y + 0.5)) / viewingPlaneHeight);
+			float imagePlaneX, imagePlaneY;
+
+			if (distributedRayTracing) {
+				// Random number between 0 and 99
+				int randomNumberX = rand() % 100;
+				int randomNumberY = rand() % 100;
+
+				imagePlaneX = imagePlaneTopLeft.x + ((rectangleWidth * (sample.x + (randomNumberX / 100.0))) / viewingPlaneWidth);
+				imagePlaneY = imagePlaneBottomLeft.y + ((rectangleHeight * (sample.y + (randomNumberY / 100.0))) / viewingPlaneHeight);
+			} else {
+				imagePlaneX = imagePlaneTopLeft.x + ((rectangleWidth * (sample.x + 0.5)) / viewingPlaneWidth);
+				imagePlaneY = imagePlaneBottomLeft.y + ((rectangleHeight * (sample.y + 0.5)) / viewingPlaneHeight);
+			}
 
 			ray->direction = Vector3(imagePlaneX - eye.x, imagePlaneY - eye.y, imagePlaneTopLeft.z - eye.z);
-//			ray->direction = Vector3(imagePlaneX, imagePlaneY, eye.z - imagePlaneTopLeft.z);
 
 			ray->t_min = 0.001;
 			ray->t_max = FLT_MAX;

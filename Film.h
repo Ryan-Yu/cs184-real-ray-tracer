@@ -18,6 +18,7 @@ public:
 		// TODO: Need to define this
 		color = color.addColor(colorToAdd);
 		numberOfSamples++;
+
 	}
 };
 
@@ -54,6 +55,7 @@ class Film {
 		for (int y = 0; y < height; y++) {
 			for (int x = 0; x < width; x++) {
 				buckets.push_back(Bucket());
+
 			}
 		}
 	}
@@ -66,6 +68,7 @@ class Film {
 		// Find the index of our 'buckets' array that corresponds with the sample's pixel, and add the 'color' to this index of the array
 		// NOTE: sample.x and sample.y are in the coordinate system of the viewing plane, i.e. [width -> height]
 		buckets[width * sample.y + sample.x].add(color);
+
 	}
 
 
@@ -74,6 +77,7 @@ class Film {
 		for (int y = 0; y < height; y++) {
 			for (int x = 0; x < width; x++) {
 				double numSamplesInBucket = buckets[width * y + x].numberOfSamples;
+
 				rawImage[4 * width * y + 4 * x + 0] = fmin((buckets[width * (height - y) + x].color.r / numSamplesInBucket), 255.0);
 				rawImage[4 * width * y + 4 * x + 1] = fmin((buckets[width * (height - y) + x].color.g / numSamplesInBucket), 255.0);
 				rawImage[4 * width * y + 4 * x + 2] = fmin((buckets[width * (height - y) + x].color.b / numSamplesInBucket), 255.0);
@@ -86,6 +90,7 @@ class Film {
 	// First converts our 2D array of color into raw data so LodePNG can use it
 	// Then encodes the image to a file with LodePNG
 	void writeImage(const char* filename) {
+
 		// Generate rawImage from our vector of buckets
 		convertToRawData();
 

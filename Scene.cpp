@@ -6,6 +6,7 @@
 #include <string>
 #include <limits>
 #include <cfloat>
+#include <cstdlib>
 #include "Eigen/Geometry"
 
 #include "Vector3.h"
@@ -130,7 +131,6 @@ class RayTracer;
 // Global Variables
 //****************************************************
 bool debug;
-bool softShadows;
 std::vector<Sample> samples;
 Film film;
 Camera camera;
@@ -141,6 +141,12 @@ std::vector<DirectionalLight> directional_lights;
 std::vector<AmbientLight> ambient_lights;
 std::vector<Point> objFileVertices;
 Transformation currentlySeenTransformation;
+
+// Extra Credit global variables
+bool softShadows;
+bool distributedRayTracing;
+
+
 
 class RayTracer {
 	public:
@@ -524,20 +530,6 @@ void parseObjFile(string filename) {
 
 	bool validLine = true;
 
-	// TODO: Change this. Right now, all of our OBJ triangles will have this same BRDF
-	BRDFCoefficients brdfToAdd = BRDFCoefficients();
-	Color kaToAdd = Color(0.2, 0.2, 0.2);
-	Color kdToAdd = Color(0.8, 0.8, 0.8);
-	Color ksToAdd = Color(0.1, 0.1, 0.1);
-	Color krToAdd = Color(0.1, 0.1, 0.1);
-	brdfToAdd.ka = kaToAdd;
-	brdfToAdd.kd = kdToAdd;
-	brdfToAdd.ks = ksToAdd;
-	brdfToAdd.kr = krToAdd;
-	brdfToAdd.sp = 50.0;
-	Material* materialToAdd = new Material();
-	materialToAdd->constantBRDF = brdfToAdd;
-
 	while (getline(file, str)) {
 		// str represents the current line of the file
 
@@ -602,7 +594,18 @@ void parseObjFile(string filename) {
 							objFileVertices[vertexIndex1].x, objFileVertices[vertexIndex1].y, objFileVertices[vertexIndex1].z,
 							objFileVertices[vertexIndex2].x, objFileVertices[vertexIndex2].y, objFileVertices[vertexIndex2].z,
 							objFileVertices[vertexIndex3].x, objFileVertices[vertexIndex3].y, objFileVertices[vertexIndex3].z);
-
+					BRDFCoefficients brdfToAdd = BRDFCoefficients();
+					Color kaToAdd = Color(0.2, 0.2, 0.2);
+					Color kdToAdd = Color(0.8, 0.8, 0.8);
+					Color ksToAdd = Color(0.1, 0.1, 0.1);
+					Color krToAdd = Color(0.1, 0.1, 0.1);
+					brdfToAdd.ka = kaToAdd;
+					brdfToAdd.kd = kdToAdd;
+					brdfToAdd.ks = ksToAdd;
+					brdfToAdd.kr = krToAdd;
+					brdfToAdd.sp = 50.0;
+					Material* materialToAdd = new Material();
+					materialToAdd->constantBRDF = brdfToAdd;
 					primitiveToAdd->material = materialToAdd;
 					primitiveToAdd->shape = triangleToAdd;
 					aggregatePrimitive.addPrimitive(primitiveToAdd);
@@ -1043,10 +1046,18 @@ void parseCommandLineOptions(int argc, char *argv[]) {
 		// Check that -depth has enough option parameters
 		if (i > (argc - 1))
 		{
-			std::cout << "Invalid number of parameters for -depth.";
+			std::cout << "Invalid number of parameters for -ss.";
 			exit(1);
 		}
 		softShadows = true;
+	} else if (flag == "-distributed") {
+		// Check that -depth has enough option parameters
+		if (i > (argc - 1))
+		{
+			std::cout << "Invalid number of parameters for -distributed.";
+			exit(1);
+		}
+		distributedRayTracing = true;
 	} else {
 		std::cout << "Extra parameters in command line options; terminating program.";
 		exit(1);
@@ -1082,15 +1093,23 @@ void render() {
 		Ray currentRay;
 		Color currentSampleColor;
 
-		// Given the sample in Film-coordinates, tell the camera to generate a viewing ray in IMAGE PLANE [-1, 1] coordinates
-		camera.generateRay(samples[i], &currentRay);
+		if (distributedRayTracing) {
 
-		// Call the trace method to try to populate currentSampleColor for the currentSample
-		rayTracer.trace(currentRay, 0, &currentSampleColor);
+			for (int j = 0; j < 16; j++) {
+				camera.generateRay(samples[i], &currentRay, distributedRayTracing);
+				rayTracer.trace(currentRay, 0, &currentSampleColor);
+				film.commitColor(samples[i], currentSampleColor);
+			}
+		} else {
+			// Given the sample in Film-coordinates, tell the camera to generate a viewing ray in IMAGE PLANE [-1, 1] coordinates
+			camera.generateRay(samples[i], &currentRay, distributedRayTracing);
 
-		// Commit the currentSampleColor for the currentSample onto our Film
-		film.commitColor(samples[i], currentSampleColor);
+			// Call the trace method to try to populate currentSampleColor for the currentSample
+			rayTracer.trace(currentRay, 0, &currentSampleColor);
 
+			// Commit the currentSampleColor for the currentSample onto our Film
+			film.commitColor(samples[i], currentSampleColor);
+		}
 	}
 
 }

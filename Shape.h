@@ -30,9 +30,6 @@ class Shape {
 			return "";
 		}
 
-		virtual ~Shape() {
-
-		}
 
 };
 

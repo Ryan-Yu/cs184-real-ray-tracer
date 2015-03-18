@@ -132,6 +132,7 @@ class RayTracer;
 //****************************************************
 bool debug;
 std::vector<Sample> samples;
+const char * filename;
 Film film;
 Camera camera;
 int recursionDepth;
@@ -595,7 +596,7 @@ void parseObjFile(string filename) {
 							objFileVertices[vertexIndex2].x, objFileVertices[vertexIndex2].y, objFileVertices[vertexIndex2].z,
 							objFileVertices[vertexIndex3].x, objFileVertices[vertexIndex3].y, objFileVertices[vertexIndex3].z);
 					BRDFCoefficients brdfToAdd = BRDFCoefficients();
-					Color kaToAdd = Color(0.2, 0.2, 0.2);
+					Color kaToAdd = Color(1.0, 0.0, 1.0);
 					Color kdToAdd = Color(0.8, 0.8, 0.8);
 					Color ksToAdd = Color(0.1, 0.1, 0.1);
 					Color krToAdd = Color(0.1, 0.1, 0.1);
@@ -1058,9 +1059,20 @@ void parseCommandLineOptions(int argc, char *argv[]) {
 			exit(1);
 		}
 		distributedRayTracing = true;
-	} else {
+	} else if (flag == "-filename") {
+		// Check that -depth has enough option parameters
+		if ((i + 1) > (argc - 1))
+		{
+			std::cout << "Invalid number of parameters for -depth.";
+			exit(1);
+		}
+		filename = argv[i+1];
+		i += 1;
+	}
+	else {
 		std::cout << "Extra parameters in command line options; terminating program.";
 		exit(1);
+
 	}
 
     // Advance to next flag, if one exists
@@ -1135,28 +1147,33 @@ void initializeSampler() {
 // Main function
 //****************************************************
 int main(int argc, char *argv[]) {
-	  // Turns debug mode ON or OFF
-	  debug = true;
 
-	  // Parse command line options
-	  parseCommandLineOptions(argc, argv);
-	  printGlobalVariables();
+	// Default the filename to 'output_image.png' if none is specified
+	if (filename == NULL) {
+		filename = "output_image.png";
+	}
 
-	  // Initializes list of buckets; Buckets have a list of samples
-	  initializeSampler();
+	// Turns debug mode ON or OFF
+	debug = true;
 
-	  render();
+	// Parse command line options
+	parseCommandLineOptions(argc, argv);
+	printGlobalVariables();
 
-	  // Deallocate memory
-	  for (std::vector<GeometricPrimitive*>::size_type i = 0; i < aggregatePrimitive.listOfPrimitives.size(); i++) {
-		  delete aggregatePrimitive.listOfPrimitives[i]->material;
-		  delete aggregatePrimitive.listOfPrimitives[i]->shape;
-		  delete aggregatePrimitive.listOfPrimitives[i];
-	  }
+	// Initializes list of buckets; Buckets have a list of samples
+	initializeSampler();
 
-	  film.writeImage("ray_tracer_output.png");
+	render();
 
+	// Deallocate memory
+	for (std::vector<GeometricPrimitive*>::size_type i = 0; i < aggregatePrimitive.listOfPrimitives.size(); i++) {
+	  delete aggregatePrimitive.listOfPrimitives[i]->material;
+	  delete aggregatePrimitive.listOfPrimitives[i]->shape;
+	  delete aggregatePrimitive.listOfPrimitives[i];
+	}
 
-	 return 0;
+	film.writeImage(filename);
+
+	return 0;
 };
 

@@ -1,12 +1,12 @@
 #ifndef BRDFCOEFFICIENTS_H_
 #define BRDFCOEFFICIENTS_H_
 
-// This is a wrapper class for the 5 BRDF coefficients.
+// This is a wrapper class for the BRDF coefficients.
 // NOTE: a BRDFCoefficient is an instance variable of a Material
 class BRDFCoefficients {
 	public:
 		Color kd, ks, ka, kr;
-		int sp;
+		int sp, refractionIndex;
 
 	BRDFCoefficients() {
 		this->sp = 1;

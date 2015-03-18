@@ -8,11 +8,6 @@ class Matrix4 {
   Matrix4() {
   }
 
-
-  // TODO: Rotation matrix
-  // TODO: SVD?
-
-
   // Creates an identity matrix
   static Eigen::Matrix4f createIdentityMatrix() {
 	  Eigen::Matrix4f m;
@@ -46,7 +41,7 @@ class Matrix4 {
   static Eigen::Matrix4f composeMatrices(Eigen::Matrix4f matrix1, Eigen::Matrix4f matrix2) {
 	  return matrix1*matrix2;
   }
-  // TODO: Might need to change homogenized coordinate from a 0 to a 1.
+
   static Vector3 multiplyMatrixByVector(Eigen::Matrix4f matrix, Vector3 vector) {
 	  Eigen::Vector4f vector4(vector.x, vector.y, vector.z, 0.0);
 	  Eigen::Vector4f resultVector4 = matrix*vector4;
@@ -54,7 +49,7 @@ class Matrix4 {
 
 	  return resultVector3;
   }
-  // TODO: Might need to change homogenized coordinate from a 1 to a 0.
+
   static Point multiplyMatrixByPoint(Eigen::Matrix4f matrix, Point point) {
 	  Eigen::Vector4f vector4(point.x, point.y, point.z, 1.0);
 	  Eigen::Vector4f resultVector4 = matrix*vector4;
@@ -73,14 +68,12 @@ class Matrix4 {
 		axisOfRotation.normalize();
 		Eigen::AngleAxisf angleAxis  = Eigen::AngleAxisf(radians, axisOfRotation);
 		Eigen::Matrix3f rotationMatrix3 = angleAxis.matrix();
-		std::cout << rotationMatrix3 << "\n";
 		Eigen::Matrix4f rotationMatrix4;
 		rotationMatrix4 << rotationMatrix3(0, 0), rotationMatrix3(0, 1), rotationMatrix3(0, 2), 0,
 						   rotationMatrix3(1, 0), rotationMatrix3(1, 1), rotationMatrix3(1, 2), 0,
 						   rotationMatrix3(2, 0), rotationMatrix3(2, 1), rotationMatrix3(2, 2), 0,
 						   0, 0, 0, 1;
 
-		std::cout << rotationMatrix4 << "\n";
 		return rotationMatrix4;
 	}
 };

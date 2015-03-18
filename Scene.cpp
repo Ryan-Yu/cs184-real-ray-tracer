@@ -130,6 +130,7 @@ class RayTracer;
 // Global Variables
 //****************************************************
 bool debug;
+bool softShadows;
 std::vector<Sample> samples;
 Film film;
 Camera camera;
@@ -525,7 +526,7 @@ void parseObjFile(string filename) {
 
 	// TODO: Change this. Right now, all of our OBJ triangles will have this same BRDF
 	BRDFCoefficients *brdfToAdd = new BRDFCoefficients();
-	Color* kaToAdd = new Color(0, 0, 0);
+	Color* kaToAdd = new Color(0.2, 0.2, 0.2);
 	Color* kdToAdd = new Color(0.8, 0.8, 0.8);
 	Color* ksToAdd = new Color(0.1, 0.1, 0.1);
 	Color* krToAdd = new Color(0.1, 0.1, 0.1);
@@ -747,8 +748,12 @@ void parseSceneFile(string filename) {
 					cerr << "Extra parameters for " << currentlyParsing << ". Ignoring them.\n";
 				}
 				if (i == 6) {
-					// Add point light to global list
-					point_lights.push_back(PointLight(px, py, pz, r, g, b, falloff));
+					if (!softShadows) {
+						// Add point light to global list
+						point_lights.push_back(PointLight(px, py, pz, r, g, b, falloff));
+					} else {
+						// We want soft shadows, so generate lots of point lights
+					}
 				}
 			} else if (currentlyParsing == "lta") {
 				float r, g, b;
@@ -976,10 +981,18 @@ void parseCommandLineOptions(int argc, char *argv[]) {
 	  }
 	  recursionDepth = stoi(argv[i+1]);
 	  i += 1;
+	} else if (flag == "-ss") {
+		// Check that -depth has enough option parameters
+		if (i > (argc - 1))
+		{
+			std::cout << "Invalid number of parameters for -depth.";
+			exit(1);
+		}
+		softShadows = true;
 	} else {
-      std::cout << "Extra parameters in command line options; terminating program.";
-      exit(1);
-    }
+		std::cout << "Extra parameters in command line options; terminating program.";
+		exit(1);
+	}
 
     // Advance to next flag, if one exists
     i++;
@@ -1003,9 +1016,9 @@ void render() {
 	// Loop through all of the samples...
 	for (vector<Sample>::size_type i = 0; i < samples.size(); i++) {
 
-		if (debug) {
-			std::cout << "Currently processing sample " << i << " out of " << samples.size() << ".\n";
-		}
+//		if (debug) {
+//			std::cout << "Currently processing sample " << i << " out of " << samples.size() << ".\n";
+//		}
 
 		// For each sample, generate a ray from the eye to the sample location
 		Ray currentRay;
@@ -1055,6 +1068,20 @@ int main(int argc, char *argv[]) {
 	  // Initializes list of buckets; Buckets have a list of samples
 	  initializeSampler();
 	  render();
+
+//	  // Deallocate memory
+//	  for (std::vector<GeometricPrimitive*>::size_type i = 0; i < aggregatePrimitive.listOfPrimitives.size(); i++) {
+//		  GeometricPrimitive* currentPrimitiveToDelete = aggregatePrimitive.listOfPrimitives[i];
+//		  Material* currentMaterialToDelete = currentPrimitiveToDelete->material;
+//		  delete currentMaterialToDelete->constantBRDF.ka;
+//		  delete currentMaterialToDelete->constantBRDF.kd;
+//		  delete currentMaterialToDelete->constantBRDF.ks;
+//		  delete currentMaterialToDelete->constantBRDF.kr;
+//		  delete currentMaterialToDelete->constantBRDF;
+//		  delete currentPrimitiveToDelete->material;
+//		  delete currentPrimitiveToDelete->shape;
+//		  delete aggregatePrimitive.listOfPrimitives[i];
+//	  }
 
 	  film.writeImage("ray_tracer_output.png");
 

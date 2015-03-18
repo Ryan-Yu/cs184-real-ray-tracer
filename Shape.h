@@ -287,12 +287,12 @@ class Triangle : public Shape {
 		// Calculate triangle edge vectors to calculate the normal
 
 		// u = T.v2 - T.v1
-		Vector3 *u = new Vector3(this->v2.x - this->v1.x, this->v2.y - this->v1.y, this->v2.z - this->v1.z);
+		Vector3 u = Vector3(this->v2.x - this->v1.x, this->v2.y - this->v1.y, this->v2.z - this->v1.z);
 		// v = T.v3 - T.v1
-		Vector3 *v = new Vector3(this->v3.x - this->v1.x, this->v3.y - this->v1.y, this->v3.z - this->v1.z);
+		Vector3 v = Vector3(this->v3.x - this->v1.x, this->v3.y - this->v1.y, this->v3.z - this->v1.z);
 
 		// normal = u x v
-		Vector3 normal = u->crossProduct(*v);
+		Vector3 normal = u.crossProduct(v);
 		// (b - a) x (c - a)
 //		return Normal::normalizeNormal(Normal(normal.x, normal.y, normal.z));
 
@@ -331,26 +331,26 @@ class Triangle : public Shape {
 
 		// Calculate the triangle edge vectors
 		// u = T.v2 - T.v1
-		Vector3 *u = new Vector3(this->v2.x - this->v1.x, this->v2.y - this->v1.y, this->v2.z - this->v1.z);
+		Vector3 u = Vector3(this->v2.x - this->v1.x, this->v2.y - this->v1.y, this->v2.z - this->v1.z);
 		// v = T.v3 - T.v1
-		Vector3 *v = new Vector3(this->v3.x - this->v1.x, this->v3.y - this->v1.y, this->v3.z - this->v1.z);
+		Vector3 v = Vector3(this->v3.x - this->v1.x, this->v3.y - this->v1.y, this->v3.z - this->v1.z);
 
 		// Calculuate plane normal
 		// normal = u x v
 		Normal normal = this->computeNormal();
-		Vector3 *normalVector = new Vector3(normal.x, normal.y, normal.z);
+		Vector3 normalVector = Vector3(normal.x, normal.y, normal.z);
 
 		// If normal = (0, 0, 0), the triangle is degenerate, so return false
 		if (normal.x == 0 && normal.y == 0 && normal.z == 0) {
 			return false;
 		}
 
-		Vector3 *rayTrianglePositionVector = new Vector3(g - this->v1.x, i - this->v1.y, k - this->v1.z);
+		Vector3 rayTrianglePositionVector = Vector3(g - this->v1.x, i - this->v1.y, k - this->v1.z);
 
-		Vector3 *rayDirectionVector = new Vector3(f, h, j);
+		Vector3 rayDirectionVector = Vector3(f, h, j);
 
-		float rayInsideTriangle = -1.0 * (normalVector->dotProduct(*rayTrianglePositionVector));
-		float rayParallelTriangle = normalVector->dotProduct(*rayDirectionVector);
+		float rayInsideTriangle = -1.0 * (normalVector.dotProduct(rayTrianglePositionVector));
+		float rayParallelTriangle = normalVector.dotProduct(rayDirectionVector);
 
 		// If the ray is parallel to the triangle, return false
 		if (std::fabs(rayParallelTriangle) < 0.001) {
@@ -369,14 +369,14 @@ class Triangle : public Shape {
 		float zCoor = (j * tIntersection) + k;
 
 		// Is the intersection inside the triangle?
-		float uu = u->dotProduct(*u);
-		float uv = u->dotProduct(*v);
-		float vv = v->dotProduct(*v);
+		float uu = u.dotProduct(u);
+		float uv = u.dotProduct(v);
+		float vv = v.dotProduct(v);
 
-		Vector3 *w = new Vector3(xCoor - this->v1.x, yCoor - this->v1.y, zCoor - this->v1.z);
+		Vector3 w = Vector3(xCoor - this->v1.x, yCoor - this->v1.y, zCoor - this->v1.z);
 
-		float wu = w->dotProduct(*u);
-		float wv = w->dotProduct(*v);
+		float wu = w.dotProduct(u);
+		float wv = w.dotProduct(v);
 
 		float discriminant = uv * uv - uu * vv;
 
@@ -421,14 +421,14 @@ class Triangle : public Shape {
 
 		// Calculate the triangle edge vectors
 		// u = T.v2 - T.v1
-		Vector3 *u = new Vector3(this->v2.x - this->v1.x, this->v2.y - this->v1.y, this->v2.z - this->v1.z);
+		Vector3 u = Vector3(this->v2.x - this->v1.x, this->v2.y - this->v1.y, this->v2.z - this->v1.z);
 		// v = T.v3 - T.v1
-		Vector3 *v = new Vector3(this->v3.x - this->v1.x, this->v3.y - this->v1.y, this->v3.z - this->v1.z);
+		Vector3 v = Vector3(this->v3.x - this->v1.x, this->v3.y - this->v1.y, this->v3.z - this->v1.z);
 
 		// Calculuate plane normal
 		// normal = u x v
 		Normal normal = this->computeNormal();
-		Vector3 *normalVector = new Vector3(normal.x, normal.y, normal.z);
+		Vector3 normalVector = Vector3(normal.x, normal.y, normal.z);
 
 		// If normal = (0, 0, 0), the triangle is degenerate, so return false
 		if (normal.x == 0 && normal.y == 0 && normal.z == 0) {
@@ -436,13 +436,13 @@ class Triangle : public Shape {
 		}
 
 		// rayTrianglePositionVector = StartingRayPosition - TriangleV1Position
-		Vector3 *rayTrianglePositionVector = new Vector3(g - this->v1.x, i - this->v1.y, k - this->v1.z);
+		Vector3 rayTrianglePositionVector = Vector3(g - this->v1.x, i - this->v1.y, k - this->v1.z);
 
 		// rayDirectionVector = RayDirection
-		Vector3 *rayDirectionVector = new Vector3(f, h, j);
+		Vector3 rayDirectionVector = Vector3(f, h, j);
 
-		float rayInsideTriangle = -1.0 * normalVector->dotProduct(*rayTrianglePositionVector);
-		float rayParallelTriangle = normalVector->dotProduct(*rayDirectionVector);
+		float rayInsideTriangle = -1.0 * normalVector.dotProduct(rayTrianglePositionVector);
+		float rayParallelTriangle = normalVector.dotProduct(rayDirectionVector);
 
 		// If the ray is parallel to the triangle, return false
 		if (std::fabs(rayParallelTriangle) < 0.001) {
@@ -461,14 +461,14 @@ class Triangle : public Shape {
 		float zCoor = (j * tIntersection) + k;
 
 		// Is the intersection inside the triangle?
-		float uu = u->dotProduct(*u);
-		float uv = u->dotProduct(*v);
-		float vv = v->dotProduct(*v);
+		float uu = u.dotProduct(u);
+		float uv = u.dotProduct(v);
+		float vv = v.dotProduct(v);
 
-		Vector3 *w = new Vector3(this->v1.x - xCoor, this->v1.y - yCoor, this->v1.z - zCoor);
+		Vector3 w = Vector3(this->v1.x - xCoor, this->v1.y - yCoor, this->v1.z - zCoor);
 
-		float wu = w->dotProduct(*u);
-		float wv = w->dotProduct(*v);
+		float wu = w.dotProduct(u);
+		float wv = w.dotProduct(v);
 
 		float discriminant = uv * uv - uu * vv;
 

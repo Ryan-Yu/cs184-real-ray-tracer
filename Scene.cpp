@@ -525,18 +525,18 @@ void parseObjFile(string filename) {
 	bool validLine = true;
 
 	// TODO: Change this. Right now, all of our OBJ triangles will have this same BRDF
-	BRDFCoefficients *brdfToAdd = new BRDFCoefficients();
-	Color* kaToAdd = new Color(0.2, 0.2, 0.2);
-	Color* kdToAdd = new Color(0.8, 0.8, 0.8);
-	Color* ksToAdd = new Color(0.1, 0.1, 0.1);
-	Color* krToAdd = new Color(0.1, 0.1, 0.1);
-	brdfToAdd->ka = *kaToAdd;
-	brdfToAdd->kd = *kdToAdd;
-	brdfToAdd->ks = *ksToAdd;
-	brdfToAdd->kr = *krToAdd;
-	brdfToAdd->sp = 50.0;
+	BRDFCoefficients brdfToAdd = BRDFCoefficients();
+	Color kaToAdd = Color(0.2, 0.2, 0.2);
+	Color kdToAdd = Color(0.8, 0.8, 0.8);
+	Color ksToAdd = Color(0.1, 0.1, 0.1);
+	Color krToAdd = Color(0.1, 0.1, 0.1);
+	brdfToAdd.ka = kaToAdd;
+	brdfToAdd.kd = kdToAdd;
+	brdfToAdd.ks = ksToAdd;
+	brdfToAdd.kr = krToAdd;
+	brdfToAdd.sp = 50.0;
 	Material* materialToAdd = new Material();
-	materialToAdd->constantBRDF = *brdfToAdd;
+	materialToAdd->constantBRDF = brdfToAdd;
 
 	while (getline(file, str)) {
 		// str represents the current line of the file
@@ -681,8 +681,6 @@ void parseSceneFile(string filename) {
 			} else if ((i == 0) && (currentWord == "xfr")) {
 				currentlyParsing = currentWord;
 
-			// TODO: Add Transformation, reset transformation identifier here
-
 			// We've found an unspecified identifier as the first word on our line
 			} else if (i == 0) {
 				currentlyParsing = currentWord;
@@ -698,6 +696,8 @@ void parseSceneFile(string filename) {
 
 			// ********** After we've figured out the first word in each line, parse the rest of the line ********** //
 			// If we've hit here, then we're NOT on the first word of the line anymore
+
+			// Camera must be the first line in the scene file
 			if (currentlyParsing == "cam") {
 				if (i == 0) { }
 				else if (i == 1) { ex = stof(currentWord); }
@@ -753,6 +753,65 @@ void parseSceneFile(string filename) {
 						point_lights.push_back(PointLight(px, py, pz, r, g, b, falloff));
 					} else {
 						// We want soft shadows, so generate lots of point lights
+
+						float horizontalLightOffset = (urx - ulx) / film.width * 8;
+						float verticalLightOffset = (ury - lry) / film.height * 8;
+
+						point_lights.push_back(PointLight(px - 3 * horizontalLightOffset, py + 3.0 * verticalLightOffset, pz, r / 49.0, g / 49.0, b / 49.0, falloff));
+						point_lights.push_back(PointLight(px - 2 * horizontalLightOffset, py + 3.0 * verticalLightOffset, pz, r / 49.0, g / 49.0, b / 49.0, falloff));
+						point_lights.push_back(PointLight(px - horizontalLightOffset, py + 3.0 * verticalLightOffset, pz, r / 49.0, g / 49.0, b / 49.0, falloff));
+						point_lights.push_back(PointLight(px, py + 3.0 * verticalLightOffset, pz, r / 49.0, g / 49.0, b / 49.0, falloff));
+						point_lights.push_back(PointLight(px + horizontalLightOffset, py + 3.0 * verticalLightOffset, pz, r / 49.0, g / 49.0, b / 49.0, falloff));
+						point_lights.push_back(PointLight(px + 2 * horizontalLightOffset, py + 3.0 * verticalLightOffset, pz, r / 49.0, g / 49.0, b / 49.0, falloff));
+						point_lights.push_back(PointLight(px + 3 * horizontalLightOffset, py + 3.0 * verticalLightOffset, pz, r / 49.0, g / 49.0, b / 49.0, falloff));
+
+						point_lights.push_back(PointLight(px - 3 * horizontalLightOffset, py + 2.0 * verticalLightOffset, pz, r / 49.0, g / 49.0, b / 49.0, falloff));
+						point_lights.push_back(PointLight(px - 2 * horizontalLightOffset, py + 2.0 * verticalLightOffset, pz, r / 49.0, g / 49.0, b / 49.0, falloff));
+						point_lights.push_back(PointLight(px - horizontalLightOffset, py + 2.0 * verticalLightOffset, pz, r / 49.0, g / 49.0, b / 49.0, falloff));
+						point_lights.push_back(PointLight(px, py + 2.0 * verticalLightOffset, pz, r / 49.0, g / 49.0, b / 49.0, falloff));
+						point_lights.push_back(PointLight(px + horizontalLightOffset, py + 2.0 * verticalLightOffset, pz, r / 49.0, g / 49.0, b / 49.0, falloff));
+						point_lights.push_back(PointLight(px + 2 * horizontalLightOffset, py + 2.0 * verticalLightOffset, pz, r / 49.0, g / 49.0, b / 49.0, falloff));
+						point_lights.push_back(PointLight(px + 3 * horizontalLightOffset, py + 2.0 * verticalLightOffset, pz, r / 49.0, g / 49.0, b / 49.0, falloff));
+
+						point_lights.push_back(PointLight(px - 3 * horizontalLightOffset, py + verticalLightOffset, pz, r / 49.0, g / 49.0, b / 49.0, falloff));
+						point_lights.push_back(PointLight(px - 2 * horizontalLightOffset, py + verticalLightOffset, pz, r / 49.0, g / 49.0, b / 49.0, falloff));
+						point_lights.push_back(PointLight(px - horizontalLightOffset, py + verticalLightOffset, pz, r / 49.0, g / 49.0, b / 49.0, falloff));
+						point_lights.push_back(PointLight(px, py + verticalLightOffset, pz, r / 49.0, g / 49.0, b / 49.0, falloff));
+						point_lights.push_back(PointLight(px + horizontalLightOffset, py + verticalLightOffset, pz, r / 49.0, g / 49.0, b / 49.0, falloff));
+						point_lights.push_back(PointLight(px + 2 * horizontalLightOffset, py + verticalLightOffset, pz, r / 49.0, g / 49.0, b / 49.0, falloff));
+						point_lights.push_back(PointLight(px + 3 * horizontalLightOffset, py + verticalLightOffset, pz, r / 49.0, g / 49.0, b / 49.0, falloff));
+
+						point_lights.push_back(PointLight(px - 3 * horizontalLightOffset, py, pz, r / 49.0, g / 49.0, b / 49.0, falloff));
+						point_lights.push_back(PointLight(px - 2 * horizontalLightOffset, py, pz, r / 49.0, g / 49.0, b / 49.0, falloff));
+						point_lights.push_back(PointLight(px - horizontalLightOffset, py, pz, r / 49.0, g / 49.0, b / 49.0, falloff));
+						point_lights.push_back(PointLight(px, py, pz, r / 49.0, g / 49.0, b / 49.0, falloff));
+						point_lights.push_back(PointLight(px + horizontalLightOffset, py, pz, r / 49.0, g / 49.0, b / 49.0, falloff));
+						point_lights.push_back(PointLight(px + 2 * horizontalLightOffset, py, pz, r / 49.0, g / 49.0, b / 49.0, falloff));
+						point_lights.push_back(PointLight(px + 3 * horizontalLightOffset, py, pz, r / 49.0, g / 49.0, b / 49.0, falloff));
+
+						point_lights.push_back(PointLight(px - 3 * horizontalLightOffset, py - verticalLightOffset, pz, r / 49.0, g / 49.0, b / 49.0, falloff));
+						point_lights.push_back(PointLight(px - 2 * horizontalLightOffset, py - verticalLightOffset, pz, r / 49.0, g / 49.0, b / 49.0, falloff));
+						point_lights.push_back(PointLight(px - horizontalLightOffset, py - verticalLightOffset, pz, r / 49.0, g / 49.0, b / 49.0, falloff));
+						point_lights.push_back(PointLight(px, py - verticalLightOffset, pz, r / 49.0, g / 49.0, b / 49.0, falloff));
+						point_lights.push_back(PointLight(px + horizontalLightOffset, py - verticalLightOffset, pz, r / 49.0, g / 49.0, b / 49.0, falloff));
+						point_lights.push_back(PointLight(px + 2 * horizontalLightOffset, py - verticalLightOffset, pz, r / 49.0, g / 49.0, b / 49.0, falloff));
+						point_lights.push_back(PointLight(px + 3 * horizontalLightOffset, py - verticalLightOffset, pz, r / 49.0, g / 49.0, b / 49.0, falloff));
+
+						point_lights.push_back(PointLight(px - 3 * horizontalLightOffset, py - 2.0 * verticalLightOffset, pz, r / 49.0, g / 49.0, b / 49.0, falloff));
+						point_lights.push_back(PointLight(px - 2 * horizontalLightOffset, py - 2.0 * verticalLightOffset, pz, r / 49.0, g / 49.0, b / 49.0, falloff));
+						point_lights.push_back(PointLight(px - horizontalLightOffset, py - 2.0 * verticalLightOffset, pz, r / 49.0, g / 49.0, b / 49.0, falloff));
+						point_lights.push_back(PointLight(px, py - 2.0 * verticalLightOffset, pz, r / 49.0, g / 49.0, b / 49.0, falloff));
+						point_lights.push_back(PointLight(px + horizontalLightOffset, py - 2.0 * verticalLightOffset, pz, r / 49.0, g / 49.0, b / 49.0, falloff));
+						point_lights.push_back(PointLight(px + 2 * horizontalLightOffset, py - 2.0 * verticalLightOffset, pz, r / 49.0, g / 49.0, b / 49.0, falloff));
+						point_lights.push_back(PointLight(px + 3 * horizontalLightOffset, py - 2.0 * verticalLightOffset, pz, r / 49.0, g / 49.0, b / 49.0, falloff));
+
+						point_lights.push_back(PointLight(px - 3 * horizontalLightOffset, py - 3.0 * verticalLightOffset, pz, r / 49.0, g / 49.0, b / 49.0, falloff));
+						point_lights.push_back(PointLight(px - 2 * horizontalLightOffset, py - 3.0 * verticalLightOffset, pz, r / 49.0, g / 49.0, b / 49.0, falloff));
+						point_lights.push_back(PointLight(px - horizontalLightOffset, py - 3.0 * verticalLightOffset, pz, r / 49.0, g / 49.0, b / 49.0, falloff));
+						point_lights.push_back(PointLight(px, py - 3.0 * verticalLightOffset, pz, r / 49.0, g / 49.0, b / 49.0, falloff));
+						point_lights.push_back(PointLight(px + horizontalLightOffset, py - 3.0 * verticalLightOffset, pz, r / 49.0, g / 49.0, b / 49.0, falloff));
+						point_lights.push_back(PointLight(px + 2 * horizontalLightOffset, py - 3.0 * verticalLightOffset, pz, r / 49.0, g / 49.0, b / 49.0, falloff));
+						point_lights.push_back(PointLight(px + 3 * horizontalLightOffset, py - 3.0 * verticalLightOffset, pz, r / 49.0, g / 49.0, b / 49.0, falloff));
 					}
 				}
 			} else if (currentlyParsing == "lta") {
@@ -1015,7 +1074,7 @@ void render() {
 	// Loop through all of the samples...
 	for (vector<Sample>::size_type i = 0; i < samples.size(); i++) {
 
-//		if (debug) {
+//		if (debug && i % 1000 == 0) {
 //			std::cout << "Currently processing sample " << i << " out of " << samples.size() << ".\n";
 //		}
 
@@ -1066,6 +1125,7 @@ int main(int argc, char *argv[]) {
 
 	  // Initializes list of buckets; Buckets have a list of samples
 	  initializeSampler();
+
 	  render();
 
 	  // Deallocate memory

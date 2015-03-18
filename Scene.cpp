@@ -799,24 +799,23 @@ void parseSceneFile(string filename) {
 				if (i == 4) {
 					// Initialize our object, with the last seen material
 					GeometricPrimitive* primitiveToAdd = new GeometricPrimitive();
-					BRDFCoefficients *brdfToAdd = new BRDFCoefficients();
-					Color* kaToAdd = new Color(kar, kag, kab);
-					Color* kdToAdd = new Color(kdr, kdg, kdb);
-					Color* ksToAdd = new Color(ksr, ksg, ksb);
-					Color* krToAdd = new Color(krr, krg, krb);
-					brdfToAdd->ka = *kaToAdd;
-					brdfToAdd->kd = *kdToAdd;
-					brdfToAdd->ks = *ksToAdd;
-					brdfToAdd->kr = *krToAdd;
-					brdfToAdd->sp = ksp;
+					BRDFCoefficients brdfToAdd = BRDFCoefficients();
+					Color kaToAdd = Color(kar, kag, kab);
+					Color kdToAdd = Color(kdr, kdg, kdb);
+					Color ksToAdd = Color(ksr, ksg, ksb);
+					Color krToAdd = Color(krr, krg, krb);
+					brdfToAdd.ka = kaToAdd;
+					brdfToAdd.kd = kdToAdd;
+					brdfToAdd.ks = ksToAdd;
+					brdfToAdd.kr = krToAdd;
+					brdfToAdd.sp = ksp;
 					Material* materialToAdd = new Material();
-					materialToAdd->constantBRDF = *brdfToAdd;
+					materialToAdd->constantBRDF = brdfToAdd;
 					primitiveToAdd->material = materialToAdd;
 					primitiveToAdd->transformation = currentlySeenTransformation;
 
 					if (!currentlySeenTransformation.m.isIdentity()) {
 						Ellipsoid* ellipsoidToAdd = new Ellipsoid(cx, cy, cz, r);
-						std::cout << ellipsoidToAdd->x;
 						primitiveToAdd->shape = ellipsoidToAdd;
 					} else {
 						Sphere* sphereToAdd = new Sphere(cx, cy, cz, r);
@@ -843,18 +842,18 @@ void parseSceneFile(string filename) {
 				if (i == 9) {
 					GeometricPrimitive* primitiveToAdd = new GeometricPrimitive();
 					Triangle* triangleToAdd = new Triangle(ax, ay, az, bx, by, bz, cx, cy, cz);
-					BRDFCoefficients *brdfToAdd = new BRDFCoefficients();
-					Color* kaToAdd = new Color(kar, kag, kab);
-					Color* kdToAdd = new Color(kdr, kdg, kdb);
-					Color* ksToAdd = new Color(ksr, ksg, ksb);
-					Color* krToAdd = new Color(krr, krg, krb);
-					brdfToAdd->ka = *kaToAdd;
-					brdfToAdd->kd = *kdToAdd;
-					brdfToAdd->ks = *ksToAdd;
-					brdfToAdd->kr = *krToAdd;
-					brdfToAdd->sp = ksp;
+					BRDFCoefficients brdfToAdd = BRDFCoefficients();
+					Color kaToAdd = Color(kar, kag, kab);
+					Color kdToAdd = Color(kdr, kdg, kdb);
+					Color ksToAdd = Color(ksr, ksg, ksb);
+					Color krToAdd = Color(krr, krg, krb);
+					brdfToAdd.ka = kaToAdd;
+					brdfToAdd.kd = kdToAdd;
+					brdfToAdd.ks = ksToAdd;
+					brdfToAdd.kr = krToAdd;
+					brdfToAdd.sp = ksp;
 					Material* materialToAdd = new Material();
-					materialToAdd->constantBRDF = *brdfToAdd;
+					materialToAdd->constantBRDF = brdfToAdd;
 					primitiveToAdd->material = materialToAdd;
 					primitiveToAdd->shape = triangleToAdd;
 					aggregatePrimitive.addPrimitive(primitiveToAdd);
@@ -1069,19 +1068,12 @@ int main(int argc, char *argv[]) {
 	  initializeSampler();
 	  render();
 
-//	  // Deallocate memory
-//	  for (std::vector<GeometricPrimitive*>::size_type i = 0; i < aggregatePrimitive.listOfPrimitives.size(); i++) {
-//		  GeometricPrimitive* currentPrimitiveToDelete = aggregatePrimitive.listOfPrimitives[i];
-//		  Material* currentMaterialToDelete = currentPrimitiveToDelete->material;
-//		  delete currentMaterialToDelete->constantBRDF.ka;
-//		  delete currentMaterialToDelete->constantBRDF.kd;
-//		  delete currentMaterialToDelete->constantBRDF.ks;
-//		  delete currentMaterialToDelete->constantBRDF.kr;
-//		  delete currentMaterialToDelete->constantBRDF;
-//		  delete currentPrimitiveToDelete->material;
-//		  delete currentPrimitiveToDelete->shape;
-//		  delete aggregatePrimitive.listOfPrimitives[i];
-//	  }
+	  // Deallocate memory
+	  for (std::vector<GeometricPrimitive*>::size_type i = 0; i < aggregatePrimitive.listOfPrimitives.size(); i++) {
+		  delete aggregatePrimitive.listOfPrimitives[i]->material;
+		  delete aggregatePrimitive.listOfPrimitives[i]->shape;
+		  delete aggregatePrimitive.listOfPrimitives[i];
+	  }
 
 	  film.writeImage("ray_tracer_output.png");
 

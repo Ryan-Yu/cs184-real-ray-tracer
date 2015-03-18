@@ -1097,16 +1097,15 @@ void render() {
 	// Loop through all of the samples...
 	for (vector<Sample>::size_type i = 0; i < samples.size(); i++) {
 
-//		if (debug && i % 1000 == 0) {
-//			std::cout << "Currently processing sample " << i << " out of " << samples.size() << ".\n";
-//		}
+		if (debug && i % 1000 == 0) {
+			std::cout << "Currently processing sample " << i << " out of " << samples.size() << ".\n";
+		}
 
 		// For each sample, generate a ray from the eye to the sample location
 		Ray currentRay;
 		Color currentSampleColor;
 
 		if (distributedRayTracing) {
-
 			for (int j = 0; j < 16; j++) {
 				camera.generateRay(samples[i], &currentRay, distributedRayTracing);
 				rayTracer.trace(currentRay, 0, &currentSampleColor);

@@ -144,6 +144,7 @@ std::vector<Point> objFileVertices;
 Transformation currentlySeenTransformation;
 // Most recently seen material
 float currentKar, currentKag, currentKab, currentKdr, currentKdg, currentKdb, currentKsr, currentKsg, currentKsb, currentKsp, currentKrr, currentKrg, currentKrb;
+int currentSp;
 
 // Extra Credit global variables
 bool softShadows;
@@ -598,15 +599,15 @@ void parseObjFile(string filename) {
 							objFileVertices[vertexIndex2].x, objFileVertices[vertexIndex2].y, objFileVertices[vertexIndex2].z,
 							objFileVertices[vertexIndex3].x, objFileVertices[vertexIndex3].y, objFileVertices[vertexIndex3].z);
 					BRDFCoefficients brdfToAdd = BRDFCoefficients();
-					Color kaToAdd = Color(0.1, 0.1, 0.1);
-					Color kdToAdd = Color(0.8, 0.8, 0.8);
-					Color ksToAdd = Color(0.1, 0.1, 0.1);
-					Color krToAdd = Color(0.1, 0.1, 0.1);
+					Color kaToAdd = Color(currentKar, currentKag, currentKab);
+					Color kdToAdd = Color(currentKdr, currentKdg, currentKdb);
+					Color ksToAdd = Color(currentKsr, currentKsg, currentKsb);
+					Color krToAdd = Color(currentKrr, currentKrg, currentKrb);
 					brdfToAdd.ka = kaToAdd;
 					brdfToAdd.kd = kdToAdd;
 					brdfToAdd.ks = ksToAdd;
 					brdfToAdd.kr = krToAdd;
-					brdfToAdd.sp = 50.0;
+					brdfToAdd.sp = currentSp;
 					Material* materialToAdd = new Material();
 					materialToAdd->constantBRDF = brdfToAdd;
 					primitiveToAdd->material = materialToAdd;
@@ -863,6 +864,7 @@ void parseSceneFile(string filename) {
 					currentKrr = krr;
 					currentKrg = krg;
 					currentKrb = krb;
+					currentSp = ksp;
 				}
 
 			} else if (currentlyParsing == "sph") {
@@ -887,7 +889,7 @@ void parseSceneFile(string filename) {
 					brdfToAdd.kd = kdToAdd;
 					brdfToAdd.ks = ksToAdd;
 					brdfToAdd.kr = krToAdd;
-					brdfToAdd.sp = ksp;
+					brdfToAdd.sp = currentSp;
 					Material* materialToAdd = new Material();
 					materialToAdd->constantBRDF = brdfToAdd;
 					primitiveToAdd->material = materialToAdd;
@@ -930,7 +932,7 @@ void parseSceneFile(string filename) {
 					brdfToAdd.kd = kdToAdd;
 					brdfToAdd.ks = ksToAdd;
 					brdfToAdd.kr = krToAdd;
-					brdfToAdd.sp = ksp;
+					brdfToAdd.sp = currentSp;
 					Material* materialToAdd = new Material();
 					materialToAdd->constantBRDF = brdfToAdd;
 					primitiveToAdd->material = materialToAdd;

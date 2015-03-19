@@ -142,6 +142,8 @@ std::vector<DirectionalLight> directional_lights;
 std::vector<AmbientLight> ambient_lights;
 std::vector<Point> objFileVertices;
 Transformation currentlySeenTransformation;
+// Most recently seen material
+float currentKar, currentKag, currentKab, currentKdr, currentKdg, currentKdb, currentKsr, currentKsg, currentKsb, currentKsp, currentKrr, currentKrg, currentKrb;
 
 // Extra Credit global variables
 bool softShadows;
@@ -848,6 +850,20 @@ void parseSceneFile(string filename) {
 				else if (i == 12) { krg = stof(currentWord); }
 				else if (i == 13) { krb = stof(currentWord); }
 				else { cerr << "Extra parameters for " << currentlyParsing << ". Ignoring them. i is : " << i << "\n"; }
+				if (i == 13) {
+					currentKar = kar;
+					currentKag = kag;
+					currentKab = kab;
+					currentKdr = kdr;
+					currentKdg = kdg;
+					currentKdb = kdb;
+					currentKsr = ksr;
+					currentKsg = ksg;
+					currentKsb = ksb;
+					currentKrr = krr;
+					currentKrg = krg;
+					currentKrb = krb;
+				}
 
 			} else if (currentlyParsing == "sph") {
 				float cx, cy, cz, r;
@@ -863,10 +879,10 @@ void parseSceneFile(string filename) {
 					// Initialize our object, with the last seen material
 					GeometricPrimitive* primitiveToAdd = new GeometricPrimitive();
 					BRDFCoefficients brdfToAdd = BRDFCoefficients();
-					Color kaToAdd = Color(kar, kag, kab);
-					Color kdToAdd = Color(kdr, kdg, kdb);
-					Color ksToAdd = Color(ksr, ksg, ksb);
-					Color krToAdd = Color(krr, krg, krb);
+					Color kaToAdd = Color(currentKar, currentKag, currentKab);
+					Color kdToAdd = Color(currentKdr, currentKdg, currentKdb);
+					Color ksToAdd = Color(currentKsr, currentKsg, currentKsb);
+					Color krToAdd = Color(currentKrr, currentKrg, currentKrb);
 					brdfToAdd.ka = kaToAdd;
 					brdfToAdd.kd = kdToAdd;
 					brdfToAdd.ks = ksToAdd;
@@ -906,10 +922,10 @@ void parseSceneFile(string filename) {
 					GeometricPrimitive* primitiveToAdd = new GeometricPrimitive();
 					Triangle* triangleToAdd = new Triangle(ax, ay, az, bx, by, bz, cx, cy, cz);
 					BRDFCoefficients brdfToAdd = BRDFCoefficients();
-					Color kaToAdd = Color(kar, kag, kab);
-					Color kdToAdd = Color(kdr, kdg, kdb);
-					Color ksToAdd = Color(ksr, ksg, ksb);
-					Color krToAdd = Color(krr, krg, krb);
+					Color kaToAdd = Color(currentKar, currentKag, currentKab);
+					Color kdToAdd = Color(currentKdr, currentKdg, currentKdb);
+					Color ksToAdd = Color(currentKsr, currentKsg, currentKsb);
+					Color krToAdd = Color(currentKrr, currentKrg, currentKrb);
 					brdfToAdd.ka = kaToAdd;
 					brdfToAdd.kd = kdToAdd;
 					brdfToAdd.ks = ksToAdd;

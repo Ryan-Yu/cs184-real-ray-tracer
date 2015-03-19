@@ -6,7 +6,7 @@
 class BRDFCoefficients {
 	public:
 		Color kd, ks, ka, kr;
-		int sp, refractionIndex;
+		int sp;
 
 	BRDFCoefficients() {
 		this->sp = 1;

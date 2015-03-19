@@ -596,7 +596,7 @@ void parseObjFile(string filename) {
 							objFileVertices[vertexIndex2].x, objFileVertices[vertexIndex2].y, objFileVertices[vertexIndex2].z,
 							objFileVertices[vertexIndex3].x, objFileVertices[vertexIndex3].y, objFileVertices[vertexIndex3].z);
 					BRDFCoefficients brdfToAdd = BRDFCoefficients();
-					Color kaToAdd = Color(0.0, 0.0, 0.0);
+					Color kaToAdd = Color(0.1, 0.1, 0.1);
 					Color kdToAdd = Color(0.8, 0.8, 0.8);
 					Color ksToAdd = Color(0.1, 0.1, 0.1);
 					Color krToAdd = Color(0.1, 0.1, 0.1);

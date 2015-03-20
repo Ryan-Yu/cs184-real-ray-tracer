@@ -149,6 +149,7 @@ int currentSp;
 // Extra Credit global variables
 bool softShadows;
 bool distributedRayTracing;
+bool checkerboard;
 
 
 
@@ -206,14 +207,44 @@ class RayTracer {
 			if (ambient_lights.size() > 0) {
 				// We want to add the ambient term even if our shape is blocked by a light
 				for (std::vector<AmbientLight>::size_type i = 0; i < ambient_lights.size(); i++) {
-					color->r += (brdf.ka.r * ambient_lights[i].r);
-					color->g += (brdf.ka.g * ambient_lights[i].g);
-					color->b += (brdf.ka.b * ambient_lights[i].b);
+
+					// If our checkerboard global boolean is on, then change ambient term into a checkerboard
+					if (checkerboard) {
+						bool x = (int)((intersectionXCoor * 1000 + 3893343)/50) % 2 == 1;
+						bool y = (int)((intersectionYCoor * 1000 + 3893343)/50) % 2 == 1;
+						bool z = (int)((intersectionZCoor * 1000 + 3893343)/50) % 2 == 1;
+
+						if (x xor y xor z) {
+							color->r += 2 * brdf.ka.r * ambient_lights[i].r;
+							color->g += 2 * brdf.ka.g * ambient_lights[i].g;
+							color->b += 2 * brdf.ka.b * ambient_lights[i].b;
+						}
+					// No checkerboard
+					} else {
+						color->r += (brdf.ka.r * ambient_lights[i].r);
+						color->g += (brdf.ka.g * ambient_lights[i].g);
+						color->b += (brdf.ka.b * ambient_lights[i].b);
+					}
 				}
+
 			} else {
-				color->r += brdf.ka.r;
-				color->g += brdf.ka.g;
-				color->b += brdf.ka.b;
+				// If our checkerboard global boolean is on, then change ambient term into a checkerboard
+				if (checkerboard) {
+					bool x = (int)((intersectionXCoor * 1000 + 3893343)/50) % 2 == 1;
+					bool y = (int)((intersectionYCoor * 1000 + 3893343)/50) % 2 == 1;
+					bool z = (int)((intersectionZCoor * 1000 + 3893343)/50) % 2 == 1;
+
+					if (x xor y xor z) {
+						color->r += 2 * brdf.ka.r;
+						color->g += 2 * brdf.ka.g;
+						color->b += 2 * brdf.ka.b;
+					}
+				// No checkerboard
+				} else {
+					color->r += brdf.ka.r;
+					color->g += brdf.ka.g;
+					color->b += brdf.ka.b;
+				}
 			}
 
 			// There is an intersection, so we have to loop through all the light source
@@ -1099,6 +1130,14 @@ void parseCommandLineOptions(int argc, char *argv[]) {
 		}
 		filename = argv[i+1];
 		i += 1;
+	} else if (flag == "-checkerboard") {
+		// Check that -depth has enough option parameters
+		if (i > (argc - 1))
+		{
+			std::cout << "Invalid number of parameters for -checkerboard.";
+			exit(1);
+		}
+		checkerboard = true;
 	}
 	else {
 		std::cout << "Extra parameters in command line options; terminating program.";

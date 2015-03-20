@@ -39,10 +39,12 @@
 
 			You can also include the flag <code>-distributed</code> to enable <b>distributed ray tracing</b> (16 randomly distributed samples per pixel).<br /><br/ >
 
+			Furthermore, including the flag <code>-checkerboard</code> will texture all materials with a non-zero ambient term with a checkerboard texture.<br /><br />
+
 			Running the ray tracer with all options enabled would thus look like this:<br />
 
 			<code>
-				./scene (scene file) dimensions x y -depth n -ss -distributed -filename (filename)
+				./scene (scene file) dimensions x y -depth n -ss -distributed -checkerboard -filename (filename)
 			</code>
 		</div>
 
@@ -648,6 +650,28 @@
 			<img src="ass2_images/glass_triangle.png" class="example-pic">
 		</div>
 
+		<hr />
+
+		<div class="center-content">
+			<div class="ass2-content-title-ec">
+				Example ?: Simple shapes: <i>textured materials (extra credit)</i>
+			</div>
+
+			<div class="example-segment">
+				<code>
+					cam   0 0 2   -1 -1 1   1 -1 1   -1 1 1   1 1 1<br />
+					mat   0.8 1 0.9   1 1 1  0 0 0   64   0 0 0<br />
+					ltp   1 1 1   1 1 1   0<br />
+					sph   0 0 0   0.65<br />
+					mat 0.2 0.4 0.5 1 1 1 0 0 0 64 0 0 0<br />
+					sph   0.6 0.6 0.7   0.1<br />
+					mat 0.5 0.2 0.9 1 1 1 0 0 0 64 0 0 0<br />
+					tri -0.75 -1 0.75 -0.5 -0.85 0.25 0.75 -0.75 0.25<br />
+				</code>
+			</div>
+
+			<img src="ass2_images/checker_test.png" class="example-pic">
+		</div>
 
 	</body>
 

@@ -520,4 +520,36 @@ class Triangle : public Shape {
 	}
 };
 
+class WarpedTriangle : public Triangle {
+public:
+	Point v1, v2, v3;
+
+	WarpedTriangle() : Triangle() {
+	}
+
+	WarpedTriangle(Point v1, Point v2, Point v3) : Triangle(v1, v2, v3) {
+
+	}
+
+	WarpedTriangle(float ax, float ay, float az,
+			float bx, float by, float bz,
+			float cx, float cy, float cz) : Triangle(ax, ay, az, bx, by, bz, cx, cy, cz) {
+	}
+
+	// If these two methods are called, then ray represents the transformed ray that has
+	// been transformed into object coordinates; i.e. original sphere coordinates.
+	bool intersect(Ray &ray, float* tHit, DifferentialGeometry* differentialGeometry) {
+		return Triangle::intersect(ray, tHit, differentialGeometry);
+	}
+
+	bool intersectP(Ray &ray) {
+		return Triangle::intersectP(ray);
+	}
+
+	std::string shapeType() {
+		return "Warped Triangle";
+	}
+
+};
+
 #endif /* SHAPE_H_ */

@@ -323,10 +323,6 @@ Color applyShadingModel(DifferentialGeometry differentialGeometry, BRDFCoefficie
 	float resultant_rgb_sum_of_pixel_b = 0;
 
 	// Set viewer vector to -1 * incoming_ray's_vector
-//	Vector3 viewer_vector = Vector3::normalizeVector(
-//			Vector3(differentialGeometry.position.x - raySource.x, differentialGeometry.position.y - raySource.y, differentialGeometry.position.z - raySource.z)
-//			);
-
 	Vector3 viewer_vector = Vector3::normalizeVector(Vector3(-1.0 * differentialGeometry.position.x, -1.0 * differentialGeometry.position.y, -1.0 * differentialGeometry.position.z));
 
 	// **************************************
@@ -594,10 +590,6 @@ void parseObjFile(string filename) {
 				// TODO: integrate .mtl files
 				if (i == 3 && vertexIndex1 < objFileVertices.size() && vertexIndex2 < objFileVertices.size() && vertexIndex3 < objFileVertices.size()) {
 					GeometricPrimitive* primitiveToAdd = new GeometricPrimitive();
-					Triangle* triangleToAdd = new Triangle(
-							objFileVertices[vertexIndex1].x, objFileVertices[vertexIndex1].y, objFileVertices[vertexIndex1].z,
-							objFileVertices[vertexIndex2].x, objFileVertices[vertexIndex2].y, objFileVertices[vertexIndex2].z,
-							objFileVertices[vertexIndex3].x, objFileVertices[vertexIndex3].y, objFileVertices[vertexIndex3].z);
 					BRDFCoefficients brdfToAdd = BRDFCoefficients();
 					Color kaToAdd = Color(currentKar, currentKag, currentKab);
 					Color kdToAdd = Color(currentKdr, currentKdg, currentKdb);
@@ -611,7 +603,21 @@ void parseObjFile(string filename) {
 					Material* materialToAdd = new Material();
 					materialToAdd->constantBRDF = brdfToAdd;
 					primitiveToAdd->material = materialToAdd;
-					primitiveToAdd->shape = triangleToAdd;
+					primitiveToAdd->transformation = currentlySeenTransformation;
+					if (currentlySeenTransformation.m.isIdentity()) {
+						Triangle* triangleToAdd = new Triangle(
+							objFileVertices[vertexIndex1].x, objFileVertices[vertexIndex1].y, objFileVertices[vertexIndex1].z,
+							objFileVertices[vertexIndex2].x, objFileVertices[vertexIndex2].y, objFileVertices[vertexIndex2].z,
+							objFileVertices[vertexIndex3].x, objFileVertices[vertexIndex3].y, objFileVertices[vertexIndex3].z);
+						primitiveToAdd->shape = triangleToAdd;
+					} else {
+						WarpedTriangle* warpedTriangleToAdd = new WarpedTriangle(
+								objFileVertices[vertexIndex1].x, objFileVertices[vertexIndex1].y, objFileVertices[vertexIndex1].z,
+								objFileVertices[vertexIndex2].x, objFileVertices[vertexIndex2].y, objFileVertices[vertexIndex2].z,
+								objFileVertices[vertexIndex3].x, objFileVertices[vertexIndex3].y, objFileVertices[vertexIndex3].z);
+						primitiveToAdd->shape = warpedTriangleToAdd;
+					}
+
 					aggregatePrimitive.addPrimitive(primitiveToAdd);
 				}
 			}
@@ -922,7 +928,6 @@ void parseSceneFile(string filename) {
 				}
 				if (i == 9) {
 					GeometricPrimitive* primitiveToAdd = new GeometricPrimitive();
-					Triangle* triangleToAdd = new Triangle(ax, ay, az, bx, by, bz, cx, cy, cz);
 					BRDFCoefficients brdfToAdd = BRDFCoefficients();
 					Color kaToAdd = Color(currentKar, currentKag, currentKab);
 					Color kdToAdd = Color(currentKdr, currentKdg, currentKdb);
@@ -936,7 +941,15 @@ void parseSceneFile(string filename) {
 					Material* materialToAdd = new Material();
 					materialToAdd->constantBRDF = brdfToAdd;
 					primitiveToAdd->material = materialToAdd;
-					primitiveToAdd->shape = triangleToAdd;
+					primitiveToAdd->transformation = currentlySeenTransformation;
+
+					if (!currentlySeenTransformation.m.isIdentity()) {
+						WarpedTriangle* warpedTriangleToAdd = new WarpedTriangle(ax, ay, az, bx, by, bz, cx, cy, cz);
+						primitiveToAdd->shape = warpedTriangleToAdd;
+					} else {
+						Triangle* triangleToAdd = new Triangle(ax, ay, az, bx, by, bz, cx, cy, cz);
+						primitiveToAdd->shape = triangleToAdd;
+					}
 					aggregatePrimitive.addPrimitive(primitiveToAdd);
 				}
 			} else if (currentlyParsing == "obj") {

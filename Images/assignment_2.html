@@ -41,6 +41,14 @@
 
 			Furthermore, including the flag <code>-checkerboard</code> will texture all materials with a non-zero ambient term with a checkerboard texture.<br /><br />
 
+			Lastly, <i>refraction</i> has been implemented. This works by adding an additional parameter, the refractive index, in <code>mat</code> lines within <code>.scene</code> files. An example <code>mat</code> line with a refractive index defined would look like this:<br /><br />
+
+			<code>
+				mat kar kag kab kdr kdg kdb ksr ksg ksb ksp krr krg krb refractiveIndex
+			</code>
+
+			If no <code>refractiveIndex</code> is defined, it will default to 0.0.<br /><br />
+
 			Running the ray tracer with all options enabled would thus look like this:<br />
 
 			<code>

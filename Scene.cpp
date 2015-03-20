@@ -143,7 +143,7 @@ std::vector<AmbientLight> ambient_lights;
 std::vector<Point> objFileVertices;
 Transformation currentlySeenTransformation;
 // Most recently seen material
-float currentKar, currentKag, currentKab, currentKdr, currentKdg, currentKdb, currentKsr, currentKsg, currentKsb, currentKsp, currentKrr, currentKrg, currentKrb;
+float currentKar, currentKag, currentKab, currentKdr, currentKdg, currentKdb, currentKsr, currentKsg, currentKsb, currentKsp, currentKrr, currentKrg, currentKrb, currentRi;
 int currentSp;
 
 // Extra Credit global variables
@@ -154,80 +154,60 @@ bool checkerboard;
 
 
 class RayTracer {
-	public:
-		void trace(Ray& ray, int depth, Color* color) {
+public:
+	void trace(Ray& ray, int depth, Color* color) {
 
-			if (depth > recursionDepth) {
-				color->r = 0;
-				color->g = 0;
-				color->b = 0;
-				return;
-			}
+		if (depth > recursionDepth) {
+			color->r = 0;
+			color->g = 0;
+			color->b = 0;
+			return;
+		}
 
-//			// For testing only: shade coordinate red if ray intersects it, else shade black
-//			if (!aggregatePrimitive.intersectP(ray)) {
-//				color->r = 0;
-//				color->g = 0;
-//				color->b = 0;
-//				return;
-//			} else {
-//				//For testing purposes, simply shade red if the ray intersects the point
-//				color->r = 255;
-//				color->g = 0;
-//				color->b = 0;
-//			}
+		//			// For testing only: shade coordinate red if ray intersects it, else shade black
+		//			if (!aggregatePrimitive.intersectP(ray)) {
+		//				color->r = 0;
+		//				color->g = 0;
+		//				color->b = 0;
+		//				return;
+		//			} else {
+		//				//For testing purposes, simply shade red if the ray intersects the point
+		//				color->r = 255;
+		//				color->g = 0;
+		//				color->b = 0;
+		//			}
 
-			// TODO: this may be wrong
-			float tHit;
-			Intersection intersection;
+		// TODO: this may be wrong
+		float tHit;
+		Intersection intersection;
 
-			// This method will populate tHit and intersection if there is an intersection with this ray and any primitive.
-			if (!aggregatePrimitive.intersect(ray, &tHit, &intersection) ) {
-				// If no intersection, then make the color black and return
-				color->r = 0;
-				color->g = 0;
-				color->b = 0;
-				return;
-			}
+		// This method will populate tHit and intersection if there is an intersection with this ray and any primitive.
+		if (!aggregatePrimitive.intersect(ray, &tHit, &intersection) ) {
+			// If no intersection, then make the color black and return
+			color->r = 0;
+			color->g = 0;
+			color->b = 0;
+			return;
+		}
 
-			BRDFCoefficients brdf;
-			// This method will populate the brdf variable with the brdf values of the intersection primitive.
-			brdf = intersection.primitive->getBRDF(intersection.differentialGeometry, &brdf);
+		BRDFCoefficients brdf;
+		// This method will populate the brdf variable with the brdf values of the intersection primitive.
+		brdf = intersection.primitive->getBRDF(intersection.differentialGeometry, &brdf);
 
-			// Initialize a new Color with R = G = B = 0.0
-			// This color will be appended to with our shading model
-			Color colorOfPixel;
-			Ray lightRay;
-			Color lightColor;
+		// Initialize a new Color with R = G = B = 0.0
+		// This color will be appended to with our shading model
+		Color colorOfPixel;
+		Ray lightRay;
+		Color lightColor;
 
-			float intersectionXCoor = intersection.differentialGeometry.position.x;
-			float intersectionYCoor = intersection.differentialGeometry.position.y;
-			float intersectionZCoor = intersection.differentialGeometry.position.z;
+		float intersectionXCoor = intersection.differentialGeometry.position.x;
+		float intersectionYCoor = intersection.differentialGeometry.position.y;
+		float intersectionZCoor = intersection.differentialGeometry.position.z;
 
-			if (ambient_lights.size() > 0) {
-				// We want to add the ambient term even if our shape is blocked by a light
-				for (std::vector<AmbientLight>::size_type i = 0; i < ambient_lights.size(); i++) {
+		if (ambient_lights.size() > 0) {
+			// We want to add the ambient term even if our shape is blocked by a light
+			for (std::vector<AmbientLight>::size_type i = 0; i < ambient_lights.size(); i++) {
 
-					// If our checkerboard global boolean is on, then change ambient term into a checkerboard
-					if (checkerboard) {
-						bool x = (int)((intersectionXCoor * 1000 + 3893343)/50) % 2 == 1;
-						bool y = (int)((intersectionYCoor * 1000 + 3893343)/50) % 2 == 1;
-						bool z = (int)((intersectionZCoor * 1000 + 3893343)/50) % 2 == 1;
-
-						if (x xor y xor z) {
-							color->r += 2 * brdf.ka.r * ambient_lights[i].r;
-							color->g += 2 * brdf.ka.g * ambient_lights[i].g;
-							color->b += 2 * brdf.ka.b * ambient_lights[i].b;
-						}
-					// No checkerboard
-					} else {
-						color->r += (brdf.ka.r * ambient_lights[i].r);
-						color->g += (brdf.ka.g * ambient_lights[i].g);
-						color->b += (brdf.ka.b * ambient_lights[i].b);
-					}
-				}
-
-			} else {
 				// If our checkerboard global boolean is on, then change ambient term into a checkerboard
 				if (checkerboard) {
 					bool x = (int)((intersectionXCoor * 1000 + 3893343)/50) % 2 == 1;
@@ -235,106 +215,206 @@ class RayTracer {
 					bool z = (int)((intersectionZCoor * 1000 + 3893343)/50) % 2 == 1;
 
 					if (x xor y xor z) {
-						color->r += 2 * brdf.ka.r;
-						color->g += 2 * brdf.ka.g;
-						color->b += 2 * brdf.ka.b;
+						color->r += 2 * brdf.ka.r * ambient_lights[i].r;
+						color->g += 2 * brdf.ka.g * ambient_lights[i].g;
+						color->b += 2 * brdf.ka.b * ambient_lights[i].b;
 					}
-				// No checkerboard
+					// No checkerboard
 				} else {
-					color->r += brdf.ka.r;
-					color->g += brdf.ka.g;
-					color->b += brdf.ka.b;
+					color->r += (brdf.ka.r * ambient_lights[i].r);
+					color->g += (brdf.ka.g * ambient_lights[i].g);
+					color->b += (brdf.ka.b * ambient_lights[i].b);
 				}
 			}
 
-			// There is an intersection, so we have to loop through all the light source
-			// and consider their contributions to the intersection pixel
-			for (std::vector<DirectionalLight>::size_type i = 0; i < directional_lights.size(); i++) {
+		} else {
+			// If our checkerboard global boolean is on, then change ambient term into a checkerboard
+			if (checkerboard) {
+				bool x = (int)((intersectionXCoor * 1000 + 3893343)/50) % 2 == 1;
+				bool y = (int)((intersectionYCoor * 1000 + 3893343)/50) % 2 == 1;
+				bool z = (int)((intersectionZCoor * 1000 + 3893343)/50) % 2 == 1;
 
-				// Generate light ray from the intersection point to the light position
-				// For directional lights, this is generated by subtracting the position of the intersection point
-				// from the position of the light (IN WORLD COORDINATES)
-				directional_lights[i].generateLightRay(intersection.differentialGeometry, &lightRay, &lightColor);
-
-				Ray reversedLightRay = Ray(lightRay.position, lightRay.direction.scaleVector(-1.0), lightRay.t_min, lightRay.t_max);
-
-				// ***** Regular shading + shadows *****
-				// If the light ray is not blocked, we apply our shading model
-				if (!aggregatePrimitive.intersectP(reversedLightRay)) {
-					Color colorToAdd = applyShadingModel(
-							intersection.differentialGeometry,
-							brdf,
-							lightRay,
-							Color(directional_lights[i].r, directional_lights[i].g, directional_lights[i].b),
-							ray.position);
-
-					color->r += colorToAdd.r;
-					color->g += colorToAdd.g;
-					color->b += colorToAdd.b;
+				if (x xor y xor z) {
+					color->r += 2 * brdf.ka.r;
+					color->g += 2 * brdf.ka.g;
+					color->b += 2 * brdf.ka.b;
 				}
-			}
-
-			for (std::vector<PointLight>::size_type i = 0; i < point_lights.size(); i++) {
-				point_lights[i].generateLightRay(intersection.differentialGeometry, &lightRay, &lightColor);
-				if (!aggregatePrimitive.intersectP(lightRay)) {
-
-					// For now, we just ignore shadows and reflections and just apply our shading model
-					// i.e. just call:
-					Color colorToAdd = applyShadingModel(
-							intersection.differentialGeometry,
-							brdf, lightRay,
-							Color(point_lights[i].r, point_lights[i].g, point_lights[i].b),
-							ray.position);
-
-					color->r += colorToAdd.r;
-					color->g += colorToAdd.g;
-					color->b += colorToAdd.b;
-				}
-			}
-
-			// ***** Mirror reflection *****
-			if (brdf.kr.greaterThanZero()) {
-				// First, create our reflection ray...
-				// r = d - 2(d . n)n
-
-				// n
-				Vector3 directional_normal_vector =
-						Vector3::normalizeVector(Vector3(intersection.differentialGeometry.normal.x, intersection.differentialGeometry.normal.y, intersection.differentialGeometry.normal.z));
-
-				Point intersectionMinusRaySource = intersection.differentialGeometry.position.subtractPoint(ray.position);
-
-				// d (view vector) = intersection coordinate - source of ray
-				// (we can't just use the intersection point, because our view is relative from the LAST HIT primitive)
-				Vector3 view_vector = Vector3::normalizeVector(
-						Vector3(intersectionMinusRaySource.x, intersectionMinusRaySource.y, intersectionMinusRaySource.z));
-
-
-				float dDotN = view_vector.dotProduct(directional_normal_vector);
-				Vector3 twoTimesdDotNTimesN = directional_normal_vector.scaleVector(dDotN * 2.0);
-				Vector3 directional_reflective_vector_prenormalize = view_vector.subtractVector(twoTimesdDotNTimesN);
-				// r
-				Vector3 directional_reflective_vector = Vector3::normalizeVector(directional_reflective_vector_prenormalize);
-
-				// NOTE: Not sure if this is right...
-				// Offset our reflection ray's position a tiny bit in the direction of the normal
-				Vector3 normalDirectionError = Vector3(intersection.differentialGeometry.normal.x, intersection.differentialGeometry.normal.y, intersection.differentialGeometry.normal.z).scaleVector(0.000001);
-				Point offsetRayPosition = Point(intersection.differentialGeometry.position.x + normalDirectionError.x,
-						intersection.differentialGeometry.position.y + normalDirectionError.y,
-						intersection.differentialGeometry.position.z + normalDirectionError.z);
-
-				Ray reflectionRay = Ray(offsetRayPosition, directional_reflective_vector, 0.001, FLT_MAX);
-
-				Color tempColor;
-
-				// Recursively call trace()
-				trace(reflectionRay, depth + 1, &tempColor);
-
-				color->r += brdf.kr.r * tempColor.r;
-				color->g += brdf.kr.g * tempColor.g;
-				color->b += brdf.kr.b * tempColor.b;
-
+				// No checkerboard
+			} else {
+				color->r += brdf.ka.r;
+				color->g += brdf.ka.g;
+				color->b += brdf.ka.b;
 			}
 		}
+
+		// There is an intersection, so we have to loop through all the light source
+		// and consider their contributions to the intersection pixel
+		for (std::vector<DirectionalLight>::size_type i = 0; i < directional_lights.size(); i++) {
+
+			// Generate light ray from the intersection point to the light position
+			// For directional lights, this is generated by subtracting the position of the intersection point
+			// from the position of the light (IN WORLD COORDINATES)
+			directional_lights[i].generateLightRay(intersection.differentialGeometry, &lightRay, &lightColor);
+
+			Ray reversedLightRay = Ray(lightRay.position, lightRay.direction.scaleVector(-1.0), lightRay.t_min, lightRay.t_max);
+
+			// ***** Regular shading + shadows *****
+			// If the light ray is not blocked, we apply our shading model
+			if (!aggregatePrimitive.intersectP(reversedLightRay)) {
+				Color colorToAdd = applyShadingModel(
+						intersection.differentialGeometry,
+						brdf,
+						lightRay,
+						Color(directional_lights[i].r, directional_lights[i].g, directional_lights[i].b),
+						ray.position);
+
+				color->r += colorToAdd.r;
+				color->g += colorToAdd.g;
+				color->b += colorToAdd.b;
+			}
+		}
+
+		for (std::vector<PointLight>::size_type i = 0; i < point_lights.size(); i++) {
+			point_lights[i].generateLightRay(intersection.differentialGeometry, &lightRay, &lightColor);
+			if (!aggregatePrimitive.intersectP(lightRay)) {
+
+				// For now, we just ignore shadows and reflections and just apply our shading model
+				// i.e. just call:
+				Color colorToAdd = applyShadingModel(
+						intersection.differentialGeometry,
+						brdf, lightRay,
+						Color(point_lights[i].r, point_lights[i].g, point_lights[i].b),
+						ray.position);
+
+				color->r += colorToAdd.r;
+				color->g += colorToAdd.g;
+				color->b += colorToAdd.b;
+			}
+		}
+
+		// ***** Reflection but no refraction *****
+		if (brdf.kr.greaterThanZero() && !brdf.isRefractive()) {
+			// First, create our reflection ray...
+			// r = d - 2(d . n)n
+
+			// n
+			Vector3 directional_normal_vector =
+					Vector3::normalizeVector(Vector3(intersection.differentialGeometry.normal.x, intersection.differentialGeometry.normal.y, intersection.differentialGeometry.normal.z));
+
+			Point intersectionMinusRaySource = intersection.differentialGeometry.position.subtractPoint(ray.position);
+
+			// d (view vector) = intersection coordinate - source of ray
+			// (we can't just use the intersection point, because our view is relative from the LAST HIT primitive)
+			Vector3 view_vector = Vector3::normalizeVector(
+					Vector3(intersectionMinusRaySource.x, intersectionMinusRaySource.y, intersectionMinusRaySource.z));
+
+
+			float dDotN = view_vector.dotProduct(directional_normal_vector);
+			Vector3 twoTimesdDotNTimesN = directional_normal_vector.scaleVector(dDotN * 2.0);
+			Vector3 directional_reflective_vector_prenormalize = view_vector.subtractVector(twoTimesdDotNTimesN);
+			// r
+			Vector3 directional_reflective_vector = Vector3::normalizeVector(directional_reflective_vector_prenormalize);
+
+			// NOTE: Not sure if this is right...
+			// Offset our reflection ray's position a tiny bit in the direction of the normal
+			Vector3 normalDirectionError = Vector3(intersection.differentialGeometry.normal.x, intersection.differentialGeometry.normal.y, intersection.differentialGeometry.normal.z).scaleVector(0.000001);
+			Point offsetRayPosition = Point(intersection.differentialGeometry.position.x + normalDirectionError.x,
+					intersection.differentialGeometry.position.y + normalDirectionError.y,
+					intersection.differentialGeometry.position.z + normalDirectionError.z);
+
+			Ray reflectionRay = Ray(offsetRayPosition, directional_reflective_vector, 0.001, FLT_MAX);
+
+			Color tempColor;
+
+			// Recursively call trace()
+			trace(reflectionRay, depth + 1, &tempColor);
+
+			color->r += brdf.kr.r * tempColor.r;
+			color->g += brdf.kr.g * tempColor.g;
+			color->b += brdf.kr.b * tempColor.b;
+
+		// Refractive and reflective
+		} else if (brdf.isRefractive() && brdf.kr.greaterThanZero()) {
+
+			// n
+			Vector3 directional_normal_vector =
+					Vector3::normalizeVector(Vector3(intersection.differentialGeometry.normal.x, intersection.differentialGeometry.normal.y, intersection.differentialGeometry.normal.z));
+
+			Point intersectionMinusRaySource = intersection.differentialGeometry.position.subtractPoint(ray.position);
+
+			// d (view vector) = intersection coordinate - source of ray
+			// (we can't just use the intersection point, because our view is relative from the LAST HIT primitive)
+			Vector3 view_vector = Vector3::normalizeVector(
+					Vector3(intersectionMinusRaySource.x, intersectionMinusRaySource.y, intersectionMinusRaySource.z));
+
+
+			float dDotN = view_vector.dotProduct(directional_normal_vector);
+			Vector3 twoTimesdDotNTimesN = directional_normal_vector.scaleVector(dDotN * 2);
+			Vector3 directional_reflective_vector_prenormalize = view_vector.subtractVector(twoTimesdDotNTimesN);
+			// r
+			Vector3 directional_reflective_vector = Vector3::normalizeVector(directional_reflective_vector_prenormalize);
+
+			// NOTE: Not sure if this is right...
+			// Offset our reflection ray's position a tiny bit in the direction of the normal
+			Vector3 normalDirectionError = Vector3(intersection.differentialGeometry.normal.x, intersection.differentialGeometry.normal.y, intersection.differentialGeometry.normal.z).scaleVector(0.00000001);
+			Point offsetRayPosition = Point(intersection.differentialGeometry.position.x + normalDirectionError.x,
+					intersection.differentialGeometry.position.y + normalDirectionError.y,
+					intersection.differentialGeometry.position.z + normalDirectionError.z);
+
+			Ray reflectionRay = Ray(offsetRayPosition, directional_reflective_vector, 0.0001, FLT_MAX);
+
+			Color tempColor;
+
+			// Recursively call trace()
+			trace(reflectionRay, depth + 1, &tempColor);
+
+			color->r += brdf.kr.r * tempColor.r;
+			color->g += brdf.kr.g * tempColor.g;
+			color->b += brdf.kr.b * tempColor.b;
+
+			Vector3 directional_refractive_vector;
+			float n1 = 1.0;
+			float n2 = brdf.ri;
+			float c = -1.0 * dDotN;
+			float c1 = c;
+			float nc, c2;
+			// Entering sphere
+			if (-c < 0) {
+				nc = n1 / n2;
+				c2 = sqrt(1 - nc * nc * (1- c1 * c1));
+				Vector3 refractive_vector_term1 = directional_normal_vector.scaleVector(nc * c1 - c2);
+				Vector3 refractive_vector_term2 = view_vector.scaleVector(nc);
+				directional_refractive_vector = refractive_vector_term1.addVector(refractive_vector_term2);
+			} else {
+				// Leaving sphere
+				nc = n2 / n1;
+				c2 = sqrt(1 - nc * nc * (1- c1 * c1));
+				Vector3 refractive_vector_term1 = directional_normal_vector.scaleVector(nc * c1 - c2);
+				Vector3 refractive_vector_term2 = view_vector.scaleVector(nc);
+				directional_refractive_vector = refractive_vector_term1.addVector(refractive_vector_term2);
+				c = directional_refractive_vector.dotProduct(directional_normal_vector);
+			}
+			float R0 = pow((n2 - 1)/(n2 + 1), 2);
+			float R = R0 + (1.0 - R0) * pow(1.0 - c, 5.0);
+
+			if ((1.0 - R) > 0.0) {
+				Ray refractionRay = Ray(intersection.differentialGeometry.position, directional_refractive_vector, 0.0001, FLT_MAX);
+
+				Color tempColor2;
+
+				// Recursively call trace()
+				trace(refractionRay, depth + 1, &tempColor2);
+
+				color->r += R * brdf.kr.r + (1.0 - R) * tempColor2.r;
+				color->g += R * brdf.kr.g + (1.0 - R) * tempColor2.g;
+				color->b += R * brdf.kr.b + (1.0 - R) * tempColor2.b;
+
+			// Not reflective or refractive
+			} else {
+				return;
+			}
+		}
+	}
 };
 
 // (Declaration of RayTracer global variable)
@@ -357,7 +437,7 @@ Color applyShadingModel(DifferentialGeometry differentialGeometry, BRDFCoefficie
 	Vector3 viewer_vector = Vector3::normalizeVector(Vector3(-1.0 * differentialGeometry.position.x, -1.0 * differentialGeometry.position.y, -1.0 * differentialGeometry.position.z));
 
 	// **************************************
-    // For directional light
+	// For directional light
 	// **************************************
 	if (lightRay.t_max == FLT_MAX) {
 
@@ -464,75 +544,75 @@ static void printPoint(Point point) {
 
 void printGlobalVariables()
 {
-  if (debug)
-  {
-    std::cout << "\n***** BEGIN PRINTING GLOBAL VARIABLES *****\n";
-    std::cout << "  " << "Film Width: " << film.width << "\n";
-    std::cout << "  " << "Film Height: " << film.height << "\n\n";
-    std::cout << "  Recursion Depth: " << recursionDepth << "\n\n";
+	if (debug)
+	{
+		std::cout << "\n***** BEGIN PRINTING GLOBAL VARIABLES *****\n";
+		std::cout << "  " << "Film Width: " << film.width << "\n";
+		std::cout << "  " << "Film Height: " << film.height << "\n\n";
+		std::cout << "  Recursion Depth: " << recursionDepth << "\n\n";
 
-    std::cout << "  Camera:\n";
-    std::cout << "    Eye: ";
-    printPoint(camera.eye);
-    std::cout << "    Bottom Left Corner: ";
-    printPoint(camera.imagePlaneBottomLeft);
-    std::cout << "    Top Left Corner: ";
-    printPoint(camera.imagePlaneTopLeft);
-    std::cout << "    Bottom Right: ";
-    printPoint(camera.imagePlaneBottomRight);
-    std::cout << "    Top Right: ";
-    printPoint(camera.imagePlaneTopRight);
-    std::cout << "\n";
+		std::cout << "  Camera:\n";
+		std::cout << "    Eye: ";
+		printPoint(camera.eye);
+		std::cout << "    Bottom Left Corner: ";
+		printPoint(camera.imagePlaneBottomLeft);
+		std::cout << "    Top Left Corner: ";
+		printPoint(camera.imagePlaneTopLeft);
+		std::cout << "    Bottom Right: ";
+		printPoint(camera.imagePlaneBottomRight);
+		std::cout << "    Top Right: ";
+		printPoint(camera.imagePlaneTopRight);
+		std::cout << "\n";
 
-    std::cout << "Directional Lights:\n";
-    if (directional_lights.size() == 0)
-    {
-      std::cout << " (none)\n";
-    }
-    for (std::vector<DirectionalLight>::size_type i = 0; i < directional_lights.size(); i++)
-    {
-      std::cout << "  " << "Light " << (i + 1) << "\n";
-      std::cout << "     " << "x: " << directional_lights[i].x << " y: " << directional_lights[i].x << " z: " << directional_lights[i].x << "\n";
-      std::cout << "     " << "r: " << directional_lights[i].r << " g: " << directional_lights[i].g << " b: " << directional_lights[i].b << "\n";
-    }
+		std::cout << "Directional Lights:\n";
+		if (directional_lights.size() == 0)
+		{
+			std::cout << " (none)\n";
+		}
+		for (std::vector<DirectionalLight>::size_type i = 0; i < directional_lights.size(); i++)
+		{
+			std::cout << "  " << "Light " << (i + 1) << "\n";
+			std::cout << "     " << "x: " << directional_lights[i].x << " y: " << directional_lights[i].x << " z: " << directional_lights[i].x << "\n";
+			std::cout << "     " << "r: " << directional_lights[i].r << " g: " << directional_lights[i].g << " b: " << directional_lights[i].b << "\n";
+		}
 
-    std::cout << "\nPoint Lights:\n";
-    if (point_lights.size() == 0)
-    {
-      std::cout << " (none)\n";
-    }
-    for (std::vector<PointLight>::size_type i = 0; i < point_lights.size(); i++)
-    {
-      std::cout << "  " << "Light " << (i + 1) << "\n";
-      std::cout << "     " << "x: " << point_lights[i].x << " y: " << point_lights[i].x << " z: " << point_lights[i].x << "\n";
-      std::cout << "     " << "r: " << point_lights[i].r << " g: " << point_lights[i].g << " b: " << point_lights[i].b << "\n";
-    }
+		std::cout << "\nPoint Lights:\n";
+		if (point_lights.size() == 0)
+		{
+			std::cout << " (none)\n";
+		}
+		for (std::vector<PointLight>::size_type i = 0; i < point_lights.size(); i++)
+		{
+			std::cout << "  " << "Light " << (i + 1) << "\n";
+			std::cout << "     " << "x: " << point_lights[i].x << " y: " << point_lights[i].x << " z: " << point_lights[i].x << "\n";
+			std::cout << "     " << "r: " << point_lights[i].r << " g: " << point_lights[i].g << " b: " << point_lights[i].b << "\n";
+		}
 
-    std::cout << "\n";
+		std::cout << "\n";
 
-    std::cout << "Number of primitives: " << aggregatePrimitive.listOfPrimitives.size() << "\n\n";
-    for (std::vector<GeometricPrimitive*>::size_type i = 0; i < aggregatePrimitive.listOfPrimitives.size(); i++) {
-    	GeometricPrimitive* currentPrimitive = aggregatePrimitive.listOfPrimitives[i];
-    	std::string shapeType = currentPrimitive->shape->shapeType();
-    	cout << shapeType << " (Shape number " << (i + 1) << " out of " << aggregatePrimitive.listOfPrimitives.size() << " total shapes)\n";
+		std::cout << "Number of primitives: " << aggregatePrimitive.listOfPrimitives.size() << "\n\n";
+		for (std::vector<GeometricPrimitive*>::size_type i = 0; i < aggregatePrimitive.listOfPrimitives.size(); i++) {
+			GeometricPrimitive* currentPrimitive = aggregatePrimitive.listOfPrimitives[i];
+			std::string shapeType = currentPrimitive->shape->shapeType();
+			cout << shapeType << " (Shape number " << (i + 1) << " out of " << aggregatePrimitive.listOfPrimitives.size() << " total shapes)\n";
 
-    	cout << currentPrimitive->shape->printShapeInformation();
+			cout << currentPrimitive->shape->printShapeInformation();
 
-    	cout << "  KA: ";
-    	printColor(currentPrimitive->material->constantBRDF.ka);
-    	cout << "  KD: ";
-    	printColor(currentPrimitive->material->constantBRDF.kd);
-    	cout << "  KR: ";
-    	printColor(currentPrimitive->material->constantBRDF.kr);
-    	cout << "  KS: ";
-    	printColor(currentPrimitive->material->constantBRDF.ks);
-    	cout << "  SP: " << currentPrimitive->material->constantBRDF.sp << "\n";
-    	cout << " This primitive's transformation is: \n";
-    	currentPrimitive->printTransformation();
-    }
+			cout << "  KA: ";
+			printColor(currentPrimitive->material->constantBRDF.ka);
+			cout << "  KD: ";
+			printColor(currentPrimitive->material->constantBRDF.kd);
+			cout << "  KR: ";
+			printColor(currentPrimitive->material->constantBRDF.kr);
+			cout << "  KS: ";
+			printColor(currentPrimitive->material->constantBRDF.ks);
+			cout << "  SP: " << currentPrimitive->material->constantBRDF.sp << "\n";
+			cout << " This primitive's transformation is: \n";
+			currentPrimitive->printTransformation();
+		}
 
-    std::cout << "***** FINISH PRINTING GLOBAL VARIABLES *****\n\n";
-  }
+		std::cout << "***** FINISH PRINTING GLOBAL VARIABLES *****\n\n";
+	}
 }
 
 // Prints contents of samples and buckets for debug purposes
@@ -618,7 +698,6 @@ void parseObjFile(string filename) {
 				}
 
 				// Push our triangle onto the list of aggregate primitives
-				// TODO: integrate .mtl files
 				if (i == 3 && vertexIndex1 < objFileVertices.size() && vertexIndex2 < objFileVertices.size() && vertexIndex3 < objFileVertices.size()) {
 					GeometricPrimitive* primitiveToAdd = new GeometricPrimitive();
 					BRDFCoefficients brdfToAdd = BRDFCoefficients();
@@ -631,15 +710,16 @@ void parseObjFile(string filename) {
 					brdfToAdd.ks = ksToAdd;
 					brdfToAdd.kr = krToAdd;
 					brdfToAdd.sp = currentSp;
+					brdfToAdd.ri = currentRi;
 					Material* materialToAdd = new Material();
 					materialToAdd->constantBRDF = brdfToAdd;
 					primitiveToAdd->material = materialToAdd;
 					primitiveToAdd->transformation = currentlySeenTransformation;
 					if (currentlySeenTransformation.m.isIdentity()) {
 						Triangle* triangleToAdd = new Triangle(
-							objFileVertices[vertexIndex1].x, objFileVertices[vertexIndex1].y, objFileVertices[vertexIndex1].z,
-							objFileVertices[vertexIndex2].x, objFileVertices[vertexIndex2].y, objFileVertices[vertexIndex2].z,
-							objFileVertices[vertexIndex3].x, objFileVertices[vertexIndex3].y, objFileVertices[vertexIndex3].z);
+								objFileVertices[vertexIndex1].x, objFileVertices[vertexIndex1].y, objFileVertices[vertexIndex1].z,
+								objFileVertices[vertexIndex2].x, objFileVertices[vertexIndex2].y, objFileVertices[vertexIndex2].z,
+								objFileVertices[vertexIndex3].x, objFileVertices[vertexIndex3].y, objFileVertices[vertexIndex3].z);
 						primitiveToAdd->shape = triangleToAdd;
 					} else {
 						WarpedTriangle* warpedTriangleToAdd = new WarpedTriangle(
@@ -686,6 +766,7 @@ void parseSceneFile(string filename) {
 	float ex, ey, ez, llx, lly, llz, lrx, lry, lrz, ulx, uly, ulz, urx, ury, urz;
 	// Most recently seen material
 	float kar, kag, kab, kdr, kdg, kdb, ksr, ksg, ksb, ksp, krr, krg, krb;
+	float ri = 0.0;
 
 	// .obj filename that we've found
 	string objFilename;
@@ -725,7 +806,7 @@ void parseSceneFile(string filename) {
 			} else if ((i == 0) && (currentWord == "xfr")) {
 				currentlyParsing = currentWord;
 
-			// We've found an unspecified identifier as the first word on our line
+				// We've found an unspecified identifier as the first word on our line
 			} else if (i == 0) {
 				currentlyParsing = currentWord;
 				validLine = false;
@@ -887,8 +968,9 @@ void parseSceneFile(string filename) {
 				else if (i == 11) { krr = stof(currentWord); }
 				else if (i == 12) { krg = stof(currentWord); }
 				else if (i == 13) { krb = stof(currentWord); }
+				else if (i == 14) { ri = stof(currentWord); }
 				else { cerr << "Extra parameters for " << currentlyParsing << ". Ignoring them. i is : " << i << "\n"; }
-				if (i == 13) {
+				if (i == 13 || i == 14) {
 					currentKar = kar;
 					currentKag = kag;
 					currentKab = kab;
@@ -902,6 +984,7 @@ void parseSceneFile(string filename) {
 					currentKrg = krg;
 					currentKrb = krb;
 					currentSp = ksp;
+					currentRi = ri;
 				}
 
 			} else if (currentlyParsing == "sph") {
@@ -926,6 +1009,7 @@ void parseSceneFile(string filename) {
 					brdfToAdd.kd = kdToAdd;
 					brdfToAdd.ks = ksToAdd;
 					brdfToAdd.kr = krToAdd;
+					brdfToAdd.ri = currentRi;
 					brdfToAdd.sp = currentSp;
 					Material* materialToAdd = new Material();
 					materialToAdd->constantBRDF = brdfToAdd;
@@ -969,6 +1053,7 @@ void parseSceneFile(string filename) {
 					brdfToAdd.ks = ksToAdd;
 					brdfToAdd.kr = krToAdd;
 					brdfToAdd.sp = currentSp;
+					brdfToAdd.ri = currentRi;
 					Material* materialToAdd = new Material();
 					materialToAdd->constantBRDF = brdfToAdd;
 					primitiveToAdd->material = materialToAdd;
@@ -1072,85 +1157,85 @@ void parseSceneFile(string filename) {
 //****************************************************
 void parseCommandLineOptions(int argc, char *argv[]) {
 
-  string flag;
+	string flag;
 
-  int i = 2;
-  while (i <= argc - 1) {
-    flag = argv[i];
+	int i = 2;
+	while (i <= argc - 1) {
+		flag = argv[i];
 
-    if (flag == "-dimensions") {
-	  // Check that -dimensions has enough option parameters
-	  if ((i + 2) > (argc - 1)) {
-		std::cout << "Invalid number of parameters for -dimensions.";
-		exit(1);
-	  }
+		if (flag == "-dimensions") {
+			// Check that -dimensions has enough option parameters
+			if ((i + 2) > (argc - 1)) {
+				std::cout << "Invalid number of parameters for -dimensions.";
+				exit(1);
+			}
 
-	  int widthOfFilm = stoi(argv[i+1]);
-	  int heightOfFilm = stoi(argv[i+2]);
+			int widthOfFilm = stoi(argv[i+1]);
+			int heightOfFilm = stoi(argv[i+2]);
 
-//	  if (widthOfFilm < 1000 || heightOfFilm < 500 || widthOfFilm > 3000 || heightOfFilm > 3000) {
-//		  std::cout << "Dimensions of output file must be at least 1000x500 and no more than 3000x3000.";
-//		  exit(1);
-//	  }
+			//	  if (widthOfFilm < 1000 || heightOfFilm < 500 || widthOfFilm > 3000 || heightOfFilm > 3000) {
+			//		  std::cout << "Dimensions of output file must be at least 1000x500 and no more than 3000x3000.";
+			//		  exit(1);
+			//	  }
 
-	  film = Film(widthOfFilm, heightOfFilm);
-	  i += 2;
+			film = Film(widthOfFilm, heightOfFilm);
+			i += 2;
 
-	} else if (flag == "-depth") {
-	  // Check that -depth has enough option parameters
-	  if ((i + 1) > (argc - 1))
-	  {
-		std::cout << "Invalid number of parameters for -depth.";
-		exit(1);
-	  }
-	  recursionDepth = stoi(argv[i+1]);
-	  i += 1;
-	} else if (flag == "-ss") {
-		// Check that -depth has enough option parameters
-		if (i > (argc - 1))
-		{
-			std::cout << "Invalid number of parameters for -ss.";
-			exit(1);
+		} else if (flag == "-depth") {
+			// Check that -depth has enough option parameters
+			if ((i + 1) > (argc - 1))
+			{
+				std::cout << "Invalid number of parameters for -depth.";
+				exit(1);
+			}
+			recursionDepth = stoi(argv[i+1]);
+			i += 1;
+		} else if (flag == "-ss") {
+			// Check that -depth has enough option parameters
+			if (i > (argc - 1))
+			{
+				std::cout << "Invalid number of parameters for -ss.";
+				exit(1);
+			}
+			softShadows = true;
+		} else if (flag == "-distributed") {
+			// Check that -depth has enough option parameters
+			if (i > (argc - 1))
+			{
+				std::cout << "Invalid number of parameters for -distributed.";
+				exit(1);
+			}
+			distributedRayTracing = true;
+		} else if (flag == "-filename") {
+			// Check that -depth has enough option parameters
+			if ((i + 1) > (argc - 1))
+			{
+				std::cout << "Invalid number of parameters for -depth.";
+				exit(1);
+			}
+			filename = argv[i+1];
+			i += 1;
+		} else if (flag == "-checkerboard") {
+			// Check that -depth has enough option parameters
+			if (i > (argc - 1))
+			{
+				std::cout << "Invalid number of parameters for -checkerboard.";
+				exit(1);
+			}
+			checkerboard = true;
 		}
-		softShadows = true;
-	} else if (flag == "-distributed") {
-		// Check that -depth has enough option parameters
-		if (i > (argc - 1))
-		{
-			std::cout << "Invalid number of parameters for -distributed.";
+		else {
+			std::cout << "Extra parameters in command line options; terminating program.";
 			exit(1);
+
 		}
-		distributedRayTracing = true;
-	} else if (flag == "-filename") {
-		// Check that -depth has enough option parameters
-		if ((i + 1) > (argc - 1))
-		{
-			std::cout << "Invalid number of parameters for -depth.";
-			exit(1);
-		}
-		filename = argv[i+1];
-		i += 1;
-	} else if (flag == "-checkerboard") {
-		// Check that -depth has enough option parameters
-		if (i > (argc - 1))
-		{
-			std::cout << "Invalid number of parameters for -checkerboard.";
-			exit(1);
-		}
-		checkerboard = true;
+
+		// Advance to next flag, if one exists
+		i++;
 	}
-	else {
-		std::cout << "Extra parameters in command line options; terminating program.";
-		exit(1);
 
-	}
-
-    // Advance to next flag, if one exists
-    i++;
-  }
-
-  // Parse scene file
-  parseSceneFile(argv[1]);
+	// Parse scene file
+	parseSceneFile(argv[1]);
 }
 
 
@@ -1236,9 +1321,9 @@ int main(int argc, char *argv[]) {
 
 	// Deallocate memory
 	for (std::vector<GeometricPrimitive*>::size_type i = 0; i < aggregatePrimitive.listOfPrimitives.size(); i++) {
-	  delete aggregatePrimitive.listOfPrimitives[i]->material;
-	  delete aggregatePrimitive.listOfPrimitives[i]->shape;
-	  delete aggregatePrimitive.listOfPrimitives[i];
+		delete aggregatePrimitive.listOfPrimitives[i]->material;
+		delete aggregatePrimitive.listOfPrimitives[i]->shape;
+		delete aggregatePrimitive.listOfPrimitives[i];
 	}
 
 	film.writeImage(filename);
